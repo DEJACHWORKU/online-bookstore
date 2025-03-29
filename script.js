@@ -38,6 +38,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Counter Animation
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+        counter.innerText = '0';
+        const updateCounter = () => {
+            const target = +counter.getAttribute('data-target');
+            const count = +counter.innerText;
+            const increment = target / 200; // Adjust speed here
+            if (count < target) {
+                counter.innerText = Math.ceil(count + increment);
+                setTimeout(updateCounter, 10);
+            } else {
+                counter.innerText = target;
+            }
+        };
+        updateCounter();
+    });
 });
 
 // Menu and Dropdown toggle functionality
@@ -56,7 +74,6 @@ dropdownToggle.onclick = (e) => {
     dropdown.classList.toggle('active');
 };
 
-// Close dropdown when clicking outside
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.dropdown') && !e.target.closest('.dropdown-toggle')) {
         dropdown.classList.remove('active');
@@ -86,8 +103,6 @@ window.onscroll = () => {
     header.classList.toggle('sticky', window.scrollY > 100);
     menuIcon.classList.remove('bx-x');
     navbar.classList.remove('active');
-    // Optional: Keep dropdown closed on scroll if desired
-    // dropdown.classList.remove('active');
 };
 
 // ScrollReveal animations
@@ -109,4 +124,13 @@ const typed = new Typed('.multiple-text', {
     backSpeed: 100,
     backDelay: 1000,
     loop: true
+});
+// Assuming script.js
+document.getElementById('menu-icon').addEventListener('click', () => {
+    document.querySelector('.navbar').classList.toggle('active');
+});
+
+document.querySelector('.dropdown-toggle').addEventListener('click', (e) => {
+    e.preventDefault(); // Prevent default link behavior
+    document.querySelector('.dropdown').classList.toggle('active');
 });
