@@ -13,7 +13,6 @@
 </head>
 
 <body>
-    <!-- Body -->
     <header class="header" id="header">
         <a href="" class="logo">
             <i class='bx bxs-book' style="color: #61e5ff;"></i>
@@ -24,7 +23,7 @@
             <a href="#home" class="active">Home <i class='bx bx-home'></i></a>
             <a href="#stats">ABOUT US <i class='bx bx-info-circle'></i></a>
             <a href="#services">USER HELP <i class='bx bx-help-circle'></i></a>
-            <a href="#notification">NOTIFICATION <i class='bx bx-bell'></i></a>
+            <a href="#notification" id="notification-link">NOTIFICATION <i class='bx bx-bell'></i></a>
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle">LOGIN <i class='bx bx-chevron-down'></i></a>
                 <div class="dropdown-menu">
@@ -95,8 +94,8 @@
         </div>
     </section>
 
-    <section class="portfolio" id="notification">
-        <h2 class="heading">Latest six <span> Upload  Book</span></h2>
+    <section class="portfolio" id="#notification">
+        <h2 class="heading">Latest six <span> Upload Book</span></h2>
         <div class="portfolio-container">
             <div class="portfolio-box">
                 <img src="image/TRAVEL.png" alt="">
@@ -120,6 +119,7 @@
     </section>
 
     <footer class="footer" id="footer">
+        <div class="footer-divider"></div>
         <div class="footer-content">
             <div class="footer-social">
                 <h3>Follow Us</h3>
@@ -144,6 +144,19 @@
             <p>Copyright © All Rights Reserved by ARSI University.</p>
         </div>
     </footer>
+
+    <!-- Notification Popup -->
+    <div id="notification-popup" class="notification-popup">
+        <div class="notification-content">
+            <i class='bx bx-bell-ring notification-icon'></i>
+            <h2>Notification Alert</h2>
+            <p>Do you want to see detailed new notifications?</p>
+            <div class="notification-buttons">
+                <button id="yes-btn" class="btn-yes">YES</button>
+                <button id="cancel-btn" class="btn-cancel">CANCEL</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

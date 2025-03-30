@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const updateCounter = () => {
             const target = +counter.getAttribute('data-target');
             const count = +counter.innerText;
-            const increment = target / 200; // Adjust speed here
+            const increment = target / 200;
             if (count < target) {
                 counter.innerText = Math.ceil(count + increment);
                 setTimeout(updateCounter, 10);
@@ -55,6 +55,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
         updateCounter();
+    });
+
+    // Notification Popup Logic
+    const notificationLink = document.getElementById('notification-link');
+    const notificationPopup = document.getElementById('notification-popup');
+    const yesBtn = document.getElementById('yes-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const portfolioSection = document.querySelector('.portfolio');
+
+    notificationLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Scroll to the portfolio section
+        portfolioSection.scrollIntoView({ behavior: 'smooth' });
+        
+        // Show popup after 5 seconds
+        setTimeout(() => {
+            notificationPopup.style.display = 'block';
+        }, 5000); // 5 seconds delay
+    });
+
+    yesBtn.addEventListener('click', function() {
+        window.location.href = 'notification.php';
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        notificationPopup.style.display = 'none';
+    });
+
+    // Close popup when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!notificationPopup.contains(e.target) && e.target !== notificationLink) {
+            notificationPopup.style.display = 'none';
+        }
     });
 });
 
@@ -124,13 +157,4 @@ const typed = new Typed('.multiple-text', {
     backSpeed: 100,
     backDelay: 1000,
     loop: true
-});
-// Assuming script.js
-document.getElementById('menu-icon').addEventListener('click', () => {
-    document.querySelector('.navbar').classList.toggle('active');
-});
-
-document.querySelector('.dropdown-toggle').addEventListener('click', (e) => {
-    e.preventDefault(); // Prevent default link behavior
-    document.querySelector('.dropdown').classList.toggle('active');
 });
