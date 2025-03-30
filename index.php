@@ -29,7 +29,7 @@
                 <div class="dropdown-menu">
                     <a href="admin_login.php">ADMIN</a>
                     <a href="librarian_login.php">LIBRARIAN</a>
-                    <a href="user_login.php">USER</a>
+                    <a href="login.php">USER</a>
                 </div>
             </div>
             <div class="theme-switcher">
@@ -123,16 +123,16 @@
         <div class="footer-content">
             <div class="footer-social">
                 <h3>Follow Us</h3>
-                <a href="https://telegram.org" target="_blank" title="Telegram"><i class='bx bxl-telegram'></i></a>
-                <a href="https://facebook.com" target="_blank" title="Facebook"><i class='bx bxl-facebook'></i></a>
-                <a href="https://linkedin.com" target="_blank" title="LinkedIn"><i class='bx bxl-linkedin'></i></a>
-                <a href="https://website.com" target="_blank" title="Website"><i class='bx bx-world'></i></a>
-                <a href="https://whatsapp.com" target="_blank" title="WhatsApp"><i class='bx bxl-whatsapp'></i></a>
+                <a href="https://t.me/ArsiUniversityYuunvarsiitiiArsii" target="_blank" title="Telegram"><i class='bx bxl-telegram'></i></a>
+                <a href="https://web.facebook.com/arsiuniversityofficial?_rdc=1&_rdr#" target="_blank" title="Facebook"><i class='bx bxl-facebook'></i></a>
+                <a href="https://www.youtube.com/@arsiuniversity" target="_blank" title="YouTube"><i class='bx bxl-youtube'></i></a>
+                <a href="https://x.com/UniversityArsi" target="_blank" title="Twitter"><i class='bx bxl-twitter'></i></a>
+                <a href="https://arsiun.edu.et/" target="_blank" title="Website"><i class='bx bx-world'></i></a>
             </div>
             <div class="footer-contact">
                 <h3>Contact Us</h3>
-                <p><i class='bx bx-mail-send'></i> <a href="mailto:info@arsiuniversity.edu">:info@arsiuniversity.edu</a></p>
-                <p><i class='bx bx-phone'></i> <a href="tel:+1234567890">:+1234567890</a></p>
+                <p><i class='bx bx-mail-send'></i> <a href="mailto:info@arsiuniversity.edu">pr.arsiu@arsiun.edu.et</a></p>
+                <p><i class='bx bx-phone'></i> <a href="tel:+1234567890">+251222380252</a></p>
             </div>
             <div class="footer-iconTop">
                 <a href="" title="Back to Top">
@@ -141,7 +141,7 @@
             </div>
         </div>
         <div class="footer-text">
-            <p>Copyright © All Rights Reserved by ARSI University.</p>
+            <p>Copyright ©2025 All Rights Reserved by ARSI University.</p>
         </div>
     </footer>
 
