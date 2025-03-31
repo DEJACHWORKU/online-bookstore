@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Online Bookstore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/userpage.css">
 </head>
 <body class="default">
     <header id="header">
@@ -16,7 +16,7 @@
         <nav class="nav-menu">
             <a href="#store">Store page<i class="icon">🛒</i></a>
             <a href="#book-list">View Book List<i class="icon">📖</i></a>
-            <a href="#comment">Comments<i class="icon">💬</i></a>
+            <a href="notification.php">Comments<i class="icon">💬</i></a>
             <div class="theme-selector">
                 <a href="#" class="theme-toggle">Theme<i class="icon fas fa-paint-brush"></i></a>
                 <div class="dropdown">
@@ -81,6 +81,6 @@
         <i class="fas fa-arrow-up"></i>
     </div>
 
-    <script src="css/index.js"></script>
+    <script src="css/userpage.js"></script>
 </body>
 </html>

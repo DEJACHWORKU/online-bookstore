@@ -27,9 +27,9 @@
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle">LOGIN <i class='bx bx-chevron-down'></i></a>
                 <div class="dropdown-menu">
-                    <a href="admin_login.php">ADMIN</a>
-                    <a href="librarian_login.php">LIBRARIAN</a>
-                    <a href="book/index.php">USER</a>
+                    <a href="admin.php">ADMIN</a>
+                    <a href="book/librarian.php">LIBRARIAN</a>
+                    <a href="book/user.php">USER</a>
                 </div>
             </div>
             <div class="theme-switcher">
