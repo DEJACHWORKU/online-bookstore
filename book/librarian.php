@@ -15,7 +15,7 @@
             <i class="fas fa-bars"></i>
         </div>
         <nav class="nav-menu">
-            <a href="user.php">Goto store</a>
+        <a href="user.php">Go to store</a>
             <a href="#" data-page="dep't.php">Add Department</a>
             <a href="#" data-page="add author.php">Add author</a>
             <a href="#" data-page="add book.php">Add Book</a>
