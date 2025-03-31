@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     updateThemeClass();
 
-    // Hamburger menu toggle
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
 
@@ -13,14 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
         navMenu.classList.toggle('active');
     });
 
-    // Close menu when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.hamburger') && !e.target.closest('.nav-menu')) {
             navMenu.classList.remove('active');
         }
     });
 
-    // Theme selection
     document.querySelectorAll('.dropdown a[data-theme]').forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -73,12 +70,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('scroll-down').addEventListener('click', function() {
         document.querySelector('footer').scrollIntoView({ behavior: 'smooth' });
-        navMenu.classList.remove('active'); // Close menu on scroll
+        navMenu.classList.remove('active');
     });
 
     document.getElementById('scroll-top').addEventListener('click', function() {
         document.getElementById('header').scrollIntoView({ behavior: 'smooth' });
-        navMenu.classList.remove('active'); // Close menu on scroll
+        navMenu.classList.remove('active');
     });
 
     function updateThemeClass() {

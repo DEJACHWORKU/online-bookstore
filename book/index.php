@@ -14,9 +14,9 @@
             <i class="fas fa-bars"></i>
         </div>
         <nav class="nav-menu">
-            <a href="#store">Store Page<i class="icon">🛒</i></a>
+            <a href="#store">Store page<i class="icon">🛒</i></a>
             <a href="#book-list">View Book List<i class="icon">📖</i></a>
-            <a href="#comment">Comment<i class="icon">💬</i></a>
+            <a href="#comment">Comments<i class="icon">💬</i></a>
             <div class="theme-selector">
                 <a href="#" class="theme-toggle">Theme<i class="icon fas fa-paint-brush"></i></a>
                 <div class="dropdown">
@@ -25,7 +25,7 @@
                         <span class="icon-circle minus-circle"><i class="fas fa-minus"></i></span>
                         <span class="icon-circle plus-circle"><i class="fas fa-plus"></i></span>
                     </span></a>
-                    <a href="#" data-theme="sepia-reader">Sepia Reader<span class="icon-container">
+                    <a href="#" data-theme="sepia-reader">Eye-care Reader<span class="icon-container">
                         <span class="icon-circle minus-circle"><i class="fas fa-minus"></i></span>
                         <span class="icon-circle plus-circle"><i class="fas fa-plus"></i></span>
                     </span></a>
@@ -40,6 +40,33 @@
         </nav>
     </header>
 
+    <div class="search-section">
+    <div class="search-container">
+        <div class="search-fields">
+            <div class="search-input-container">
+                <div class="input-wrapper">
+                    <span class="search-label">Search By:</span>
+                    <input type="text" class="search-input" placeholder="Enter Book title">
+                    <button class="search-icon"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div class="search-input-container">
+                <div class="input-wrapper">
+                    <span class="search-label">Search By:</span>
+                    <input type="text" class="search-input" placeholder="Enter Author name">
+                    <button class="search-icon"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div class="search-input-container">
+                <div class="input-wrapper">
+                    <span class="search-label">Search By:</span>
+                    <input type="text" class="search-input" placeholder="Enter Department">
+                    <button class="search-icon"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     <main class="reading-optimized">
         <!-- Content will go here -->
     </main>
