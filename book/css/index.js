@@ -1,36 +1,93 @@
-function changeTheme(theme, event) {
-    event.stopPropagation();
-    const currentPower = parseInt(localStorage.getItem('themePower')) || 2;
-    document.body.className = theme + ' power-' + currentPower;
-    localStorage.setItem('selectedTheme', theme);
-}
-
-function adjustPower(theme, delta, event) {
-    event.stopPropagation();
-    const currentTheme = document.body.className.split(' ')[0] || 'theme-default';
-    if (currentTheme !== theme) return;
-    let currentPower = parseInt(localStorage.getItem('themePower')) || 2;
-    currentPower = Math.max(1, Math.min(10, currentPower + delta));
-    document.body.className = theme + ' power-' + currentPower;
-    localStorage.setItem('themePower', currentPower);
-}
-
-window.onload = function() {
-    const savedTheme = localStorage.getItem('selectedTheme') || 'theme-default';
-    const savedPower = localStorage.getItem('themePower') || '2';
-    document.body.className = savedTheme + ' power-' + savedPower;
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-    const dropdown = document.querySelector('#settingsDropdown');
-    const dropdownMenu = document.querySelector('.dropdown-menu');
-    dropdown.addEventListener('click', function(event) {
-        event.stopPropagation();
-        dropdownMenu.classList.add('show');
+    let currentTheme = localStorage.getItem('selectedTheme') || 'default';
+    let currentIntensity = parseInt(localStorage.getItem('selectedIntensity')) || 0;
+    const MAX_INTENSITY = 10;
+
+    updateThemeClass();
+
+    // Hamburger menu toggle
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+
+    hamburger.addEventListener('click', function() {
+        navMenu.classList.toggle('active');
     });
-    document.addEventListener('click', function(event) {
-        if (!dropdownMenu.contains(event.target) && !dropdown.contains(event.target)) {
-            dropdownMenu.classList.remove('show');
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.hamburger') && !e.target.closest('.nav-menu')) {
+            navMenu.classList.remove('active');
         }
     });
+
+    // Theme selection
+    document.querySelectorAll('.dropdown a[data-theme]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            currentTheme = this.getAttribute('data-theme');
+            currentIntensity = 0;
+            updateThemeClass();
+            saveTheme();
+        });
+
+        const minusBtn = item.querySelector('.minus-circle');
+        const plusBtn = item.querySelector('.plus-circle');
+
+        if (minusBtn) {
+            minusBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (currentTheme === item.getAttribute('data-theme')) {
+                    currentIntensity = Math.max(0, currentIntensity - 1);
+                    updateThemeClass();
+                    saveTheme();
+                }
+            });
+        }
+
+        if (plusBtn) {
+            plusBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (currentTheme === item.getAttribute('data-theme')) {
+                    currentIntensity = Math.min(MAX_INTENSITY, currentIntensity + 1);
+                    updateThemeClass();
+                    saveTheme();
+                }
+            });
+        }
+    });
+
+    const themeToggle = document.querySelector('.theme-toggle');
+    const dropdown = document.querySelector('.dropdown');
+
+    themeToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === 'none' || dropdown.style.display === '' ? 'block' : 'none';
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.theme-selector')) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    document.getElementById('scroll-down').addEventListener('click', function() {
+        document.querySelector('footer').scrollIntoView({ behavior: 'smooth' });
+        navMenu.classList.remove('active'); // Close menu on scroll
+    });
+
+    document.getElementById('scroll-top').addEventListener('click', function() {
+        document.getElementById('header').scrollIntoView({ behavior: 'smooth' });
+        navMenu.classList.remove('active'); // Close menu on scroll
+    });
+
+    function updateThemeClass() {
+        const intensityClass = currentIntensity > 0 ? ` intensity-${currentIntensity}` : '';
+        document.body.className = `${currentTheme}${intensityClass}`;
+    }
+
+    function saveTheme() {
+        localStorage.setItem('selectedTheme', currentTheme);
+        localStorage.setItem('selectedIntensity', currentIntensity);
+    }
 });
