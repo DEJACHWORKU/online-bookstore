@@ -43,7 +43,7 @@ header {
     box-sizing: border-box;
 }
 
-body.default header { background: linear-gradient(135deg, #6a0dad, #ff6f61); }
+body.default header { background: linear-gradient(135deg, hwb(252 11% 16%), #2c0da8); }
 body.light-reader header { background: linear-gradient(135deg, #4a90e2, #50c9c3); }
 body.sepia-reader header { background: linear-gradient(135deg, #8b7355, #c0b8a8); }
 body.dark-reader header { background: linear-gradient(135deg, #333, #555); }
@@ -238,26 +238,34 @@ footer {
 
 .scroll-top {
     position: fixed;
-    right: 20px;
-    bottom: 20px;
-    background: linear-gradient(135deg, #6a0dad, #ff6f61);
+    bottom: 10px;
+    right: 10px;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
+    background-color: #000;
+    color: #fff;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s, transform 0.3s;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 100;
-    color: white;
-    opacity: 0.9;
 }
 
 .scroll-top:hover {
+    background-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-5px) scale(1.1);
-    opacity: 1;
+}
+
+.scroll-top i {
+    font-size: 24px;
+    transition: color 0.3s;
+}
+
+.scroll-top:hover i {
+    color: #ff4081;
 }
 
 .search-section { padding: 20px 5%; }

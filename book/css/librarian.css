@@ -11,7 +11,7 @@ body {
 }
 
 header {
-    background: hsl(208, 48%, 5%);
+    background: hwb(224 24% 6%);
     color: #fff;
     padding: 1rem 2rem;
     display: flex;
@@ -46,24 +46,24 @@ h1 {
 }
 
 .nav-menu a {
-    color: transparent;
-    background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+    color: white;
+    background: rgb(23, 19, 230);
     -webkit-background-clip: text;
     background-clip: text;
     text-decoration: none;
     margin: 0 0.5rem;
     font-size: 1.2rem;
     padding: 0.5rem;
-    font-weight: 500;
+    font-weight: 900;
     border: 2px solid transparent;
-    border-radius: 0.5rem;
+    border-radius: 1rem;
     transition: color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 .nav-menu a:hover {
-    color: #ffe66d;
-    border-color: #ffe66d;
-    box-shadow: 0 0 5px rgba(255, 230, 109, 0.7);
+    color: #6dff91;
+    border-color: #3312bb;
+    box-shadow: 0 0 5px rgba(252, 20, 47, 0.7);
 }
 
 .logout {

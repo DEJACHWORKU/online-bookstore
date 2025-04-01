@@ -201,7 +201,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10rem 9% 2rem;
+    height: 85vh;
+    padding: 10rem 1% 2rem;
     background: var(--bg-color);
 }
 
@@ -217,9 +218,9 @@ body {
 
 .home-img img {
     width: 35vw;
-    max-width: 600px;
-    min-width: 300px;
-    border-radius: 50%;
+    max-width: 900px;
+    min-width: 500px;
+    border-radius: 35%;
     animation: floatImage 4s ease-in-out infinite;
 }
 
@@ -231,6 +232,7 @@ body {
 
 .stats {
     padding: 10rem 9% 2rem;
+    height: 100vh;
     background: var(--second-bg-color);
 }
 
@@ -378,15 +380,8 @@ body {
 
 .footer {
     padding: 3rem 9%;
+    height: 5vh;
     background: var(--second-bg-color);
-}
-
-.footer-divider {
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, #d8074da5, #ff4d4d, #bb86fc, #6200ee, #0ef);
-    box-shadow: 0 0 1rem rgba(255, 255, 255, 0.5);
-    animation: gradientShift 5s infinite linear;
 }
 
 @keyframes gradientShift {
@@ -705,7 +700,6 @@ body.light {
         justify-content: center;
     }
 }
-
 @media (max-width: 617px) {
     .portfolio-container {
         grid-template-columns: 1fr;
