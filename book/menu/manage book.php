@@ -67,24 +67,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Process if no errors
         if (empty($errors)) {
-            // Create upload directories if they don't exist
-            $cover_dir = 'uploads/covers/';
-            $file_dir = 'uploads/files/';
+            $cover_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/uploads/covers/';
+            $file_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/uploads/files/';
+            $cover_web_path = 'uploads/covers/';
+            $file_web_path = 'uploads/files/';
+
             if (!is_dir($cover_dir)) mkdir($cover_dir, 0777, true);
             if (!is_dir($file_dir)) mkdir($file_dir, 0777, true);
 
-            // Generate unique filenames
             $cover_filename = uniqid() . '.' . $cover_ext;
             $file_filename = uniqid() . '.pdf';
             
-            $cover_path = $cover_dir . $cover_filename;
-            $file_path = $file_dir . $file_filename;
+            $cover_path = $cover_web_path . $cover_filename;
+            $file_path = $file_web_path . $file_filename;
 
-            // Move uploaded files
-            if (move_uploaded_file($book_cover['tmp_name'], $cover_path) && 
-                move_uploaded_file($book_file['tmp_name'], $file_path)) {
+            if (move_uploaded_file($book_cover['tmp_name'], $cover_dir . $cover_filename) && 
+                move_uploaded_file($book_file['tmp_name'], $file_dir . $file_filename)) {
                 
-                // Insert into database
                 $stmt = $conn->prepare("INSERT INTO books (date, title, description, department, author, cover, file, is_read, is_download) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 $stmt->bind_param("sssssssii", $book_date, $book_title, $book_description, $department, $author, $cover_path, $file_path, $is_read, $is_download);
                 
@@ -118,42 +117,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $existing_cover = $_POST['existing_cover'];
         $existing_file = $_POST['existing_file'];
         
-        // Handle file uploads if new files are provided
         $cover_path = $existing_cover;
         $file_path = $existing_file;
+        $cover_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/uploads/covers/';
+        $file_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/uploads/files/';
         
         if (!empty($_FILES['book_cover']['name'])) {
-            $cover_dir = 'uploads/covers/';
             $cover_ext = strtolower(pathinfo($_FILES['book_cover']['name'], PATHINFO_EXTENSION));
             $cover_filename = uniqid() . '.' . $cover_ext;
-            $cover_path = $cover_dir . $cover_filename;
+            $cover_path = 'uploads/covers/' . $cover_filename;
             
-            if (move_uploaded_file($_FILES['book_cover']['tmp_name'], $cover_path)) {
-                // Delete old cover if it exists
-                if (file_exists($existing_cover)) {
-                    unlink($existing_cover);
+            if (move_uploaded_file($_FILES['book_cover']['tmp_name'], $cover_dir . $cover_filename)) {
+                if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $existing_cover)) {
+                    unlink($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $existing_cover);
                 }
             } else {
-                $cover_path = $existing_cover; // Revert to existing if upload fails
+                $cover_path = $existing_cover;
             }
         }
         
         if (!empty($_FILES['book_file']['name'])) {
-            $file_dir = 'uploads/files/';
             $file_filename = uniqid() . '.pdf';
-            $file_path = $file_dir . $file_filename;
+            $file_path = 'uploads/files/' . $file_filename;
             
-            if (move_uploaded_file($_FILES['book_file']['tmp_name'], $file_path)) {
-                // Delete old file if it exists
-                if (file_exists($existing_file)) {
-                    unlink($existing_file);
+            if (move_uploaded_file($_FILES['book_file']['tmp_name'], $file_dir . $file_filename)) {
+                if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $existing_file)) {
+                    unlink($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $existing_file);
                 }
             } else {
-                $file_path = $existing_file; // Revert to existing if upload fails
+                $file_path = $existing_file;
             }
         }
         
-        // Update database record
         $stmt = $conn->prepare("UPDATE books SET date=?, title=?, description=?, department=?, author=?, cover=?, file=?, is_read=?, is_download=? WHERE id=?");
         $stmt->bind_param("sssssssiii", $book_date, $book_title, $book_description, $department, $author, $cover_path, $file_path, $is_read, $is_download, $edit_id);
         
@@ -172,7 +167,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (isset($_GET['delete_id'])) {
     $delete_id = $_GET['delete_id'];
     
-    // First get file paths to delete the physical files
     $stmt = $conn->prepare("SELECT cover, file FROM books WHERE id = ?");
     $stmt->bind_param("i", $delete_id);
     $stmt->execute();
@@ -180,14 +174,14 @@ if (isset($_GET['delete_id'])) {
     $stmt->fetch();
     $stmt->close();
     
-    // Delete the record
     $stmt = $conn->prepare("DELETE FROM books WHERE id = ?");
     $stmt->bind_param("i", $delete_id);
     
     if ($stmt->execute()) {
-        // Delete the physical files
-        if (file_exists($cover_path)) unlink($cover_path);
-        if (file_exists($file_path)) unlink($file_path);
+        if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $cover_path)) 
+            unlink($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $cover_path);
+        if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $file_path)) 
+            unlink($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $file_path);
         
         $message = urlencode("<div class='alert alert-success'>Book deleted successfully!</div>");
     } else {
@@ -230,238 +224,22 @@ $conn->close();
     <title>Book Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: var(--dark-color);
-        }
-        
-        .top-bar {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            padding: 1rem 0;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .search-box {
-            background: white;
-            border-radius: 50px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .search-input {
-            border: none;
-            outline: none;
-            padding: 0.5rem 1rem;
-            width: 100%;
-        }
-        
-        .search-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1.5rem;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .search-btn:hover {
-            background: #2980b9;
-        }
-        
-        .action-btn {
-            border-radius: 50px;
-            padding: 0.5rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .card {
-            border: none;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin-bottom: 1.5rem;
-            height: 100%;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-img-top {
-            height: 200px;
-            object-fit: cover;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-            position: relative;
-            padding-bottom: 3rem;
-        }
-        
-        .card-title {
-            font-weight: 600;
-            color: var(--secondary-color);
-            margin-bottom: 0.75rem;
-        }
-        
-        .card-text {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-        
-        .data-label {
-            font-weight: 600;
-            color: var(--secondary-color);
-            margin-right: 0.5rem;
-        }
-        
-        .data-value {
-            color: #555;
-        }
-        
-        .author-text {
-            font-style: italic;
-            color: #7f8c8d;
-        }
-        
-        .action-buttons {
-            position: absolute;
-            bottom: 1rem;
-            left: 1.5rem;
-            right: 1.5rem;
-        }
-        
-        .action-buttons .btn {
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .btn-view {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-edit {
-            background-color: #f39c12;
-            color: white;
-        }
-        
-        .btn-delete {
-            background-color: var(--accent-color);
-            color: white;
-        }
-        
-        .availability-indicators {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-        
-        .availability-indicator {
-            display: flex;
-            align-items: center;
-            font-size: 0.8rem;
-            color: #555;
-        }
-        
-        .indicator-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 5px;
-        }
-        
-        .read-indicator {
-            background-color: #2ecc71;
-        }
-        
-        .download-indicator {
-            background-color: #3498db;
-        }
-        
-        .form-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
-        }
-        
-        .modal-content {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-        
-        .form-control, .form-select {
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            border: 1px solid #ddd;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
-        }
-        
-        @media (max-width: 768px) {
-            .card {
-                margin-bottom: 1.5rem;
-            }
-            
-            .action-buttons .btn {
-                width: 100%;
-                margin-right: 0;
-            }
-            
-            .top-bar {
-                padding: 0.5rem 0;
-            }
-        }
-        
-        /* Animation for alerts */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .alert {
-            animation: fadeIn 0.3s ease-out;
-        }
-    </style>
+    <link rel="stylesheet" href="css/fetch.css">
 </head>
 <body>
-    <!-- Top Bar with Search and Add Button -->
     <div class="top-bar">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8 mb-3 mb-md-0">
-                    <form method="GET" action="" class="d-flex search-box">
-                        <input type="text" class="search-input" name="search" placeholder="Search books by title, author or department..." value="<?php echo htmlspecialchars($search_query); ?>">
-                        <button type="submit" class="search-btn">
+                    <form method="GET" action="" class="d-flex">
+                        <input type="text" class="form-control me-2" name="search" placeholder="Search books by title, author or department..." value="<?php echo htmlspecialchars($search_query); ?>">
+                        <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i>
                         </button>
                     </form>
                 </div>
                 <div class="col-md-4 text-md-end">
-                    <button class="btn btn-light action-btn me-2" data-bs-toggle="modal" data-bs-target="#addBookModal">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">
                         <i class="fas fa-plus me-2"></i> Add Book
                     </button>
                 </div>
@@ -469,7 +247,6 @@ $conn->close();
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="container">
         <?php if (isset($_GET['message'])): ?>
             <div class="alert alert-info alert-dismissible fade show" role="alert">
@@ -478,14 +255,13 @@ $conn->close();
             </div>
         <?php endif; ?>
 
-        <!-- Books Listing -->
         <div class="row">
             <?php if (empty($books)): ?>
                 <div class="col-12">
                     <div class="alert alert-info text-center py-4">
-                        <i class="fas fa-book-open fa-3x mb-3 text-muted"></i>
+                        <i class="fas fa-book-open fa-3x mb-3"></i>
                         <h4>No books found</h4>
-                        <p class="mb-0"><?php echo $search_query ? "No results for '$search_query'" : "The book collection is empty"; ?></p>
+                        <p><?php echo $search_query ? "No results for '$search_query'" : "The book collection is empty"; ?></p>
                         <?php if ($search_query): ?>
                             <a href="manage_books.php" class="btn btn-primary mt-3">Clear Search</a>
                         <?php else: ?>
@@ -499,75 +275,72 @@ $conn->close();
                 <?php foreach ($books as $book): ?>
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="card h-100">
-                            <!-- Book Cover -->
-                            <img src="<?php echo htmlspecialchars($book['cover']); ?>" class="card-img-top" alt="Book Cover">
+                            <img src="/bookstore/book/<?php echo htmlspecialchars($book['cover']); ?>" 
+                                 class="card-img-top" 
+                                 alt="Book Cover"
+                                 style="height: 200px; object-fit: cover;">
                             
                             <div class="card-body">
-                                <!-- Title -->
                                 <h5 class="card-title">
-                                    <span class="data-label">Title:</span>
-                                    <span class="data-value"><?php echo htmlspecialchars($book['title']); ?></span>
+                                    <span>Title:</span>
+                                    <span><?php echo htmlspecialchars($book['title']); ?></span>
                                 </h5>
                                 
-                                <!-- Description -->
                                 <p class="card-text">
-                                    <span class="data-label">Description:</span>
-                                    <span class="data-value"><?php echo htmlspecialchars(substr($book['description'], 0, 100) . (strlen($book['description']) > 100 ? '...' : '')); ?></span>
+                                    <span>Description:</span>
+                                    <span><?php echo htmlspecialchars(substr($book['description'], 0, 100) . (strlen($book['description']) > 100 ? '...' : '')); ?></span>
                                 </p>
                                 
-                                <!-- Readable/Downloadable Indicators -->
-                                <div class="availability-indicators">
+                                <div>
                                     <?php if ($book['is_read']): ?>
-                                        <span class="availability-indicator">
-                                            <span class="indicator-dot read-indicator"></span>
-                                            Readable
-                                        </span>
+                                        <span>Readable</span>
                                     <?php endif; ?>
                                     <?php if ($book['is_download']): ?>
-                                        <span class="availability-indicator">
-                                            <span class="indicator-dot download-indicator"></span>
-                                            Downloadable
-                                        </span>
+                                        <span>Downloadable</span>
                                     <?php endif; ?>
                                 </div>
                                 
-                                <!-- Department -->
-                                <div class="mb-2">
-                                    <span class="data-label">Department:</span>
-                                    <span class="data-value"><?php echo htmlspecialchars($book['department']); ?></span>
+                                <div>
+                                    <span>Department:</span>
+                                    <span><?php echo htmlspecialchars($book['department']); ?></span>
                                 </div>
                                 
-                                <!-- Author and Date -->
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <p class="author-text mb-0">
-                                        <span class="data-label">Author:</span>
-                                        <span class="data-value"><?php echo htmlspecialchars($book['author']); ?></span>
+                                    <p class="mb-0">
+                                        <span>Author:</span>
+                                        <span><?php echo htmlspecialchars($book['author']); ?></span>
                                     </p>
-                                    <small class="text-muted">
-                                        <span class="data-label">Date:</span>
-                                        <span class="data-value"><?php echo date('M d, Y', strtotime($book['date'])); ?></span>
+                                    <small>
+                                        <span>Date:</span>
+                                        <span><?php echo date('M d, Y', strtotime($book['date'])); ?></span>
                                     </small>
                                 </div>
                                 
-                                <!-- Action Buttons -->
-                                <div class="action-buttons d-flex flex-wrap">
-                                    <a href="<?php echo htmlspecialchars($book['file']); ?>" target="_blank" class="btn btn-sm btn-view">
+                                <div class="d-flex flex-wrap">
+                                    <a href="/bookstore/book/<?php echo htmlspecialchars($book['file']); ?>" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-primary me-2"
+                                       download="<?php echo htmlspecialchars($book['title'] . '.pdf'); ?>">
                                         <i class="fas fa-eye me-1"></i> View
                                     </a>
-                                    <button class="btn btn-sm btn-edit" data-bs-toggle="modal" data-bs-target="#editBookModal" 
-                                        data-id="<?php echo $book['id']; ?>"
-                                        data-title="<?php echo htmlspecialchars($book['title']); ?>"
-                                        data-description="<?php echo htmlspecialchars($book['description']); ?>"
-                                        data-date="<?php echo htmlspecialchars($book['date']); ?>"
-                                        data-department="<?php echo htmlspecialchars($book['department']); ?>"
-                                        data-author="<?php echo htmlspecialchars($book['author']); ?>"
-                                        data-isread="<?php echo $book['is_read']; ?>"
-                                        data-isdownload="<?php echo $book['is_download']; ?>"
-                                        data-cover="<?php echo htmlspecialchars($book['cover']); ?>"
-                                        data-file="<?php echo htmlspecialchars($book['file']); ?>">
+                                    <button class="btn btn-sm btn-warning me-2" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editBookModal" 
+                                            data-id="<?php echo $book['id']; ?>"
+                                            data-title="<?php echo htmlspecialchars($book['title']); ?>"
+                                            data-description="<?php echo htmlspecialchars($book['description']); ?>"
+                                            data-date="<?php echo htmlspecialchars($book['date']); ?>"
+                                            data-department="<?php echo htmlspecialchars($book['department']); ?>"
+                                            data-author="<?php echo htmlspecialchars($book['author']); ?>"
+                                            data-isread="<?php echo $book['is_read']; ?>"
+                                            data-isdownload="<?php echo $book['is_download']; ?>"
+                                            data-cover="<?php echo htmlspecialchars($book['cover']); ?>"
+                                            data-file="<?php echo htmlspecialchars($book['file']); ?>">
                                         <i class="fas fa-edit me-1"></i> Edit
                                     </button>
-                                    <a href="?delete_id=<?php echo $book['id']; ?>" class="btn btn-sm btn-delete" onclick="return confirm('Are you sure you want to delete this book?');">
+                                    <a href="?delete_id=<?php echo $book['id']; ?>" 
+                                       class="btn btn-sm btn-danger" 
+                                       onclick="return confirm('Are you sure you want to delete this book?');">
                                         <i class="fas fa-trash me-1"></i> Delete
                                     </a>
                                 </div>
@@ -587,7 +360,7 @@ $conn->close();
                     <h5 class="modal-title" id="addBookModalLabel">Add New Book</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="addBookForm" method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data">
                     <div class="modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -677,7 +450,7 @@ $conn->close();
                     <h5 class="modal-title" id="editBookModalLabel">Edit Book</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="editBookForm" method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data">
                     <input type="hidden" name="edit_id" id="edit_id">
                     <input type="hidden" name="existing_cover" id="existing_cover">
                     <input type="hidden" name="existing_file" id="existing_file">
@@ -712,16 +485,16 @@ $conn->close();
                             <div class="col-md-6">
                                 <label for="edit_book_cover" class="form-label">Book Cover (PNG/JPG)</label>
                                 <input class="form-control" type="file" id="edit_book_cover" name="book_cover" accept="image/png, image/jpeg">
-                                <small class="text-muted">Leave blank to keep existing cover</small>
+                                <small>Leave blank to keep existing cover</small>
                                 <div class="mt-2">
-                                    <img id="current_cover" src="" alt="Current Cover" style="max-height: 100px; display: none;" class="img-thumbnail">
+                                    <img id="current_cover" src="" alt="Current Cover" style="max-height: 100px; display: none;">
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <label for="edit_book_file" class="form-label">Upload File (PDF)</label>
                                 <input class="form-control" type="file" id="edit_book_file" name="book_file" accept=".pdf">
-                                <small class="text-muted">Leave blank to keep existing file</small>
+                                <small>Leave blank to keep existing file</small>
                             </div>
                             
                             <div class="col-12">
@@ -748,44 +521,38 @@ $conn->close();
         </div>
     </div>
 
-    <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize edit modal with book data
-        document.addEventListener('DOMContentLoaded', function() {
-            var editBookModal = document.getElementById('editBookModal');
-            if (editBookModal) {
-                editBookModal.addEventListener('show.bs.modal', function(event) {
-                    var button = event.relatedTarget;
-                    
-                    document.getElementById('edit_id').value = button.getAttribute('data-id');
-                    document.getElementById('edit_book_title').value = button.getAttribute('data-title');
-                    document.getElementById('edit_book_description').value = button.getAttribute('data-description');
-                    document.getElementById('edit_book_date').value = button.getAttribute('data-date');
-                    document.getElementById('edit_department').value = button.getAttribute('data-department');
-                    document.getElementById('edit_author').value = button.getAttribute('data-author');
-                    document.getElementById('existing_cover').value = button.getAttribute('data-cover');
-                    document.getElementById('existing_file').value = button.getAttribute('data-file');
-                    
-                    // Set checkboxes
-                    document.getElementById('edit_readCheckbox').checked = button.getAttribute('data-isread') === '1';
-                    document.getElementById('edit_downloadCheckbox').checked = button.getAttribute('data-isdownload') === '1';
-                    
-                    // Show current cover
-                    var currentCover = document.getElementById('current_cover');
-                    currentCover.src = button.getAttribute('data-cover');
-                    currentCover.style.display = 'block';
-                });
-            }
-            
-            // Auto-scroll to message if present
-            if (window.location.hash === '#message') {
-                const messageElement = document.querySelector('.alert');
-                if (messageElement) {
-                    messageElement.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        var editModal = document.getElementById('editBookModal');
+        editModal.addEventListener('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var id = button.getAttribute('data-id');
+            var title = button.getAttribute('data-title');
+            var description = button.getAttribute('data-description');
+            var date = button.getAttribute('data-date');
+            var department = button.getAttribute('data-department');
+            var author = button.getAttribute('data-author');
+            var isread = button.getAttribute('data-isread');
+            var isdownload = button.getAttribute('data-isdownload');
+            var cover = button.getAttribute('data-cover');
+            var file = button.getAttribute('data-file');
+
+            var modal = this;
+            modal.querySelector('#edit_id').value = id;
+            modal.querySelector('#edit_book_title').value = title;
+            modal.querySelector('#edit_book_description').value = description;
+            modal.querySelector('#edit_book_date').value = date;
+            modal.querySelector('#edit_department').value = department;
+            modal.querySelector('#edit_author').value = author;
+            modal.querySelector('#edit_readCheckbox').checked = (isread == '1');
+            modal.querySelector('#edit_downloadCheckbox').checked = (isdownload == '1');
+            modal.querySelector('#existing_cover').value = cover;
+            modal.querySelector('#existing_file').value = file;
+            modal.querySelector('#current_cover').src = '/bookstore/book/' + cover;
+            modal.querySelector('#current_cover').style.display = 'block';
         });
+    });
     </script>
 </body>
 </html>
