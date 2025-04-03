@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,7 +10,6 @@
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 </head>
-
 <body>
     <header class="header" id="header">
         <a href="" class="logo">
@@ -23,7 +21,31 @@
             <a href="#home" class="active">Home <i class='bx bx-home'></i></a>
             <a href="#stats">ABOUT US <i class='bx bx-info-circle'></i></a>
             <a href="#services">USER HELP <i class='bx bx-help-circle'></i></a>
-            <a href="#notification" id="notification-link">NOTIFICATION <i class='bx bx-bell'></i></a>
+            <div style="position:relative;display:inline-block;">
+                <a href="book/menu/notifications.php">NOTIFICATION <i class='bx bx-bell'></i></a>
+                <?php
+                $servername = "localhost";
+                $username = "root";
+                $password = "";
+                $dbname = "online_book_Db";
+                $count = 0;
+                
+                $conn = new mysqli($servername, $username, $password, $dbname);
+                if (!$conn->connect_error) {
+                    $sql = "SELECT COUNT(*) as total FROM notifications";
+                    $result = $conn->query($sql);
+                    if ($result && $result->num_rows > 0) {
+                        $row = $result->fetch_assoc();
+                        $count = $row['total'];
+                    }
+                    $conn->close();
+                }
+                
+                if ($count > 0) {
+                    echo '<span style="position:absolute;top:-10px;right:-10px;background-color:red;color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;">'.$count.'</span>';
+                }
+                ?>
+            </div>
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle">LOGIN <i class='bx bx-chevron-down'></i></a>
                 <div class="dropdown-menu">
@@ -47,7 +69,6 @@
             </a>
         </nav>
     </header>
-
     <section class="home" id="home">
         <div class="home-content">
             <h1>Welcome to ARSI University <span>Online Bookstore</span></h1>
@@ -56,7 +77,6 @@
             <img src="image/logo1.jpeg" alt="Bookstore Image">
         </div>
     </section>
-
     <section class="stats" id="stats">
         <h2 class="heading">System <span>Statistics</span></h2>
         <div class="stats-container">
@@ -72,7 +92,6 @@
             </div>
         </div>
     </section>
-
     <section class="services" id="services">
         <h2 class="heading">User<span>Access Rule & Principle</span></h2>
         <div class="services-container">
@@ -93,31 +112,35 @@
             </div>
         </div>
     </section>
-
-    <section class="portfolio" id="#notification">
+    <section class="portfolio" id="notification">
         <h2 class="heading">Latest six <span> Upload Book</span></h2>
         <div class="portfolio-container">
-            <div class="portfolio-box">
-                <img src="image/TRAVEL.png" alt="">
-            </div>
-            <div class="portfolio-box">
-                <img src="image/CAR_RENTAL_.png" alt="">
-            </div>
-            <div class="portfolio-box">
-                <img src="image/MOVIES_.png" alt="">
-            </div>
-            <div class="portfolio-box">
-                <img src="image/D'LIFE_.png" alt="">
-            </div>
-            <div class="portfolio-box">
-                <img src="image/PORTFOLIO_.png" alt="">
-            </div>
-            <div class="portfolio-box">
-                <img src="image/G-FOOD_.png" alt="">
-            </div>
+            <?php
+            $servername = "localhost";
+            $username = "root";
+            $password = "";
+            $dbname = "online_book_Db";
+
+            $conn = new mysqli($servername, $username, $password, $dbname);
+            if ($conn->connect_error) {
+                echo '<p style="color: #fff; font-size: 1.6rem; text-align: center;">Database connection failed.</p>';
+            } else {
+                $sql = "SELECT cover FROM books ORDER BY id DESC LIMIT 6";
+                $result = $conn->query($sql);
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        echo '<div class="portfolio-box">';
+                        echo '<img src="/bookstore/book/' . htmlspecialchars($row['cover']) . '" alt="Book Cover">';
+                        echo '</div>';
+                    }
+                } else {
+                    echo '<p style="color: #fff; font-size: 1.6rem; text-align: center;">No books found.</p>';
+                }
+                $conn->close();
+            }
+            ?>
         </div>
     </section>
-
     <footer class="footer" id="footer">
         <div class="footer-divider"></div>
         <div class="footer-content">
@@ -144,21 +167,6 @@
             <p>Copyright ©2025 All Rights Reserved by ARSI University.</p>
         </div>
     </footer>
-
-    <!-- Notification Popup -->
-    <div id="notification-popup" class="notification-popup">
-        <div class="notification-content">
-            <i class='bx bx-bell-ring notification-icon'></i>
-            <h2>Notification Alert</h2>
-            <p>Do you want to see detailed new notifications?</p>
-            <div class="notification-buttons">
-                <button id="yes-btn" class="btn-yes">YES</button>
-                <button id="cancel-btn" class="btn-cancel">CANCEL</button>
-            </div>
-        </div>
-    </div>
-
     <script src="script.js"></script>
 </body>
-
 </html>

@@ -1,160 +1,128 @@
-// Theme switcher functionality
 document.addEventListener('DOMContentLoaded', function() {
-    const settingsToggle = document.getElementById('settings-toggle');
+    // 1. Theme Switcher with Local Storage
+    const themeSwitcher = document.querySelector('.theme-switcher');
     const themeOptions = document.getElementById('theme-options');
+    const settingsToggle = document.getElementById('settings-toggle');
     
     settingsToggle.addEventListener('click', function(e) {
         e.preventDefault();
         themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
     });
     
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.theme-switcher')) {
-            themeOptions.style.display = 'none';
-        }
-    });
-    
-    const themeOptionsElements = document.querySelectorAll('.theme-option');
-    themeOptionsElements.forEach(option => {
+    document.querySelectorAll('.theme-option').forEach(option => {
         option.addEventListener('click', function() {
             const theme = this.getAttribute('data-theme');
-            setTheme(theme);
-            localStorage.setItem('selectedTheme', theme);
+            document.body.className = theme;
+            localStorage.setItem('bookstoreTheme', theme);
+            themeOptions.style.display = 'none'; // Hide after selection
         });
     });
     
-    const savedTheme = localStorage.getItem('selectedTheme');
+    // Load saved theme
+    const savedTheme = localStorage.getItem('bookstoreTheme');
     if (savedTheme) {
-        setTheme(savedTheme);
+        document.body.className = savedTheme;
     }
+
+    // 2. Animated Counters
+    const animateCounters = () => {
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+        
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText;
+                const increment = target / speed;
+                
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + increment);
+                    setTimeout(updateCount, 1);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            
+            updateCount();
+        });
+    };
     
-    function setTheme(theme) {
-        document.body.className = theme;
-        themeOptionsElements.forEach(option => {
-            if (option.getAttribute('data-theme') === theme) {
-                option.classList.add('active-theme');
-            } else {
-                option.classList.remove('active-theme');
+    // 4. Responsive Menu Toggle
+    const menuIcon = document.getElementById('menu-icon');
+    const navbar = document.querySelector('.navbar');
+    
+    menuIcon.addEventListener('click', function() {
+        navbar.classList.toggle('active');
+        menuIcon.classList.toggle('bx-x');
+    });
+
+    // 5. Dropdown Menu (Login)
+    const dropdowns = document.querySelectorAll('.dropdown');
+    
+    dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            dropdown.classList.toggle('active');
+        });
+    });
+
+    // 6. Hide Dropdowns and Theme Options on Outside Click
+    document.addEventListener('click', function(e) {
+        // Hide theme options if click is outside theme-switcher
+        if (!themeSwitcher.contains(e.target) && themeOptions.style.display === 'block') {
+            themeOptions.style.display = 'none';
+        }
+        
+        // Hide login dropdown if click is outside any dropdown
+        dropdowns.forEach(dropdown => {
+            if (!dropdown.contains(e.target) && dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
             }
         });
-    }
-
-    // Counter Animation
-    const counters = document.querySelectorAll('.counter');
-    counters.forEach(counter => {
-        counter.innerText = '0';
-        const updateCounter = () => {
-            const target = +counter.getAttribute('data-target');
-            const count = +counter.innerText;
-            const increment = target / 200;
-            if (count < target) {
-                counter.innerText = Math.ceil(count + increment);
-                setTimeout(updateCounter, 10);
-            } else {
-                counter.innerText = target;
-            }
-        };
-        updateCounter();
     });
 
-    // Notification Popup Logic
-    const notificationLink = document.getElementById('notification-link');
-    const notificationPopup = document.getElementById('notification-popup');
-    const yesBtn = document.getElementById('yes-btn');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const portfolioSection = document.querySelector('.portfolio');
-
-    notificationLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        // Scroll to the portfolio section
-        portfolioSection.scrollIntoView({ behavior: 'smooth' });
+    // 7. Active Section Highlighting
+    window.addEventListener('scroll', function() {
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.navbar a');
+        const header = document.querySelector('header');
         
-        // Show popup after 5 seconds
-        setTimeout(() => {
-            notificationPopup.style.display = 'block';
-        }, 5000); // 5 seconds delay
+        sections.forEach(sec => {
+            const top = window.scrollY;
+            const offset = sec.offsetTop - 150;
+            const height = sec.offsetHeight;
+            const id = sec.getAttribute('id');
+            
+            if (top >= offset && top < offset + height) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(id)) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+        
+        header.classList.toggle('sticky', window.scrollY > 100);
     });
 
-    yesBtn.addEventListener('click', function() {
-        window.location.href = 'notification.php';
+    // 8. Scroll Animations
+    ScrollReveal().reveal('.home-content, .heading', { 
+        origin: 'top',
+        distance: '80px',
+        duration: 2000,
+        delay: 200
+    });
+    
+    ScrollReveal().reveal('.home-img, .services-container, .portfolio-container, .stats-container', { 
+        origin: 'bottom',
+        distance: '80px',
+        duration: 2000,
+        delay: 200
     });
 
-    cancelBtn.addEventListener('click', function() {
-        notificationPopup.style.display = 'none';
-    });
-
-    // Close popup when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!notificationPopup.contains(e.target) && e.target !== notificationLink) {
-            notificationPopup.style.display = 'none';
-        }
-    });
-});
-
-// Menu and Dropdown toggle functionality
-let menuIcon = document.querySelector('#menu-icon');
-let navbar = document.querySelector('.navbar');
-let dropdown = document.querySelector('.dropdown');
-let dropdownToggle = document.querySelector('.dropdown-toggle');
-
-menuIcon.onclick = () => {
-    menuIcon.classList.toggle('bx-x');
-    navbar.classList.toggle('active');
-};
-
-dropdownToggle.onclick = (e) => {
-    e.preventDefault();
-    dropdown.classList.toggle('active');
-};
-
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.dropdown') && !e.target.closest('.dropdown-toggle')) {
-        dropdown.classList.remove('active');
-    }
-});
-
-// Active section highlighting on scroll
-let sections = document.querySelectorAll('section');
-let navLinks = document.querySelectorAll('header nav a');
-
-window.onscroll = () => {
-    sections.forEach(sec => {
-        let top = window.scrollY;
-        let offset = sec.offsetTop - 150;
-        let height = sec.offsetHeight;
-        let id = sec.getAttribute('id');
-
-        if(top >= offset && top < offset + height) {
-            navLinks.forEach(links => {
-                links.classList.remove('active');
-                document.querySelector('header nav a[href*=' + id + ']').classList.add('active');
-            });
-        }
-    });
-
-    let header = document.querySelector('header');
-    header.classList.toggle('sticky', window.scrollY > 100);
-    menuIcon.classList.remove('bx-x');
-    navbar.classList.remove('active');
-};
-
-// ScrollReveal animations
-ScrollReveal({
-    distance: '80px',
-    duration: 2000,
-    delay: 200
-});
-
-ScrollReveal().reveal('.home-content, .heading', { origin: 'top' });
-ScrollReveal().reveal('.home-img, .services-container, .notification', { origin: 'bottom' });
-ScrollReveal().reveal('.home-content h1, .about-img', { origin: 'left' });
-ScrollReveal().reveal('.home-content p, .about-content', { origin: 'right' });
-
-// Typed.js animation
-const typed = new Typed('.multiple-text', {
-    strings: ['Latest book provide', 'any where and', 'any time Access', 'provide easy service', 'save your time'],
-    typeSpeed: 100,
-    backSpeed: 100,
-    backDelay: 1000,
-    loop: true
+    // Initialize counters when page loads
+    animateCounters();
 });

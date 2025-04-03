@@ -18,7 +18,7 @@
             <a href="#" data-page="menu/manage-user.php">Manage User</a>
             <a href="#" data-page="menu/manage book.php">Manage Book</a>
             <a href="#" data-page="menu/notify-user.php">Notify Users</a>
-            <a href="#" data-page="menu/view-comment.php">View Comment</a>
+            <a href="#" data-page="view-comment.php">View Comment</a>
             <button class="logout">Logout</button>
         </nav>
     </header>

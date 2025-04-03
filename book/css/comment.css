@@ -1,0 +1,232 @@
+/* comment.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #ff006e, #00d4ff, #ffbe0b, #8338ec);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background-size: 300% 300%;
+    animation: gradientBG 8s ease infinite;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+section {
+    background: rgba(255, 255, 255, 0.97);
+    padding: 30px;
+    border-radius: 25px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 700px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.heading {
+    text-align: center;
+    font-size: 2.8em;
+    color: #ff006e;
+    margin-bottom: 25px;
+    font-weight: 700;
+    text-shadow: 2px 2px 5px rgba(255, 0, 110, 0.2);
+}
+
+.heading span {
+    color: #00d4ff;
+    font-weight: 800;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-box {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    min-width: 45%;
+}
+
+input[type="text"]:focus {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+    outline: none;
+    background: white;
+}
+
+input[type="text"]::placeholder {
+    color: #777;
+    opacity: 0.9;
+}
+
+textarea {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1em;
+    min-height: 140px;
+    resize: vertical;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+textarea:focus {
+    transform: scale(1.01);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+    outline: none;
+    background: white;
+}
+
+textarea::placeholder {
+    color: #777;
+    opacity: 0.9;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    background: linear-gradient(45deg, #8338ec, #ffbe0b);
+    color: white;
+    padding: 12px 40px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(131, 56, 236, 0.4);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(131, 56, 236, 0.6);
+    background: linear-gradient(45deg, #ffbe0b, #8338ec);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(131, 56, 236, 0.3);
+}
+
+.logout-btn {
+    background: linear-gradient(45deg, #ff0000, #ff4040);
+    color: white;
+    padding: 12px 40px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+}
+
+.logout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.6);
+    background: linear-gradient(45deg, #ff4040, #ff0000);
+}
+
+.logout-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(255, 0, 0, 0.3);
+}
+
+#message-container {
+    text-align: center;
+    transition: opacity 0.5s ease;
+}
+
+.success-msg {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+.error-msg {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    section {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .heading {
+        font-size: 2.2em;
+    }
+
+    .input-box {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    input[type="text"] {
+        min-width: 100%;
+    }
+
+    .btn, .logout-btn {
+        padding: 12px 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .heading {
+        font-size: 1.8em;
+    }
+
+    input[type="text"],
+    textarea {
+        padding: 12px;
+    }
+
+    .btn, .logout-btn {
+        padding: 10px 30px;
+        font-size: 1em;
+    }
+}

@@ -26,6 +26,7 @@ html {
 body {
     background: var(--bg-color);
     color: var(--text-color);
+    min-height: 100vh;
 }
 
 .header {
@@ -63,7 +64,6 @@ body {
 .navbar a {
     font-size: 1.7rem;
     font-weight: 900;
-    font: bold;
     color: var(--text-color);
     padding: 0.8rem 1.5rem;
     border-radius: 0.5rem;
@@ -131,6 +131,10 @@ body {
     padding: 1rem 0;
 }
 
+.dropdown.active .dropdown-menu {
+    display: block;
+}
+
 .dropdown-menu a {
     font-size: 1.6rem;
     color: var(--text-color);
@@ -151,10 +155,6 @@ body {
     font-size: 1.8rem;
 }
 
-.dropdown.active .dropdown-menu {
-    display: block;
-}
-
 .theme-switcher {
     position: relative;
 }
@@ -170,6 +170,10 @@ body {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
     z-index: 1;
     padding: 1rem 0;
+}
+
+.theme-options[style*="display: block"] {
+    display: block;
 }
 
 .theme-option {
@@ -232,7 +236,7 @@ body {
 
 .stats {
     padding: 10rem 9% 2rem;
-    height: 100vh;
+    min-height: 100vh;
     background: var(--second-bg-color);
 }
 
@@ -286,6 +290,7 @@ body {
 
 .services {
     padding: 10rem 9% 2rem;
+    min-height: 100vh;
     background: var(--bg-color);
 }
 
@@ -340,6 +345,7 @@ body {
 
 .portfolio {
     padding: 10rem 9% 2rem;
+    min-height: 100vh;
     background: var(--second-bg-color);
 }
 
@@ -371,6 +377,8 @@ body {
 
 .portfolio-box img {
     width: 100%;
+    height: 100%;
+    object-fit: cover;
     transition: .5s ease;
 }
 
@@ -380,13 +388,8 @@ body {
 
 .footer {
     padding: 3rem 9%;
-    height: 5vh;
     background: var(--second-bg-color);
-}
-
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    100% { background-position: 400% 50%; }
+    width: 100%;
 }
 
 .footer-content {
@@ -395,7 +398,7 @@ body {
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 3rem;
-    margin: 3rem 0;
+    margin: 0; /* Removed bottom margin to align with no padding/margin requirement */
 }
 
 .footer-social, .footer-contact {
@@ -406,7 +409,21 @@ body {
 .footer-social h3, .footer-contact h3 {
     font-size: 2.4rem;
     color: var(--main-color);
-    margin-bottom: 2rem;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    padding-bottom: 0; /* No padding bottom */
+    margin-bottom: 0; /* No margin bottom */
+}
+
+.footer-social h3::before, .footer-contact h3::before {
+    content: '';
+    position: absolute;
+    top: -0.5rem; /* Line above h3 */
+    left: 0;
+    width: 100%;
+    height: 0.2rem;
+    background: linear-gradient(to right, #0ef, #ff6b9d, #ff4d4d);
 }
 
 .footer-social a {
@@ -456,7 +473,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 1rem;
+    padding: 0; /* No padding */
+    margin-bottom: 0; /* No margin bottom */
     background: var(--main-color);
     border-radius: 50%;
     transition: .5s ease;
@@ -482,7 +500,8 @@ body {
 .footer-text {
     text-align: center;
     font-size: 1.6rem;
-    padding: 1.5rem 0;
+    padding: 0; /* No padding */
+    margin-bottom: 0; /* No margin bottom */
     border-top: .1rem solid rgba(0, 0, 0, 0.2);
 }
 
@@ -700,6 +719,7 @@ body.light {
         justify-content: center;
     }
 }
+
 @media (max-width: 617px) {
     .portfolio-container {
         grid-template-columns: 1fr;
@@ -728,4 +748,24 @@ body.light {
         width: 250px;
         height: 250px;
     }
+}
+.notification-container {
+    position: relative;
+    display: inline-block;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
 }
