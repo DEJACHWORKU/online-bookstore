@@ -6,11 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ONLINE BOOKSTORE SYSTEM</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 </head>
 <body>
+    <?php
+    function countBooks() {
+        $servername = "localhost";
+        $username = "root";
+        $password = "";
+        $dbname = "online_book_Db";
+        $count = 0;
+        
+        try {
+            $conn = new mysqli($servername, $username, $password, $dbname);
+            if ($conn->connect_error) {
+                throw new Exception("Connection failed: " . $conn->connect_error);
+            }
+            $sql = "SELECT COUNT(file) as total FROM books";
+            $result = $conn->query($sql);
+            if ($result && $result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $count = $row['total'];
+            }
+            $conn->close();
+        } catch (Exception $e) {
+            $count = 0;
+        }
+        return $count;
+    }
+    
+    $totalBooks = countBooks();
+    ?>
+
     <header class="header" id="header">
         <a href="" class="logo">
             <i class='bx bxs-book' style="color: #61e5ff;"></i>
@@ -22,36 +51,14 @@
             <a href="#stats">ABOUT US <i class='bx bx-info-circle'></i></a>
             <a href="#services">USER HELP <i class='bx bx-help-circle'></i></a>
             <div style="position:relative;display:inline-block;">
-                <a href="book/menu/notifications.php">NOTIFICATION <i class='bx bx-bell'></i></a>
-                <?php
-                $servername = "localhost";
-                $username = "root";
-                $password = "";
-                $dbname = "online_book_Db";
-                $count = 0;
-                
-                $conn = new mysqli($servername, $username, $password, $dbname);
-                if (!$conn->connect_error) {
-                    $sql = "SELECT COUNT(*) as total FROM notifications";
-                    $result = $conn->query($sql);
-                    if ($result && $result->num_rows > 0) {
-                        $row = $result->fetch_assoc();
-                        $count = $row['total'];
-                    }
-                    $conn->close();
-                }
-                
-                if ($count > 0) {
-                    echo '<span style="position:absolute;top:-10px;right:-10px;background-color:red;color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;">'.$count.'</span>';
-                }
-                ?>
+                <a href="notifications.php">NOTIFICATION <i class='bx bx-bell'></i></a>
             </div>
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle">LOGIN <i class='bx bx-chevron-down'></i></a>
                 <div class="dropdown-menu">
                     <a href="admin.php">ADMIN</a>
-                    <a href="book/librarian.php">LIBRARIAN</a>
-                    <a href="book/user.php">USER</a>
+                    <a href="librarian.php">LIBRARIAN</a>
+                    <a href="user.php">USER</a>
                 </div>
             </div>
             <div class="theme-switcher">
@@ -69,6 +76,7 @@
             </a>
         </nav>
     </header>
+
     <section class="home" id="home">
         <div class="home-content">
             <h1>Welcome to ARSI University <span>Online Bookstore</span></h1>
@@ -77,6 +85,7 @@
             <img src="image/logo1.jpeg" alt="Bookstore Image">
         </div>
     </section>
+
     <section class="stats" id="stats">
         <h2 class="heading">System <span>Statistics</span></h2>
         <div class="stats-container">
@@ -88,10 +97,11 @@
             <div class="stats-box">
                 <i class='bx bx-book'></i>
                 <h3>Total Books</h3>
-                <p class="counter" data-target="5000">0</p>
+                <p class="counter" data-target="<?php echo $totalBooks; ?>">0</p>
             </div>
         </div>
     </section>
+
     <section class="services" id="services">
         <h2 class="heading">User<span>Access Rule & Principle</span></h2>
         <div class="services-container">
@@ -108,12 +118,13 @@
             <div class="services-box">
                 <i class='bx bx-time-five'></i>
                 <h3>When can use?</h3>
-                <p>Regarding your question of when you can use the system, all permissions are decided by the University leader, system admin, or librarian. As per university rules, access to the online bookstore is granted only while you are enrolled in an active university program. If you are dismissed from the university records, you lose your access permission, or if you graduate, your access will also be revoked.</p>
+                <p>all permissions are decided by the University leader, system admin, or librarian. As per university rules, access to the online bookstore is granted only while you are enrolled in an active university program. If you are dismissed from the university records, you lose your access permission, or if you graduate.</p>
             </div>
         </div>
     </section>
+
     <section class="portfolio" id="notification">
-        <h2 class="heading">Latest six <span> Upload Book</span></h2>
+        <h2 class="heading">Latest <span> Upload Book</span></h2>
         <div class="portfolio-container">
             <?php
             $servername = "localhost";
@@ -125,6 +136,15 @@
             if ($conn->connect_error) {
                 echo '<p style="color: #fff; font-size: 1.6rem; text-align: center;">Database connection failed.</p>';
             } else {
+                $cleanupSql = "DELETE FROM notifications WHERE 
+                             (availability = '1minute' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE)) OR
+                             (availability = '1day' AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)) OR
+                             (availability = '1week' AND created_at < DATE_SUB(NOW(), INTERVAL 1 WEEK)) OR
+                             (availability = '2weeks' AND created_at < DATE_SUB(NOW(), INTERVAL 2 WEEK)) OR
+                             (availability = '3weeks' AND created_at < DATE_SUB(NOW(), INTERVAL 3 WEEK)) OR
+                             (availability = '1month' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH))";
+                $conn->query($cleanupSql);
+
                 $sql = "SELECT cover FROM books ORDER BY id DESC LIMIT 6";
                 $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
@@ -141,6 +161,7 @@
             ?>
         </div>
     </section>
+
     <footer class="footer" id="footer">
         <div class="footer-divider"></div>
         <div class="footer-content">
@@ -158,8 +179,8 @@
                 <p><i class='bx bx-phone'></i> <a href="tel:+1234567890">+251222380252</a></p>
             </div>
             <div class="footer-iconTop">
-                <a href="" title="Back to Top">
-                    <i class='bx bx-up-arrow-alt' id="home"></i>
+                <a href="#home" title="Back to Top">
+                    <i class='bx bx-up-arrow-alt'></i>
                 </a>
             </div>
         </div>
@@ -167,6 +188,139 @@
             <p>Copyright ©2025 All Rights Reserved by ARSI University.</p>
         </div>
     </footer>
-    <script src="script.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuIcon = document.getElementById('menu-icon');
+        const navbar = document.querySelector('.navbar');
+        const dropdowns = document.querySelectorAll('.dropdown');
+        const themeSwitcher = document.querySelector('.theme-switcher');
+        const themeOptions = document.getElementById('theme-options');
+        const settingsToggle = document.getElementById('settings-toggle');
+        
+        menuIcon.addEventListener('click', function() {
+            navbar.classList.toggle('active');
+            menuIcon.classList.toggle('bx-x');
+        });
+        
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                dropdown.classList.toggle('active');
+            });
+        });
+        
+        settingsToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const theme = this.getAttribute('data-theme');
+                document.body.className = theme;
+                localStorage.setItem('bookstoreTheme', theme);
+                themeOptions.style.display = 'none';
+            });
+        });
+        
+        const savedTheme = localStorage.getItem('bookstoreTheme');
+        if (savedTheme) {
+            document.body.className = savedTheme;
+        }
+        
+        document.addEventListener('click', function(e) {
+            if (!themeSwitcher.contains(e.target) && themeOptions.style.display === 'block') {
+                themeOptions.style.display = 'none';
+            }
+            dropdowns.forEach(dropdown => {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        });
+        
+        const animateCounters = () => {
+            const counters = document.querySelectorAll('.counter');
+            const speed = 200;
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+                    const increment = target / speed;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + increment);
+                        setTimeout(updateCount, 1);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        };
+        
+        animateCounters();
+        
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.navbar a');
+            const header = document.querySelector('header');
+            sections.forEach(sec => {
+                const top = window.scrollY;
+                const offset = sec.offsetTop - 150;
+                const height = sec.offsetHeight;
+                const id = sec.getAttribute('id');
+                if (top >= offset && top < offset + height) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href').includes(id)) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+            header.classList.toggle('sticky', window.scrollY > 100);
+        });
+        
+        ScrollReveal(). Ascend({origin: 'top', distance: '80px', duration: 2000, delay: 200}).reveal('.home-content, .heading');
+        ScrollReveal().reveal('.home-img, .services-container, .portfolio-container, .stats-container', {origin: 'bottom', distance: '80px', duration: 2000, delay: 200});
+        
+        function handleNotificationMenu() {
+            const notificationContainer = document.querySelector('.notification-container');
+            const notificationLink = notificationContainer.querySelector('a');
+            if (window.innerWidth <= 768) {
+                notificationLink.addEventListener('click', function(e) {});
+            }
+        }
+
+        function updateNotificationCount() {
+            fetch('get_notification_count.php')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.querySelector('.notification-badge');
+                    const notificationLink = document.querySelector('.notification-container a');
+                    if (data.count > 0) {
+                        if (!badge) {
+                            const newBadge = document.createElement('span');
+                            newBadge.className = 'notification-badge';
+                            newBadge.textContent = data.count;
+                            notificationLink.appendChild(newBadge);
+                        } else {
+                            badge.textContent = data.count;
+                        }
+                    } else if (badge) {
+                        badge.remove();
+                    }
+                })
+                .catch(error => console.error('Error updating notification count:', error));
+        }
+        
+        handleNotificationMenu();
+        updateNotificationCount();
+        setInterval(updateNotificationCount, 30000);
+        window.addEventListener('resize', handleNotificationMenu);
+    });
+    </script>
 </body>
 </html>
