@@ -36,6 +36,7 @@
         </div>
         <nav class="nav-menu">
             <a href="librarian.php">Go back</a>
+            <a href="#" data-page="manage dep't.php">Manage department</a>
             <a href="#" data-page="">Manage User</a>
             <a href="#" data-page="manage book.php" class="active">Manage Book</a>
             <a href="#" data-page="notify-user.php">Notify Users</a>

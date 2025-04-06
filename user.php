@@ -85,10 +85,11 @@
             <i class="fas fa-bars"></i>
         </div>
         <nav class="nav-menu">
-            <a href="index.php">Go home<i class="icon">🛒</i></a>
-            <a href="view_book_list.php">View your department Book List<i class="icon">📖</i></a>
-            <a href="comment.php">Comments<i class="icon">💬</i></a>
-            <button class="logout">Logout<i class="icon">🔒</i></button>
+<a href="index.php">Go home <i class="fas fa-home"></i></a>
+<a href="view_book_list.php">Go Book List <i class="fas fa-book-open"></i></a>
+<a href="comment.php">Comments <i class="fas fa-comments"></i></a>
+<a href="profile.php">Your profile <i class="fas fa-user-circle"></i></a>
+<button class="logout">Logout <i class="fas fa-sign-out-alt"></i></button>
         </nav>
         <div class="overlay"></div>
     </header>

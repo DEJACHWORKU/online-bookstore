@@ -3,13 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Registration</title>
-   <link rel="stylesheet" href="css/admin register.css">
+    <title>Librarian Registration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="../css/admin register.css">
 </head>
 <body>
     <div class="container">
-        <h1 class="title">Admin Registration Form</h1>
+        <h1 class="title">Librarian Registration Form</h1>
+        
+        <div class="profile-image-container">
+            <div class="profile-image-placeholder">
+                <i class="fas fa-user-circle"></i>
+                <input type="file" id="profileImage" name="profileImage" accept="image/*" style="display: none;">
+            </div>
+            <label for="profileImage" class="upload-label">Upload Photo</label>
+        </div>
         
         <form id="registrationForm">
             <div class="form-row">
@@ -20,7 +28,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="adminID">Admin ID</label>
+                    <label for="adminID">Personal ID</label>
                     <input type="text" id="adminID" name="adminID" required>
                     <i class="fas fa-id-card input-icon"></i>
                 </div>
@@ -98,6 +106,26 @@
                 icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
+        
+        // Profile image upload functionality
+        document.querySelector('.profile-image-placeholder').addEventListener('click', function() {
+            document.getElementById('profileImage').click();
+        });
+
+        document.getElementById('profileImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const placeholder = document.querySelector('.profile-image-placeholder');
+                    placeholder.innerHTML = ''; // Clear the icon
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    placeholder.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
         
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
