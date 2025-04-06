@@ -51,10 +51,9 @@
             }
         }
         
-        // Only apply LIMIT 1 when there's a search query
         $query .= " ORDER BY date DESC LIMIT 1";
     } else {
-        // No search query - show all books
+   
         $query .= " ORDER BY date DESC";
     }
 

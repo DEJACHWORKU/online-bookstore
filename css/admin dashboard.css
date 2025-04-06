@@ -1,0 +1,152 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background: #2c3e50;
+    color: #fff;
+    font-size: 1.1rem;
+    text-align: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    line-height: 50px;
+}
+
+.container {
+    display: flex;
+    margin-top: 50px;
+}
+
+.sidebar {
+    width: 200px;
+    background: #2c3e50;
+    height: calc(100vh - 50px);
+    position: fixed;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+
+.hamburger {
+    display: none;
+    color: #fff;
+    font-size: 1.5rem;
+    padding: 10px;
+    cursor: pointer;
+    background: #2c3e50;
+    width: 50px;
+    text-align: center;
+    position: fixed;
+    top: 50px;
+    left: 0;
+    z-index: 1001;
+}
+
+.menu {
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid #3498db;
+    max-height: calc(100vh - 62px);
+    overflow-y: auto;
+}
+
+.menu-item {
+    display: block;
+    padding: 12px 15px;
+    color: white;
+    text-decoration: none;
+    transition: background 0.3s ease;
+    cursor: pointer;
+    margin: 5px 0;
+    text-align: left;
+    width: fit-content;
+}
+
+.menu-item:hover {
+    background: #3498db;
+    width: fit-content;
+}
+
+.menu-item.active {
+    background: #2980b9;
+    font-weight: bold;
+    width: fit-content;
+}
+
+.menu-item.logout {
+    background: #e74c3c;
+}
+
+.menu-item.logout:hover {
+    background: #c0392b;
+}
+
+.menu-item.logout.active {
+    background: #992d22;
+}
+
+.sidebar.hidden {
+    width: 0;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 180px;
+    }
+    
+    .menu-item {
+        padding: 10px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        font-size: 1rem;
+        line-height: 40px;
+    }
+    
+    .container {
+        margin-top: 40px;
+    }
+    
+    .sidebar {
+        width: 0;
+        overflow: hidden;
+    }
+    
+    .sidebar:not(.hidden) {
+        width: 180px;
+    }
+
+    .hamburger {
+        display: block;
+        top: 40px;
+    }
+
+    .menu {
+        max-height: calc(100vh - 52px);
+    }
+    
+    .menu-item {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+}

@@ -6,44 +6,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ONLINE BOOKSTORE SYSTEM</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" type="text/css" href="css/style.css">
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <?php
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "online_book_Db";
+
     function countBooks() {
-        $servername = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "online_book_Db";
+        global $servername, $username, $password, $dbname;
         $count = 0;
-        
-        try {
-            $conn = new mysqli($servername, $username, $password, $dbname);
-            if ($conn->connect_error) {
-                throw new Exception("Connection failed: " . $conn->connect_error);
-            }
-            $sql = "SELECT COUNT(file) as total FROM books";
-            $result = $conn->query($sql);
-            if ($result && $result->num_rows > 0) {
-                $row = $result->fetch_assoc();
-                $count = $row['total'];
-            }
-            $conn->close();
-        } catch (Exception $e) {
-            $count = 0;
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        if ($conn->connect_error) {
+            return 0;
         }
+        $sql = "SELECT COUNT(file) as total FROM books";
+        $result = $conn->query($sql);
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $count = $row['total'];
+        }
+        $conn->close();
         return $count;
     }
-    
+
+    function getActiveNotifications() {
+        global $servername, $username, $password, $dbname;
+        $notifications = array();
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        if ($conn->connect_error) {
+            return $notifications;
+        }
+
+        $cleanupSql = "DELETE FROM notifications WHERE 
+                     (availability = '1minute' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE)) OR
+                     (availability = '1day' AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)) OR
+                     (availability = '1week' AND created_at < DATE_SUB(NOW(), INTERVAL 1 WEEK)) OR
+                     (availability = '2weeks' AND created_at < DATE_SUB(NOW(), INTERVAL 2 WEEK)) OR
+                     (availability = '3weeks' AND created_at < DATE_SUB(NOW(), INTERVAL 3 WEEK)) OR
+                     (availability = '1month' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH))";
+        $conn->query($cleanupSql);
+
+        $sql = "SELECT *, TIMESTAMPDIFF(SECOND, NOW(), 
+                CASE availability
+                    WHEN '1minute' THEN DATE_ADD(created_at, INTERVAL 1 MINUTE)
+                    WHEN '1day' THEN DATE_ADD(created_at, INTERVAL 1 DAY)
+                    WHEN '1week' THEN DATE_ADD(created_at, INTERVAL 1 WEEK)
+                    WHEN '2weeks' THEN DATE_ADD(created_at, INTERVAL 2 WEEK)
+                    WHEN '3weeks' THEN DATE_ADD(created_at, INTERVAL 3 WEEK)
+                    WHEN '1month' THEN DATE_ADD(created_at, INTERVAL 1 MONTH)
+                END) as remaining_seconds 
+                FROM notifications 
+                HAVING remaining_seconds > 0";
+        $result = $conn->query($sql);
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $notifications[] = $row;
+            }
+        }
+        $conn->close();
+        return $notifications;
+    }
+
     $totalBooks = countBooks();
+    $activeNotifications = getActiveNotifications();
+    $notificationCount = count($activeNotifications);
     ?>
 
     <header class="header" id="header">
         <a href="" class="logo">
             <i class='bx bxs-book' style="color: #61e5ff;"></i>
-            BOOKSTORE
+            ONLINE BOOKSTORE
         </a>
         <i class='bx bx-menu' id="menu-icon"></i>
         <nav class="navbar">
@@ -51,12 +88,14 @@
             <a href="#stats">ABOUT US <i class='bx bx-info-circle'></i></a>
             <a href="#services">USER HELP <i class='bx bx-help-circle'></i></a>
             <div style="position:relative;display:inline-block;">
-                <a href="notifications.php">NOTIFICATION <i class='bx bx-bell'></i></a>
+                <a href="notifications.php">NOTIFICATION <i class='bx bx-bell'></i>
+                    <span id="notification-badge" class="notification-badge" style="<?php echo $notificationCount > 0 ? '' : 'display:none;' ?>"><?php echo $notificationCount; ?></span>
+                </a>
             </div>
             <div class="dropdown">
                 <a href="#" class="dropdown-toggle">LOGIN <i class='bx bx-chevron-down'></i></a>
                 <div class="dropdown-menu">
-                    <a href="admin.php">ADMIN</a>
+                    <a href="admin dashboard.php">ADMIN</a>
                     <a href="librarian.php">LIBRARIAN</a>
                     <a href="user.php">USER</a>
                 </div>
@@ -127,11 +166,6 @@
         <h2 class="heading">Latest <span> Upload Book</span></h2>
         <div class="portfolio-container">
             <?php
-            $servername = "localhost";
-            $username = "root";
-            $password = "";
-            $dbname = "online_book_Db";
-
             $conn = new mysqli($servername, $username, $password, $dbname);
             if ($conn->connect_error) {
                 echo '<p style="color: #fff; font-size: 1.6rem; text-align: center;">Database connection failed.</p>';
@@ -283,44 +317,90 @@
             header.classList.toggle('sticky', window.scrollY > 100);
         });
         
-        ScrollReveal(). Ascend({origin: 'top', distance: '80px', duration: 2000, delay: 200}).reveal('.home-content, .heading');
+        ScrollReveal().reveal('.home-content, .heading', {origin: 'top', distance: '80px', duration: 2000, delay: 200});
         ScrollReveal().reveal('.home-img, .services-container, .portfolio-container, .stats-container', {origin: 'bottom', distance: '80px', duration: 2000, delay: 200});
         
-        function handleNotificationMenu() {
-            const notificationContainer = document.querySelector('.notification-container');
-            const notificationLink = notificationContainer.querySelector('a');
-            if (window.innerWidth <= 768) {
-                notificationLink.addEventListener('click', function(e) {});
-            }
-        }
-
         function updateNotificationCount() {
-            fetch('get_notification_count.php')
-                .then(response => response.json())
+            fetch('?notification_count=1')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    const badge = document.querySelector('.notification-badge');
-                    const notificationLink = document.querySelector('.notification-container a');
+                    const badge = document.getElementById('notification-badge');
                     if (data.count > 0) {
-                        if (!badge) {
-                            const newBadge = document.createElement('span');
-                            newBadge.className = 'notification-badge';
-                            newBadge.textContent = data.count;
-                            notificationLink.appendChild(newBadge);
-                        } else {
-                            badge.textContent = data.count;
-                        }
-                    } else if (badge) {
-                        badge.remove();
+                        badge.style.display = 'block';
+                        badge.textContent = data.count;
+                        
+                        data.notifications.forEach(notification => {
+                            startCountdown(notification.id, notification.remaining_seconds);
+                        });
+                    } else {
+                        badge.style.display = 'none';
                     }
                 })
-                .catch(error => console.error('Error updating notification count:', error));
+                .catch(error => {
+                    console.error('Error updating notification count:', error);
+                });
         }
-        
-        handleNotificationMenu();
+
+        function startCountdown(notificationId, seconds) {
+            const countdownElement = document.getElementById('countdown-' + notificationId);
+            if (!countdownElement) return;
+
+            let remaining = seconds;
+            
+            const interval = setInterval(() => {
+                remaining--;
+                
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    countdownElement.textContent = "Expired";
+                    updateNotificationCount();
+                    return;
+                }
+                
+                const hours = Math.floor(remaining / 3600);
+                const minutes = Math.floor((remaining % 3600) / 60);
+                const secs = remaining % 60;
+                
+                let timeString = '';
+                if (hours > 0) timeString += hours + 'h ';
+                if (minutes > 0) timeString += minutes + 'm ';
+                timeString += secs + 's';
+                
+                countdownElement.textContent = timeString;
+            }, 1000);
+        }
+
         updateNotificationCount();
         setInterval(updateNotificationCount, 30000);
-        window.addEventListener('resize', handleNotificationMenu);
     });
     </script>
+
+    <?php
+    if (isset($_GET['notification_count'])) {
+        $activeNotifications = getActiveNotifications();
+        $notificationCount = count($activeNotifications);
+        
+        $response = array(
+            'count' => $notificationCount,
+            'notifications' => array()
+        );
+        
+        foreach ($activeNotifications as $notification) {
+            $response['notifications'][] = array(
+                'id' => $notification['id'],
+                'remaining_seconds' => $notification['remaining_seconds']
+            );
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
+    }
+    ?>
 </body>
 </html>

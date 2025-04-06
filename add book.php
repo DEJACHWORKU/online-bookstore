@@ -116,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bind_param("sssssssii", $book_date, $book_title, $book_description, $department, $author, $cover_path, $file_path, $is_read, $is_download);
             
             if ($stmt->execute()) {
-                $message = "<p class='success'>New book added successfully! <a href='book_management.php'>Back to Book Management</a></p>";
+                $message = "<p class='success'>New book added successfully!</p>";
             } else {
                 $message = "<p class='error'>Error: " . $stmt->error . "</p>";
             }
@@ -194,7 +194,7 @@ $conn->close();
 
             const coverInput = document.getElementById('book_cover');
             const fileInput = document.getElementById('book_file');
-            const maxSize = 20971520; // 20MB in bytes
+            const maxSize = 20971520;
 
             if (coverInput.files[0] && coverInput.files[0].size > maxSize) {
                 document.getElementById('message-container').innerHTML = "<p class='error'>Book cover must be less than 20MB</p>";
@@ -221,6 +221,9 @@ $conn->close();
                 messageContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
                 if (data.message.includes('success')) {
                     this.reset();
+                    setTimeout(() => {
+                        messageContainer.innerHTML = '';
+                    }, 3000);
                 }
             })
             .catch(error => {

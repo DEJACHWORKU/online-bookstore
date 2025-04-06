@@ -28,9 +28,9 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notify Users</title>
-    <link rel="stylesheet" href="css/notifyuser.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/notifyuser.css">
 </head>
 <body>
     <section>
@@ -58,45 +58,38 @@ $conn->close();
                             <div class="book-title-header">
                                 title: <?php echo htmlspecialchars($book['title']); ?>
                             </div>
-                            
                             <div class="detail-row">
                                 <span class="detail-label">author:</span>
                                 <span class="detail-value"><?php echo htmlspecialchars($book['author']); ?></span>
                             </div>
-                            
                             <div class="detail-row">
                                 <span class="detail-label">department:</span>
                                 <span class="detail-value"><?php echo htmlspecialchars($book['department']); ?></span>
                             </div>
-                            
                             <div class="detail-row">
                                 <span class="detail-label">date added:</span>
                                 <span class="detail-value"><?php echo date('M d, Y', strtotime($book['date'])); ?></span>
                             </div>
-                            
                             <div class="detail-row description-row">
                                 <span class="detail-label">description:</span>
                                 <span class="detail-value"><?php echo nl2br(htmlspecialchars($book['description'])); ?></span>
                             </div>
-                            
                             <div class="detail-row">
                                 <span class="detail-label">readable:</span>
                                 <span class="detail-value"><?php echo $book['is_read'] ? 'Yes' : 'No'; ?></span>
                             </div>
-                            
                             <div class="detail-row">
                                 <span class="detail-label">downloadable:</span>
                                 <span class="detail-value"><?php echo $book['is_download'] ? 'Yes' : 'No'; ?></span>
                             </div>
-                            
                             <div class="notification-card">
                                 <form class="notify-form" onsubmit="sendNotification(event, <?php echo $book['id']; ?>)">
                                     <input type="hidden" name="book_id" value="<?php echo $book['id']; ?>">
                                     <input type="hidden" name="book_title" value="<?php echo htmlspecialchars($book['title']); ?>">
-                                    
                                     <div class="form-group">
                                         <label for="availability_<?php echo $book['id']; ?>" class="availability-label">Notification availability Time</label>
                                         <select name="availability" id="availability_<?php echo $book['id']; ?>" class="availability-select" required>
+                                            <option value="" selected disabled>Select availability time</option>
                                             <option value="1min">1 Minute</option>
                                             <option value="1day">1 Day</option>
                                             <option value="1week">1 Week</option>
@@ -105,7 +98,6 @@ $conn->close();
                                             <option value="1month">1 Month</option>
                                         </select>
                                     </div>
-                                    
                                     <button type="submit" class="notify-btn">
                                         <i class="fas fa-bell"></i> Notify Users
                                     </button>

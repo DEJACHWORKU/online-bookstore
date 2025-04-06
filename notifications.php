@@ -10,6 +10,31 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Handle AJAX request for deleting expired notifications
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $ids = $data['ids'] ?? [];
+    
+    if (!empty($ids)) {
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $conn->prepare("DELETE FROM notifications WHERE id IN ($placeholders)");
+        $types = str_repeat('i', count($ids));
+        $stmt->bind_param($types, ...$ids);
+        
+        if ($stmt->execute()) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'deleted_count' => $stmt->affected_rows]);
+        } else {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => $stmt->error]);
+        }
+        $stmt->close();
+        $conn->close();
+        exit();
+    }
+}
+
+// Clean up expired notifications
 $cleanupSql = "DELETE FROM notifications WHERE 
                (availability = '1min' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE)) OR
                (availability = '1day' AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)) OR
@@ -19,7 +44,8 @@ $cleanupSql = "DELETE FROM notifications WHERE
                (availability = '1month' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH))";
 $conn->query($cleanupSql);
 
-$sql = "SELECT b.*, n.availability, n.created_at as notification_date 
+// Get active notifications
+$sql = "SELECT b.*, n.availability, n.created_at as notification_date, n.id as notification_id
         FROM books b 
         JOIN notifications n ON b.id = n.book_id 
         ORDER BY n.created_at DESC";
@@ -43,6 +69,7 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/notification.css">
+    
 </head>
 <body>
     <div class="container">
@@ -69,24 +96,12 @@ $conn->close();
                         $expiryDate = clone $createdAt;
                         
                         switch ($book['availability']) {
-                            case '1min':
-                                $expiryDate->add(new DateInterval('PT1M'));
-                                break;
-                            case '1day':
-                                $expiryDate->add(new DateInterval('P1D'));
-                                break;
-                            case '1week':
-                                $expiryDate->add(new DateInterval('P7D'));
-                                break;
-                            case '2weeks':
-                                $expiryDate->add(new DateInterval('P14D'));
-                                break;
-                            case '3weeks':
-                                $expiryDate->add(new DateInterval('P21D'));
-                                break;
-                            case '1month':
-                                $expiryDate->add(new DateInterval('P1M'));
-                                break;
+                            case '1min': $expiryDate->add(new DateInterval('PT1M')); break;
+                            case '1day': $expiryDate->add(new DateInterval('P1D')); break;
+                            case '1week': $expiryDate->add(new DateInterval('P7D')); break;
+                            case '2weeks': $expiryDate->add(new DateInterval('P14D')); break;
+                            case '3weeks': $expiryDate->add(new DateInterval('P21D')); break;
+                            case '1month': $expiryDate->add(new DateInterval('P1M')); break;
                         }
                         
                         $remaining = $now->diff($expiryDate);
@@ -115,7 +130,7 @@ $conn->close();
                         $expiryDate = new DateTime();
                     }
                 ?>
-                    <div class="notification-card" data-expiry="<?php echo $expiryDate->format('Y-m-d H:i:s'); ?>">
+                    <div class="notification-card" data-expiry="<?php echo $expiryDate->format('Y-m-d H:i:s'); ?>" data-notification-id="<?php echo $book['notification_id']; ?>">
                         <div class="book-cover-container">
                             <?php if (!empty($book['cover'])): ?>
                                 <img src="/bookstore/book/<?php echo htmlspecialchars($book['cover']); ?>" alt="Book Cover" class="book-cover">
@@ -164,14 +179,18 @@ $conn->close();
     function checkExpiredNotifications() {
         const now = new Date();
         const notificationCards = document.querySelectorAll('.notification-card');
+        let expiredIds = [];
         
         notificationCards.forEach(card => {
             const expiryDateStr = card.getAttribute('data-expiry');
+            const notificationId = card.getAttribute('data-notification-id');
             
             try {
                 const expiryDate = new Date(expiryDateStr);
                 
                 if (now > expiryDate) {
+                    expiredIds.push(notificationId);
+                    
                     card.style.transition = 'all 0.5s ease';
                     card.style.opacity = '0';
                     card.style.height = '0';
@@ -198,6 +217,26 @@ $conn->close();
                 console.error('Error processing expiry date:', e);
             }
         });
+        
+        if (expiredIds.length > 0) {
+            fetch(location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ ids: expiredIds }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Error deleting expired notifications:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting expired notifications:', error);
+            });
+        }
     }
     
     setInterval(checkExpiredNotifications, 60000);

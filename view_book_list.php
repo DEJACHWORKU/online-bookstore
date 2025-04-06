@@ -18,7 +18,7 @@ while ($row = $dept_result->fetch_assoc()) {
 }
 
 // Sorting and filtering logic
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
+$sort = isset($_GET['sort']) ? $_GET['sort'] : '';
 $department_filter = isset($_GET['department']) ? $_GET['department'] : '';
 
 $sql = "SELECT date, title, description, department, author, cover FROM books WHERE 1=1";
@@ -31,7 +31,9 @@ if (!empty($department_filter)) {
     $types .= 's';
 }
 
-$sql .= ($sort === 'newest') ? " ORDER BY date DESC" : " ORDER BY date ASC";
+if (!empty($sort)) {
+    $sql .= ($sort === 'newest') ? " ORDER BY date DESC" : " ORDER BY date ASC";
+}
 
 $stmt = $conn->prepare($sql);
 if (!empty($params)) {
@@ -55,39 +57,51 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Book List</title>
-    <link rel="stylesheet" href="css/view book list.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="css/view book list.css">
 </head>
 <body>
     <div class="menu-bar">
-        <a href="user.php" class="menu-btn bookstore"><i class="fas fa-book"></i> Go to Bookstore</a>
-        <button onclick="window.location.href='index.php'" class="menu-btn logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
-    </div>
-    <h1>Welcome to Viewing Book List</h1>
-    <div class="subtitle">Filter by department or sort books as you like!</div>
-    <div class="container">
-        <div class="controls">
-            <div class="control-group">
-                <span class="control-label">Search by Department:</span>
-                <div class="control-input">
-                    <input type="text" name="department" list="department_list" placeholder="Type or select" value="<?php echo htmlspecialchars($department_filter); ?>" onchange="updateFilter()">
-                    <datalist id="department_list">
-                        <?php foreach ($departments as $dept): ?>
-                            <option value="<?php echo htmlspecialchars($dept); ?>">
-                        <?php endforeach; ?>
-                    </datalist>
-                </div>
-            </div>
-            <div class="control-group">
-                <span class="control-label">Sort by:</span>
-                <div class="control-input">
-                    <select name="sort" onchange="updateFilter()">
-                        <option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Newest First</option>
-                        <option value="oldest" <?php echo $sort === 'oldest' ? 'selected' : ''; ?>>Oldest First</option>
-                    </select>
-                </div>
-            </div>
+        <div>
+            <h1>Welcome to Viewing Book List</h1>
+            <div class="subtitle">Filter by department or sort books as you like!</div>
         </div>
+        <div>
+            <a href="user.php" class="menu-btn bookstore"><i class="fas fa-book"></i> Go to Bookstore</a>
+            <button onclick="window.location.href='index.php'" class="menu-btn logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <form id="filterForm" method="GET" action="">
+            <div class="controls">
+                <div class="control-group">
+                    <span class="control-label">Search by Department:</span>
+                    <div class="control-input">
+                        <input type="text" name="department" list="department_list" placeholder="Type or select" value="<?php echo htmlspecialchars($department_filter); ?>">
+                        <datalist id="department_list">
+                            <?php foreach ($departments as $dept): ?>
+                                <option value="<?php echo htmlspecialchars($dept); ?>">
+                            <?php endforeach; ?>
+                        </datalist>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Sort by:</span>
+                    <div class="sort-selector">
+                        <div class="sort-trigger" id="sortTrigger">
+                            <?php echo empty($sort) ? 'Select sort option' : ($sort === 'newest' ? 'Newest First' : 'Oldest First'); ?>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="sort-options" id="sortOptions">
+                            <div class="sort-option <?php echo $sort === 'newest' ? 'active' : ''; ?>" data-value="newest">Newest First</div>
+                            <div class="sort-option <?php echo $sort === 'oldest' ? 'active' : ''; ?>" data-value="oldest">Oldest First</div>
+                        </div>
+                        <input type="hidden" name="sort" id="sortInput" value="<?php echo $sort; ?>">
+                    </div>
+                </div>
+            </div>
+        </form>
 
         <div class="book-grid">
             <?php if (empty($books)): ?>
@@ -110,15 +124,45 @@ $conn->close();
     </div>
 
     <script>
-        function updateFilter() {
-            const department = document.querySelector('input[name="department"]').value;
-            const sort = document.querySelector('select[name="sort"]').value;
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filterForm');
+            const departmentInput = document.querySelector('input[name="department"]');
+            const sortTrigger = document.getElementById('sortTrigger');
+            const sortOptions = document.getElementById('sortOptions');
+            const sortInput = document.getElementById('sortInput');
+            const sortOptionElements = document.querySelectorAll('.sort-option');
 
-            const url = new URL(window.location.href);
-            url.searchParams.set('department', department);
-            url.searchParams.set('sort', sort);
-            window.location.href = url.toString();
-        }
+            sortTrigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sortOptions.classList.toggle('show');
+            });
+
+            sortOptionElements.forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    
+                    sortTrigger.innerHTML = text + ' <i class="fas fa-chevron-down"></i>';
+                    sortTrigger.style.color = '#333';
+                    sortInput.value = value;
+                    
+                    sortOptionElements.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    sortOptions.classList.remove('show');
+                    
+                    form.submit();
+                });
+            });
+
+            document.addEventListener('click', function() {
+                sortOptions.classList.remove('show');
+            });
+
+            departmentInput.addEventListener('change', function() {
+                form.submit();
+            });
+        });
     </script>
 </body>
 </html>
