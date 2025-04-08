@@ -2,7 +2,6 @@
 ini_set('upload_max_filesize', '5M');
 ini_set('post_max_size', '21M');
 ini_set('max_execution_time', '300');
-
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -37,8 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($email)) {
         $errors['email'] = "Valid email is required.";
     }
-    if (!preg_match("/^[0-9]*$/", $phone) || empty($phone)) {
-        $errors['phone'] = "Phone number must contain only digits and cannot be empty.";
+    if (!preg_match("/^[0-9]{10,15}$/", $phone) || empty($phone)) {
+        $errors['phone'] = "Phone number must contain 10-15 digits only.";
     }
     if (empty($username)) {
         $errors['username'] = "Username is required.";

@@ -186,8 +186,8 @@
                 <a href="user/user register form.php" class="menu-item">Add User</a>
                 <a href="add book.php" class="menu-item">Add Book</a>
                 <a href="user/manage admin.php" class="menu-item">Manage Admin</a>
-                <a href="manage librarian.php" class="menu-item">Manage Librarian</a>
-                <a href="manage user.php" class="menu-item">Manage User</a>
+                <a href="user/manage librarian.php" class="menu-item">Manage Librarian</a>
+                <a href="user/manage user.php" class="menu-item">Manage User</a>
                 <a href="manage book.php" class="menu-item">Manage Book</a>
                 <a href="view-comment.php" class="menu-item">View Comment</a>
                 <a href="user approval.php" class="menu-item">User Approval</a>
