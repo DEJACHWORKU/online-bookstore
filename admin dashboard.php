@@ -185,7 +185,7 @@
                 <a href="user/librarian register form.php" class="menu-item">Add Librarian</a>
                 <a href="user/user register form.php" class="menu-item">Add User</a>
                 <a href="add book.php" class="menu-item">Add Book</a>
-                <a href="manage admin.php" class="menu-item">Manage Admin</a>
+                <a href="user/manage admin.php" class="menu-item">Manage Admin</a>
                 <a href="manage librarian.php" class="menu-item">Manage Librarian</a>
                 <a href="manage user.php" class="menu-item">Manage User</a>
                 <a href="manage book.php" class="menu-item">Manage Book</a>

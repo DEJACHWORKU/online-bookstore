@@ -1,5 +1,5 @@
 <?php
-ini_set('upload_max_filesize', '20M');
+ini_set('upload_max_filesize', '5M');
 ini_set('post_max_size', '21M');
 ini_set('max_execution_time', '300');
 
@@ -16,6 +16,7 @@ if ($conn->connect_error) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $message = '';
+    $errors = [];
     
     $fullName = trim($_POST['fullName'] ?? '');
     $adminID = trim($_POST['adminID'] ?? '');
@@ -28,52 +29,87 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $profileImage = $_FILES['profileImage'] ?? null;
 
     if (!preg_match("/^[a-zA-Z ]*$/", $fullName) || empty($fullName)) {
-        $message .= "<p class='error'>Full Name must contain only letters and cannot be empty.</p>";
+        $errors['fullName'] = "Full Name must contain only letters and cannot be empty.";
     }
     if (empty($adminID)) {
-        $message .= "<p class='error'>Admin ID is required.</p>";
+        $errors['adminID'] = "Admin ID is required.";
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($email)) {
-        $message .= "<p class='error'>Valid email is required.</p>";
+        $errors['email'] = "Valid email is required.";
     }
     if (!preg_match("/^[0-9]*$/", $phone) || empty($phone)) {
-        $message .= "<p class='error'>Phone number must contain only digits and cannot be empty.</p>";
+        $errors['phone'] = "Phone number must contain only digits and cannot be empty.";
     }
     if (empty($username)) {
-        $message .= "<p class='error'>Username is required.</p>";
+        $errors['username'] = "Username is required.";
     }
     if (strlen($password) < 6 || empty($password)) {
-        $message .= "<p class='error'>Password must be at least 6 characters long and is required.</p>";
+        $errors['password'] = "Password must be at least 6 characters long and is required.";
     }
     if ($password !== $confirmPassword) {
-        $message .= "<p class='error'>Passwords do not match.</p>";
+        $errors['confirmPassword'] = "Passwords do not match.";
     }
 
     if ($profileImage && $profileImage['error'] !== UPLOAD_ERR_OK && $profileImage['error'] !== UPLOAD_ERR_NO_FILE) {
-        $message .= "<p class='error'>Error uploading profile image.</p>";
+        $errors['profileImage'] = "Error uploading profile image.";
     } elseif ($profileImage && $profileImage['error'] === UPLOAD_ERR_OK) {
         $image_ext = strtolower(pathinfo($profileImage['name'], PATHINFO_EXTENSION));
         if (!in_array($image_ext, ['png', 'jpg', 'jpeg'])) {
-            $message .= "<p class='error'>Profile image must be PNG, JPG, or JPEG.</p>";
+            $errors['profileImage'] = "Profile image must be PNG, JPG, or JPEG.";
         }
         if ($profileImage['size'] > 20971520) {
-            $message .= "<p class='error'>Profile image must be less than 20MB.</p>";
+            $errors['profileImage'] = "Profile image must be less than 5MB.";
         }
     }
 
-    if (empty($message)) {
-        $check_stmt = $conn->prepare("SELECT id FROM Admin WHERE username = ? OR email = ?");
-        $check_stmt->bind_param("ss", $username, $email);
-        $check_stmt->execute();
-        $check_stmt->store_result();
-        
-        if ($check_stmt->num_rows > 0) {
-            $message .= "<p class='error'>Username or email already exists.</p>";
+    if (empty($errors)) {
+        $check_fullname = $conn->prepare("SELECT id FROM Admin WHERE full_name = ?");
+        $check_fullname->bind_param("s", $fullName);
+        $check_fullname->execute();
+        $check_fullname->store_result();
+        if ($check_fullname->num_rows > 0) {
+            $errors['fullName'] = "Full Name already exists.";
         }
-        $check_stmt->close();
+        $check_fullname->close();
+
+        $check_adminid = $conn->prepare("SELECT id FROM Admin WHERE admin_id = ?");
+        $check_adminid->bind_param("s", $adminID);
+        $check_adminid->execute();
+        $check_adminid->store_result();
+        if ($check_adminid->num_rows > 0) {
+            $errors['adminID'] = "Admin ID already exists.";
+        }
+        $check_adminid->close();
+
+        $check_phone = $conn->prepare("SELECT id FROM Admin WHERE phone = ?");
+        $check_phone->bind_param("s", $phone);
+        $check_phone->execute();
+        $check_phone->store_result();
+        if ($check_phone->num_rows > 0) {
+            $errors['phone'] = "Phone number already exists.";
+        }
+        $check_phone->close();
+
+        $check_username = $conn->prepare("SELECT id FROM Admin WHERE username = ?");
+        $check_username->bind_param("s", $username);
+        $check_username->execute();
+        $check_username->store_result();
+        if ($check_username->num_rows > 0) {
+            $errors['username'] = "Username already exists.";
+        }
+        $check_username->close();
+
+        $check_email = $conn->prepare("SELECT id FROM Admin WHERE email = ?");
+        $check_email->bind_param("s", $email);
+        $check_email->execute();
+        $check_email->store_result();
+        if ($check_email->num_rows > 0) {
+            $errors['email'] = "Email already exists.";
+        }
+        $check_email->close();
     }
 
-    if (empty($message)) {
+    if (empty($errors)) {
         $profileImagePath = "";
         if ($profileImage && $profileImage['error'] === UPLOAD_ERR_OK) {
             $base_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/Admin/';
@@ -90,19 +126,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (move_uploaded_file($profileImage['tmp_name'], $image_dir . $image_filename)) {
                 $profileImagePath = $image_path;
             } else {
-                $message .= "<p class='error'>Error uploading profile image! Please check your file permissions.</p>";
+                $errors['profileImage'] = "Error uploading profile image! Please check your file permissions.";
             }
         }
 
-        if (empty($message)) {
+        if (empty($errors)) {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $conn->prepare("INSERT INTO Admin (full_name, admin_id, email, phone, username, password, profile_image, remember_me) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->bind_param("ssssssss", $fullName, $adminID, $email, $phone, $username, $hashedPassword, $profileImagePath, $rememberMe);
             
             if ($stmt->execute()) {
-                $message = "<p class='success'>Admin registration successful!</p>";
+                $message = "Admin registration successful!";
             } else {
-                $message = "<p class='error'>Error: " . $stmt->error . "</p>";
+                $errors['general'] = "Error: " . $stmt->error;
                 if ($profileImagePath && file_exists($image_dir . $image_filename)) {
                     unlink($image_dir . $image_filename);
                 }
@@ -112,7 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     header('Content-Type: application/json');
-    echo json_encode(['message' => $message]);
+    echo json_encode(['message' => $message, 'errors' => $errors]);
     exit;
 }
 
@@ -133,20 +169,23 @@ $conn->close();
         <h1 class="title">Admin Registration Form</h1>
         
         <form id="registrationForm" method="POST" enctype="multipart/form-data">
-            <label for="profileImage">Profile Image (PNG/JPG, max 20MB, Optional):</label>
-            <input type="file" id="profileImage" name="profileImage" accept="image/png, image/jpeg, image/jpg" data-max-size="20971520">
+            <label for="profileImage">Profile Image (PNG/JPG, max 5MB):</label>
+            <input type="file" id="profileImage" name="profileImage" accept="image/png, image/jpeg, image/jpg">
+            <div class="error-message" id="profileImage-error"></div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label for="fullName">Full Name</label>
                     <input type="text" id="fullName" name="fullName" required>
                     <i class="fas fa-user input-icon"></i>
+                    <div class="error-message" id="fullName-error"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="adminID">Admin ID</label>
                     <input type="text" id="adminID" name="adminID" required>
                     <i class="fas fa-id-card input-icon"></i>
+                    <div class="error-message" id="adminID-error"></div>
                 </div>
             </div>
             
@@ -155,12 +194,14 @@ $conn->close();
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" required>
                     <i class="fas fa-envelope input-icon"></i>
+                    <div class="error-message" id="email-error"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
                     <input type="tel" id="phone" name="phone" required>
                     <i class="fas fa-phone input-icon"></i>
+                    <div class="error-message" id="phone-error"></div>
                 </div>
             </div>
             
@@ -169,6 +210,7 @@ $conn->close();
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" required>
                     <i class="fas fa-user-tag input-icon"></i>
+                    <div class="error-message" id="username-error"></div>
                 </div>
                 
                 <div class="form-group">
@@ -177,6 +219,7 @@ $conn->close();
                     <span class="password-toggle" onclick="togglePassword()">
                         <i class="fas fa-eye"></i>
                     </span>
+                    <div class="error-message" id="password-error"></div>
                 </div>
             </div>
             
@@ -187,6 +230,7 @@ $conn->close();
                     <span class="password-toggle" onclick="toggleConfirmPassword()">
                         <i class="fas fa-eye"></i>
                     </span>
+                    <div class="error-message" id="confirmPassword-error"></div>
                 </div>
                 
                 <div class="form-group">
@@ -232,17 +276,12 @@ $conn->close();
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const profileImage = document.getElementById('profileImage');
-            const maxSize = 20971520;
-
-            if (profileImage.files[0] && profileImage.files[0].size > maxSize) {
-                document.getElementById('message-container').innerHTML = "<p class='error'>Profile image must be less than 20MB</p>";
-                return;
-            }
-
             const formData = new FormData(this);
             const button = this.querySelector('button[type="submit"]');
             button.disabled = true;
+
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            document.getElementById('message-container').textContent = '';
 
             fetch(window.location.href, {
                 method: 'POST',
@@ -250,20 +289,37 @@ $conn->close();
             })
             .then(response => response.json())
             .then(data => {
-                const messageContainer = document.getElementById('message-container');
-                messageContainer.innerHTML = data.message;
-                button.disabled = false;
-                messageContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-                if (data.message.includes('success')) {
-                    this.reset();
-                    setTimeout(() => {
-                        messageContainer.innerHTML = '';
-                    }, 3000);
+                if (data.message) {
+                    document.getElementById('message-container').innerHTML = 
+                        `<p class="success">${data.message}</p>`;
+                    if (data.message.includes('success')) {
+                        this.reset();
+                    }
                 }
+
+                if (data.errors) {
+                    for (const [field, error] of Object.entries(data.errors)) {
+                        const errorElement = document.getElementById(`${field}-error`);
+                        if (errorElement) {
+                            errorElement.textContent = error;
+                        } else {
+                            document.getElementById('message-container').innerHTML += 
+                                `<p class="error">${error}</p>`;
+                        }
+                    }
+                }
+
+                button.disabled = false;
+                document.getElementById('message-container').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest', 
+                    inline: 'nearest' 
+                });
             })
             .catch(error => {
                 console.error('Error:', error);
-                document.getElementById('message-container').innerHTML = "<p class='error'>An error occurred. Please try again.</p>";
+                document.getElementById('message-container').innerHTML = 
+                    "<p class='error'>An error occurred. Please try again.</p>";
                 button.disabled = false;
             });
         });

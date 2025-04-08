@@ -1,5 +1,5 @@
 <?php
-ini_set('upload_max_filesize', '20M');
+ini_set('upload_max_filesize', '05M');
 ini_set('post_max_size', '21M');
 ini_set('max_execution_time', '300');
 
@@ -57,20 +57,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message .= "<p class='error'>Profile image must be PNG, JPG, or JPEG.</p>";
         }
         if ($profileImage['size'] > 20971520) {
-            $message .= "<p class='error'>Profile image must be less than 20MB.</p>";
+            $message .= "<p class='error'>Profile image must be less than 5MB.</p>";
         }
     }
 
     if (empty($message)) {
-        $check_stmt = $conn->prepare("SELECT id FROM Librarian WHERE username = ? OR email = ?");
-        $check_stmt->bind_param("ss", $username, $email);
-        $check_stmt->execute();
-        $check_stmt->store_result();
-        
-        if ($check_stmt->num_rows > 0) {
-            $message .= "<p class='error'>Username or email already exists.</p>";
+        $check_fullname = $conn->prepare("SELECT id FROM Librarian WHERE full_name = ?");
+        $check_fullname->bind_param("s", $fullName);
+        $check_fullname->execute();
+        $check_fullname->store_result();
+        if ($check_fullname->num_rows > 0) {
+            $message .= "<p class='error'>Full Name already exists.</p>";
         }
-        $check_stmt->close();
+        $check_fullname->close();
+
+        $check_personalid = $conn->prepare("SELECT id FROM Librarian WHERE personal_id = ?");
+        $check_personalid->bind_param("s", $personalID);
+        $check_personalid->execute();
+        $check_personalid->store_result();
+        if ($check_personalid->num_rows > 0) {
+            $message .= "<p class='error'>Personal ID already exists.</p>";
+        }
+        $check_personalid->close();
+
+        $check_phone = $conn->prepare("SELECT id FROM Librarian WHERE phone = ?");
+        $check_phone->bind_param("s", $phone);
+        $check_phone->execute();
+        $check_phone->store_result();
+        if ($check_phone->num_rows > 0) {
+            $message .= "<p class='error'>Phone number already exists.</p>";
+        }
+        $check_phone->close();
+
+        $check_username = $conn->prepare("SELECT id FROM Librarian WHERE username = ?");
+        $check_username->bind_param("s", $username);
+        $check_username->execute();
+        $check_username->store_result();
+        if ($check_username->num_rows > 0) {
+            $message .= "<p class='error'>Username already exists.</p>";
+        }
+        $check_username->close();
+
+        $check_email = $conn->prepare("SELECT id FROM Librarian WHERE email = ?");
+        $check_email->bind_param("s", $email);
+        $check_email->execute();
+        $check_email->store_result();
+        if ($check_email->num_rows > 0) {
+            $message .= "<p class='error'>Email already exists.</p>";
+        }
+        $check_email->close();
     }
 
     if (empty($message)) {
@@ -133,7 +168,7 @@ $conn->close();
         <h1 class="title">Librarian Registration Form</h1>
         
         <form id="registrationForm" method="POST" enctype="multipart/form-data">
-            <label for="profileImage">Profile Image (PNG/JPG, max 20MB, Optional):</label>
+            <label for="profileImage">Profile Image (PNG/JPG, max 5MB, Optional):</label>
             <input type="file" id="profileImage" name="profileImage" accept="image/png, image/jpeg, image/jpg" data-max-size="20971520">
             
             <div class="form-row">

@@ -109,7 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (!in_array($image_ext, ['png', 'jpg', 'jpeg', 'gif'])) {
                 $errors['profileImage'] = "Only PNG, JPG, JPEG, and GIF allowed";
             }
-            if ($profileImage['size'] > 5242880) { // 5MB in bytes
+            if ($profileImage['size'] > 5242880) {
                 $errors['profileImage'] = "Image must be less than 5MB";
             }
         }
@@ -153,7 +153,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $image_dir = $base_dir . 'users/';
             $image_web_path = 'users/';
             
-            // Create directory if it doesn't exist
             if (!is_dir($image_dir)) {
                 mkdir($image_dir, 0777, true);
             }
@@ -225,7 +224,6 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration Form</title>
     <link rel="stylesheet" href="../css/user register.css">
-   
 </head>
 <body>
     <div class="form-container">
@@ -377,6 +375,12 @@ $conn->close();
             errorElement.textContent = '';
         }
 
+        function hideSuccessMessage() {
+            setTimeout(() => {
+                document.getElementById('form-message').textContent = '';
+            }, 3000);
+        }
+
         document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -402,6 +406,7 @@ $conn->close();
                     form.reset();
                     document.getElementById('imagePreview').style.display = 'none';
                     document.getElementById('uploadText').style.display = 'block';
+                    hideSuccessMessage();
                 } else {
                     for (const [field, error] of Object.entries(data.errors)) {
                         const errorElement = document.getElementById(`${field}-error`);
