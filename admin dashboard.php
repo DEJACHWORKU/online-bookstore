@@ -180,7 +180,7 @@
     <div class="container">
         <div class="sidebar">
             <div class="menu">
-                <a href="view-profile.php" class="menu-item active">Profile</a>
+                <a href="view-profile.php" class="menu-item active">Your Profile</a>
                 <a href="user/admin register form.php" class="menu-item">Add Admin</a>
                 <a href="user/librarian register form.php" class="menu-item">Add Librarian</a>
                 <a href="user/user register form.php" class="menu-item">Add User</a>
@@ -190,6 +190,7 @@
                 <a href="manage user.php" class="menu-item">Manage User</a>
                 <a href="manage book.php" class="menu-item">Manage Book</a>
                 <a href="view-comment.php" class="menu-item">View Comment</a>
+                <a href="user approval.php" class="menu-item">User Approval</a>
                 <a href="index.php" class="menu-item logout">Logout</a>
             </div>
         </div>

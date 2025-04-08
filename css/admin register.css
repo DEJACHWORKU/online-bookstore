@@ -59,11 +59,7 @@ body {
     position: relative;
 }
 
-.form-group.confirm-password {
-    flex: 0 1 300px;
-}
-
-.form-group label {
+.form-group label, label {
     display: block;
     margin-bottom: 6px;
     font-weight: 500;
@@ -71,7 +67,7 @@ body {
     font-size: 14px;
 }
 
-.form-group input {
+.form-group input, input[type="file"] {
     width: 100%;
     padding: 10px 35px 10px 12px;
     border: 1.5px solid #ddd;
@@ -80,7 +76,7 @@ body {
     transition: all 0.2s ease;
 }
 
-.form-group input:focus {
+.form-group input:focus, input[type="file"]:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
     outline: none;
@@ -117,57 +113,24 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
 }
-  /* Profile Image Styles */
-  .profile-image-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
+
+.message-container {
+    margin-top: 15px;
+    text-align: center;
 }
 
-.profile-image-placeholder {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    cursor: pointer;
-    border: 3px solid #4a90e2;
-    margin-bottom: 10px;
+.error {
+    color: #e74c3c;
+    font-size: 14px;
 }
 
-.profile-image-placeholder i {
-    font-size: 60px;
-    color: #777;
-}
-
-.profile-image-placeholder img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.upload-label {
-    color: #4a90e2;
-    cursor: pointer;
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.upload-label:hover {
-    color: #3a7bc8;
-    text-decoration: underline;
+.success {
+    color: #2ecc71;
+    font-size: 14px;
 }
 
 @media (max-width: 600px) {
     .form-group {
-        flex: 1 1 100%;
-    }
-    
-    .form-group.confirm-password {
         flex: 1 1 100%;
     }
     

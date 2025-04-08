@@ -1,93 +1,326 @@
+<?php
+ini_set('upload_max_filesize', '5M');
+ini_set('post_max_size', '6M');
+ini_set('max_execution_time', '300');
+
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "online_book_DB";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $errors = [];
+    $input = [];
+
+    $input['date'] = trim($_POST['date'] ?? '');
+    $input['academicYear'] = trim($_POST['academicYear'] ?? '');
+    $input['fullName'] = trim($_POST['fullName'] ?? '');
+    $input['idNumber'] = trim($_POST['idNumber'] ?? '');
+    $input['department'] = trim($_POST['department'] ?? '');
+    $input['year'] = trim($_POST['year'] ?? '');
+    $input['semester'] = trim($_POST['semester'] ?? '');
+    $input['phone'] = trim($_POST['phone'] ?? '');
+    $input['username'] = trim($_POST['username'] ?? '');
+    $input['password'] = $_POST['password'] ?? '';
+    $input['rememberMe'] = trim($_POST['rememberMe'] ?? '');
+    $input['accessPermission'] = trim($_POST['accessPermission'] ?? '');
+    $profileImage = $_FILES['profileImage'] ?? null;
+
+    if (empty($input['date'])) $errors['date'] = "Date is required";
+
+    if (empty($input['academicYear'])) {
+        $errors['academicYear'] = "Academic year is required";
+    } elseif (!preg_match('/^\d{4}$/', $input['academicYear'])) {
+        $errors['academicYear'] = "Academic year must be 4 digits";
+    }
+
+    if (empty($input['fullName'])) {
+        $errors['fullName'] = "Full name is required";
+    } elseif (!preg_match('/^[a-zA-Z\s]+$/', $input['fullName'])) {
+        $errors['fullName'] = "Full name can only contain letters";
+    } else {
+        $input['fullName'] = ucwords(strtolower($input['fullName']));
+    }
+
+    if (empty($input['idNumber'])) {
+        $errors['idNumber'] = "ID number is required";
+    }
+
+    if (empty($input['department'])) {
+        $errors['department'] = "Department is required";
+    } elseif (!preg_match('/^[a-zA-Z\s]+$/', $input['department'])) {
+        $errors['department'] = "Department can only contain letters";
+    }
+
+    $validYears = ['1', '2', '3', '4', '5', '6', '7'];
+    if (empty($input['year'])) {
+        $errors['year'] = "Year is required";
+    } elseif (!in_array($input['year'], $validYears)) {
+        $errors['year'] = "Invalid year selected";
+    }
+
+    $validSemesters = ['1', '2'];
+    if (empty($input['semester'])) {
+        $errors['semester'] = "Semester is required";
+    } elseif (!in_array($input['semester'], $validSemesters)) {
+        $errors['semester'] = "Invalid semester selected";
+    }
+
+    if (empty($input['phone'])) {
+        $errors['phone'] = "Phone number is required";
+    } elseif (!preg_match('/^\d{10}$/', $input['phone'])) {
+        $errors['phone'] = "Phone must be 10 digits";
+    }
+
+    if (empty($input['username'])) {
+        $errors['username'] = "Username is required";
+    } elseif (!preg_match('/^[a-zA-Z0-9\-_]+$/', $input['username'])) {
+        $errors['username'] = "Username can contain letters, numbers, hyphens and underscores";
+    }
+
+    if (empty($input['password'])) {
+        $errors['password'] = "Password is required";
+    } elseif (strlen($input['password']) < 6) {
+        $errors['password'] = "Password must be at least 6 characters";
+    }
+
+    if (empty($input['rememberMe'])) {
+        $errors['rememberMe'] = "Remember Me is required";
+    }
+
+    $validPermissions = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+    if (empty($input['accessPermission'])) {
+        $errors['accessPermission'] = "Access permission is required";
+    } elseif (!in_array($input['accessPermission'], $validPermissions)) {
+        $errors['accessPermission'] = "Invalid access permission selected";
+    }
+
+    if ($profileImage && $profileImage['error'] !== UPLOAD_ERR_NO_FILE) {
+        if ($profileImage['error'] !== UPLOAD_ERR_OK) {
+            $errors['profileImage'] = "Error uploading file";
+        } else {
+            $image_ext = strtolower(pathinfo($profileImage['name'], PATHINFO_EXTENSION));
+            if (!in_array($image_ext, ['png', 'jpg', 'jpeg', 'gif'])) {
+                $errors['profileImage'] = "Only PNG, JPG, JPEG, and GIF allowed";
+            }
+            if ($profileImage['size'] > 5242880) { // 5MB in bytes
+                $errors['profileImage'] = "Image must be less than 5MB";
+            }
+        }
+    }
+
+    if (empty($errors)) {
+        $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR phone = ? OR id_number = ? OR LOWER(full_name) = ?");
+        $lowerFullName = strtolower($input['fullName']);
+        $stmt->bind_param("ssss", $input['username'], $input['phone'], $input['idNumber'], $lowerFullName);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        if ($stmt->num_rows > 0) {
+            $checkStmt = $conn->prepare("SELECT username, phone, id_number, full_name FROM users WHERE username = ? OR phone = ? OR id_number = ? OR LOWER(full_name) = ? LIMIT 1");
+            $checkStmt->bind_param("ssss", $input['username'], $input['phone'], $input['idNumber'], $lowerFullName);
+            $checkStmt->execute();
+            $result = $checkStmt->get_result();
+            $existingData = $result->fetch_assoc();
+            $checkStmt->close();
+            
+            if (strtolower($existingData['full_name']) === $lowerFullName) {
+                $errors['fullName'] = "This name is already registered";
+            }
+            if ($existingData['username'] === $input['username']) {
+                $errors['username'] = "Username already exists";
+            }
+            if ($existingData['phone'] === $input['phone']) {
+                $errors['phone'] = "Phone number already exists";
+            }
+            if ($existingData['id_number'] === $input['idNumber']) {
+                $errors['idNumber'] = "ID number already exists";
+            }
+        }
+        $stmt->close();
+    }
+
+    if (empty($errors)) {
+        $profileImagePath = "";
+        if ($profileImage && $profileImage['error'] === UPLOAD_ERR_OK) {
+            $base_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/';
+            $image_dir = $base_dir . 'users/';
+            $image_web_path = 'users/';
+            
+            // Create directory if it doesn't exist
+            if (!is_dir($image_dir)) {
+                mkdir($image_dir, 0777, true);
+            }
+
+            $image_ext = strtolower(pathinfo($profileImage['name'], PATHINFO_EXTENSION));
+            $image_filename = uniqid('user_') . '.' . $image_ext;
+            $image_path = $image_web_path . $image_filename;
+
+            if (move_uploaded_file($profileImage['tmp_name'], $image_dir . $image_filename)) {
+                $profileImagePath = $image_path;
+            } else {
+                $errors['profileImage'] = "Failed to upload profile image! Please check file permissions.";
+            }
+        }
+
+        if (empty($errors)) {
+            $hashedPassword = password_hash($input['password'], PASSWORD_DEFAULT);
+            
+            $stmt = $conn->prepare("INSERT INTO users (
+                date, academic_year, full_name, id_number, department, 
+                year, semester, phone, username, password, 
+                remember_me, access_permission, profile_image
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            
+            $stmt->bind_param(
+                "sssssssssssss",
+                $input['date'],
+                $input['academicYear'],
+                $input['fullName'],
+                $input['idNumber'],
+                $input['department'],
+                $input['year'],
+                $input['semester'],
+                $input['phone'],
+                $input['username'],
+                $hashedPassword,
+                $input['rememberMe'],
+                $input['accessPermission'],
+                $profileImagePath
+            );
+            
+            if ($stmt->execute()) {
+                $success = true;
+            } else {
+                $errors['database'] = "Database error: " . $stmt->error;
+                if ($profileImagePath && file_exists($image_dir . $image_filename)) {
+                    unlink($image_dir . $image_filename);
+                }
+            }
+            $stmt->close();
+        }
+    }
+
+    if (!empty($errors)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'errors' => $errors]);
+    } else {
+        echo json_encode(['success' => true, 'message' => 'Registration successful!']);
+    }
+    exit;
+}
+
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration Form</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/user register.css">
+   
 </head>
 <body>
     <div class="form-container">
         <h2>User Registration Form</h2>
-        <form id="registrationForm" class="form-grid" onsubmit="return validateForm(event)" enctype="multipart/form-data">
-            <!-- Image Upload Section -->
-            <div class="image-upload-container">
+        <form id="registrationForm" class="form-grid" method="post" enctype="multipart/form-data">
+            <div style="grid-column: span 2;">
                 <div class="image-upload-circle" onclick="document.getElementById('profileImage').click()">
-                    <i class="fas fa-user-circle upload-icon"></i>
-                    <img id="imagePreview" src="#" alt="Profile Preview">
-                    <input type="file" id="profileImage" name="profileImage" accept="image/*" onchange="previewImage(event)">
+                    <span id="uploadText">Click to upload photo</span>
+                    <img id="imagePreview" src="#" alt="Preview" style="display:none; width:100%; height:100%; object-fit:cover;">
+                    <input type="file" id="profileImage" name="profileImage" accept="image/*" style="display:none;" onchange="previewImage(event)">
                 </div>
-                <span class="image-upload-text">Click to upload profile picture</span>
+                <div id="profileImage-error" class="error-message"></div>
             </div>
-
-            <!-- Form Fields -->
-            <div class="form-group">
+            
+            <div>
                 <label for="date">Date</label>
-                <input type="date" id="date" name="date" placeholder="Select date" required>
-                <i class="fas fa-calendar-alt input-icon"></i>
+                <input type="date" id="date" name="date" required placeholder="Select date">
+                <div id="date-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="academicYear">Academic Year</label>
-                <input type="text" id="academicYear" name="academicYear" placeholder="YYYY-YYYY (e.g. 2023-2024)" required>
-                <i class="fas fa-graduation-cap input-icon"></i>
+                <input type="text" id="academicYear" name="academicYear" placeholder="e.g. 2023" required maxlength="4" pattern="\d{4}" title="Enter 4 digit year">
+                <div id="academicYear-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="fullName">Full Name</label>
-                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
-                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="fullName" name="fullName" placeholder="e.g. John Doe" required pattern="[a-zA-Z\s]+" title="Letters only">
+                <div id="fullName-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="idNumber">ID Number</label>
                 <input type="text" id="idNumber" name="idNumber" placeholder="Enter your ID number" required>
-                <i class="fas fa-id-card input-icon"></i>
+                <div id="idNumber-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="department">Department</label>
-                <input type="text" id="department" name="department" placeholder="Enter your department" required>
-                <i class="fas fa-building input-icon"></i>
+                <input type="text" id="department" name="department" placeholder="e.g. Computer Science" required pattern="[a-zA-Z\s]+" title="Letters only">
+                <div id="department-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="year">Year</label>
                 <select id="year" name="year" required>
                     <option value="">Select Year</option>
-                    <option value="1">1<sup>st</sup></option>
-                    <option value="2">2<sup>nd</sup></option>
-                    <option value="3">3<sup>rd</sup></option>
-                    <option value="4">4<sup>th</sup></option>
-                    <option value="5">5<sup>th</sup></option>
-                    <option value="6">6<sup>th</sup></option>
-                    <option value="7">7<sup>th</sup></option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                    <option value="5">5th Year</option>
+                    <option value="6">6th Year</option>
+                    <option value="7">7th Year</option>
                 </select>
-                <i class="fas fa-calendar input-icon"></i>
+                <div id="year-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="semester">Semester</label>
                 <select id="semester" name="semester" required>
                     <option value="">Select Semester</option>
-                    <option value="1">1<sup>st</sup></option>
-                    <option value="2">2<sup>nd</sup></option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
                 </select>
-                <i class="fas fa-book input-icon"></i>
+                <div id="semester-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
-                <i class="fas fa-phone input-icon"></i>
+                <input type="tel" id="phone" name="phone" placeholder="e.g. 0912345678" required pattern="\d{10}" title="10 digits only" maxlength="10">
+                <div id="phone-error" class="error-message"></div>
             </div>
-            <div class="form-group">
+            
+            <div>
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Choose a username" required>
-                <i class="fas fa-at input-icon"></i>
+                <input type="text" id="username" name="username" placeholder="e.g. john_doe123" required pattern="[a-zA-Z0-9\-_]+" title="Letters, numbers, hyphens and underscores">
+                <div id="username-error" class="error-message"></div>
             </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Create a password" required>
-                <i class="fas fa-lock input-icon"></i>
+            
+            <div>
+                <label for="password">Password (min 6 chars)</label>
+                <input type="password" id="password" name="password" placeholder="Enter at least 6 characters" required minlength="6">
+                <div id="password-error" class="error-message"></div>
             </div>
-            <div class="form-group full-width">
-                <label for="accessPermission">User Access Permission (Months)</label>
+            
+            <div>
+                <label for="rememberMe">Remember Me</label>
+                <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter remember me value" required>
+                <div id="rememberMe-error" class="error-message"></div>
+            </div>
+            
+            <div>
+                <label for="accessPermission">Access Permission</label>
                 <select id="accessPermission" name="accessPermission" required>
                     <option value="">Select Duration</option>
                     <option value="1">1 Month</option>
@@ -103,69 +336,135 @@
                     <option value="11">11 Months</option>
                     <option value="12">12 Months</option>
                 </select>
-                <i class="fas fa-clock input-icon"></i>
+                <div id="accessPermission-error" class="error-message"></div>
             </div>
-            <button type="submit">Register</button>
+            
+            <button type="submit" id="submitBtn">Register</button>
+            <div id="form-message" style="grid-column: span 2;"></div>
         </form>
     </div>
 
     <script>
-        function validateForm(event) {
-            event.preventDefault();
-            const form = document.getElementById('registrationForm');
-            const date = form.date.value.trim();
-            const academicYear = form.academicYear.value.trim();
-            const fullName = form.fullName.value.trim();
-            const idNumber = form.idNumber.value.trim();
-            const phone = form.phone.value.trim();
-            const username = form.username.value.trim();
-            const password = form.password.value.trim();
-
-            if (!date || !academicYear || !fullName || !idNumber || !phone || !username || !password) {
-                alert('Please fill in all required fields.');
-                return false;
-            }
-            
-            // Validate academic year format (YYYY-YYYY)
-            if (!/^\d{4}-\d{4}$/.test(academicYear)) {
-                alert('Academic Year must be in the format YYYY-YYYY (e.g. 2023-2024)');
-                return false;
-            }
-            
-            if (!/^\d+$/.test(phone)) {
-                alert('Phone number must contain only digits.');
-                return false;
-            }
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters long.');
-                return false;
-            }
-
-            alert('Registration successful!');
-            form.reset();
-            // Also reset the image preview
-            document.getElementById('imagePreview').style.display = 'none';
-            document.querySelector('.upload-icon').style.display = 'block';
-            return true;
-        }
-
         function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
             const reader = new FileReader();
             const imagePreview = document.getElementById('imagePreview');
-            const uploadIcon = document.querySelector('.upload-icon');
+            const uploadText = document.getElementById('uploadText');
             
-            reader.onload = function() {
-                if (reader.readyState === 2) {
-                    imagePreview.src = reader.result;
-                    imagePreview.style.display = 'block';
-                    uploadIcon.style.display = 'none';
-                }
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadText.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+            
+            const errorElement = document.getElementById('profileImage-error');
+            if (file.size > 5 * 1024 * 1024) {
+                errorElement.textContent = "Image must be less than 5MB";
+                event.target.value = '';
+                return;
             }
             
-            if (event.target.files[0]) {
-                reader.readAsDataURL(event.target.files[0]);
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                errorElement.textContent = "Only JPG, PNG, and GIF allowed";
+                event.target.value = '';
+                return;
             }
+            
+            errorElement.textContent = '';
         }
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitBtn = document.getElementById('submitBtn');
+            
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Processing...";
+            
+            fetch('', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('form-message').style.color = 'green';
+                    document.getElementById('form-message').textContent = data.message;
+                    form.reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    document.getElementById('uploadText').style.display = 'block';
+                } else {
+                    for (const [field, error] of Object.entries(data.errors)) {
+                        const errorElement = document.getElementById(`${field}-error`);
+                        const inputElement = document.getElementById(field);
+                        if (errorElement && inputElement) {
+                            errorElement.textContent = error;
+                            inputElement.classList.add('is-invalid');
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                document.getElementById('form-message').textContent = "An error occurred";
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Register";
+            });
+        });
+
+        document.getElementById('academicYear').addEventListener('input', function() {
+            if (/^\d{4}$/.test(this.value)) {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('fullName').addEventListener('input', function() {
+            if (/^[a-zA-Z\s]+$/.test(this.value)) {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('idNumber').addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+
+        document.getElementById('department').addEventListener('input', function() {
+            if (/^[a-zA-Z\s]+$/.test(this.value)) {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('phone').addEventListener('input', function() {
+            if (/^\d{10}$/.test(this.value)) {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('username').addEventListener('input', function() {
+            if (/^[a-zA-Z0-9\-_]+$/.test(this.value)) {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value.length >= 6) {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById('rememberMe').addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
     </script>
 </body>
 </html>
