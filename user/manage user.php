@@ -66,7 +66,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
- <link rel="stylesheet" href="../css/manage user.css">
+   <link rel="stylesheet" href="../css/manage user.css">
 </head>
 <body>
     <div class="container">
@@ -77,20 +77,17 @@ $conn->close();
             <div class="search-group">
                 <label for="searchDepartment">Department:</label>
                 <input type="text" id="searchDepartment" placeholder="Enter department" oninput="filterUsers()">
-             
             </div>
             <div class="search-group">
                 <label for="searchAcademicYear">Academic Year:</label>
                 <input type="text" id="searchAcademicYear" placeholder="Enter academic year" oninput="filterUsers()">
-   
             </div>
         </div>
         <div class="user-grid" id="userGrid">
             <?php foreach ($users as $user): ?>
                 <div class="user-card" data-id="<?php echo $user['id']; ?>">
                     <?php if (!empty($user['profile_image'])): ?>
-                        <img src="/bookstore/book/<?php echo htmlspecialchars($user['profile_image']); ?>" 
-                             alt="Profile" class="profile-img">
+                        <img src="/bookstore/book/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile" class="profile-img">
                     <?php else: ?>
                         <img src="https://via.placeholder.com/140" alt="Default Profile" class="profile-img">
                     <?php endif; ?>
@@ -197,6 +194,7 @@ $conn->close();
                 <div class="form-group">
                     <label for="editAccessPermission">Access Permission</label>
                     <select id="editAccessPermission" name="accessPermission" required>
+                        <option value="0.25">1 Week</option>
                         <option value="1">1 Month</option>
                         <option value="2">2 Months</option>
                         <option value="3">3 Months</option>
@@ -253,7 +251,7 @@ $conn->close();
             document.getElementById('editPhone').value = card.querySelector('.user-info:nth-child(9)').textContent.replace('Phone: ', '');
             document.getElementById('editUsername').value = card.querySelector('.user-info:nth-child(10)').textContent.replace('Username: ', '');
             document.getElementById('editRememberMe').value = card.querySelector('.user-info:nth-child(11)').textContent.replace('Remember Me: ', '') === 'Not set' ? '' : card.querySelector('.user-info:nth-child(11)').textContent.replace('Remember Me: ', '');
-            document.getElementById('editAccessPermission').value = card.querySelector('.user-info:nth-child(12)').textContent.replace('Access Permission: ', '').replace(/ Months?/, '');
+            document.getElementById('editAccessPermission').value = card.querySelector('.user-info:nth-child(12)').textContent.replace('Access Permission: ', '').replace(/ Months?/, '').replace('1 Week', '0.25');
 
             modal.style.display = 'flex';
 
@@ -269,6 +267,9 @@ $conn->close();
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        const accessPermission = formData.get('accessPermission');
+                        const permissionText = accessPermission === '0.25' ? '1 Week' : `${accessPermission} Month${accessPermission > 1 ? 's' : ''}`;
+                        
                         card.querySelector('.user-info:nth-child(2)').textContent = `Date: ${formData.get('date')}`;
                         card.querySelector('.user-info:nth-child(3)').textContent = `Academic Year: ${formData.get('academicYear')}`;
                         card.querySelector('.user-info:nth-child(4)').textContent = `Full Name: ${formData.get('fullName')}`;
@@ -279,7 +280,7 @@ $conn->close();
                         card.querySelector('.user-info:nth-child(9)').textContent = `Phone: ${formData.get('phone')}`;
                         card.querySelector('.user-info:nth-child(10)').textContent = `Username: ${formData.get('username')}`;
                         card.querySelector('.user-info:nth-child(11)').textContent = `Remember Me: ${formData.get('rememberMe') || 'Not set'}`;
-                        card.querySelector('.user-info:nth-child(12)').textContent = `Access Permission: ${formData.get('accessPermission')} Month${formData.get('accessPermission') > 1 ? 's' : ''}`;
+                        card.querySelector('.user-info:nth-child(12)').textContent = `Access Permission: ${permissionText}`;
                         closeModal();
                         alert('User updated successfully!');
                         filterUsers();
@@ -328,39 +329,7 @@ $conn->close();
                     <head>
                         <title>User Details</title>
                         <style>
-                            body { font-family: Arial, sans-serif; padding: 15px; margin: 0; background: #fff; }
-                            .user-card {
-                                background: #fff;
-                                border-radius: 15px;
-                                border: 1px solid #dfe6e9;
-                                padding: 20px;
-                                min-height: 480px;
-                                max-width: 300px;
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: space-between;
-                            }
-                            .profile-img {
-                                width: 140px;
-                                height: 140px;
-                                border-radius: 50%;
-                                object-fit: contain;
-                                margin: 0 auto 15px;
-                                border: 3px solid #3498db;
-                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                                display: block;
-                            }
-                            .user-info {
-                                margin: 8px 0;
-                                font-size: 15px;
-                                line-height: 1.4;
-                                color: #2d3436;
-                            }
-                            .user-info span {
-                                font-weight: bold;
-                                color: #2980b9;
-                                margin-right: 5px;
-                            }
+                            body{font-family:Arial,sans-serif;padding:15px;margin:0;background:#fff}.user-card{background:#fff;border-radius:15px;border:1px solid #dfe6e9;padding:20px;min-height:480px;max-width:300px;display:flex;flex-direction:column;justify-content:space-between}.profile-img{width:140px;height:140px;border-radius:50%;object-fit:contain;margin:0 auto 15px;border:3px solid #3498db;box-shadow:0 2px 4px rgba(0,0,0,0.1);display:block}.user-info{margin:8px 0;font-size:15px;line-height:1.4;color:#2d3436}.user-info span{font-weight:bold;color:#2980b9;margin-right:5px}
                         </style>
                     </head>
                     <body>

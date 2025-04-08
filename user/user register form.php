@@ -30,6 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $input['password'] = $_POST['password'] ?? '';
     $input['rememberMe'] = trim($_POST['rememberMe'] ?? '');
     $input['accessPermission'] = trim($_POST['accessPermission'] ?? '');
+
     $profileImage = $_FILES['profileImage'] ?? null;
 
     if (empty($input['date'])) $errors['date'] = "Date is required";
@@ -80,8 +81,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty($input['username'])) {
         $errors['username'] = "Username is required";
-    } elseif (!preg_match('/^[a-zA-Z0-9\-_]+$/', $input['username'])) {
-        $errors['username'] = "Username can contain letters, numbers, hyphens and underscores";
     }
 
     if (empty($input['password'])) {
@@ -94,7 +93,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors['rememberMe'] = "Remember Me is required";
     }
 
-    $validPermissions = ['1','2','3','4','5','6','7','8','9','10','11','12'];
+    // Updated validPermissions to use full text values
+    $validPermissions = [
+        '1 Week', '1 Month', '2 Months', '3 Months', '4 Months', '5 Months',
+        '6 Months', '7 Months', '8 Months', '9 Months', '10 Months', '11 Months', '12 Months'
+    ];
     if (empty($input['accessPermission'])) {
         $errors['accessPermission'] = "Access permission is required";
     } elseif (!in_array($input['accessPermission'], $validPermissions)) {
@@ -190,7 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $input['username'],
                 $hashedPassword,
                 $input['rememberMe'],
-                $input['accessPermission'],
+                $input['accessPermission'], // Now stores full text like "1 Week"
                 $profileImagePath
             );
             
@@ -301,7 +304,7 @@ $conn->close();
             
             <div>
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="e.g. john_doe123" required pattern="[a-zA-Z0-9\-_]+" title="Letters, numbers, hyphens and underscores">
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
                 <div id="username-error" class="error-message"></div>
             </div>
             
@@ -321,18 +324,19 @@ $conn->close();
                 <label for="accessPermission">Access Permission</label>
                 <select id="accessPermission" name="accessPermission" required>
                     <option value="">Select Duration</option>
-                    <option value="1">1 Month</option>
-                    <option value="2">2 Months</option>
-                    <option value="3">3 Months</option>
-                    <option value="4">4 Months</option>
-                    <option value="5">5 Months</option>
-                    <option value="6">6 Months</option>
-                    <option value="7">7 Months</option>
-                    <option value="8">8 Months</option>
-                    <option value="9">9 Months</option>
-                    <option value="10">10 Months</option>
-                    <option value="11">11 Months</option>
-                    <option value="12">12 Months</option>
+                    <option value="1 Week">1 Week</option>
+                    <option value="1 Month">1 Month</option>
+                    <option value="2 Months">2 Months</option>
+                    <option value="3 Months">3 Months</option>
+                    <option value="4 Months">4 Months</option>
+                    <option value="5 Months">5 Months</option>
+                    <option value="6 Months">6 Months</option>
+                    <option value="7 Months">7 Months</option>
+                    <option value="8 Months">8 Months</option>
+                    <option value="9 Months">9 Months</option>
+                    <option value="10 Months">10 Months</option>
+                    <option value="11 Months">11 Months</option>
+                    <option value="12 Months">12 Months</option>
                 </select>
                 <div id="accessPermission-error" class="error-message"></div>
             </div>
@@ -427,6 +431,7 @@ $conn->close();
             });
         });
 
+        // Input validation clearing
         document.getElementById('academicYear').addEventListener('input', function() {
             if (/^\d{4}$/.test(this.value)) {
                 this.classList.remove('is-invalid');
@@ -456,9 +461,7 @@ $conn->close();
         });
 
         document.getElementById('username').addEventListener('input', function() {
-            if (/^[a-zA-Z0-9\-_]+$/.test(this.value)) {
-                this.classList.remove('is-invalid');
-            }
+            this.classList.remove('is-invalid');
         });
 
         document.getElementById('password').addEventListener('input', function() {

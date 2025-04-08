@@ -1,10 +1,6 @@
 <?php
-// Enable error reporting for debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+session_start(); // Start session to share data if needed
 
-// Database connection
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -16,73 +12,151 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Current date (dynamic for real use)
-$current_date = new DateTime();
+function getExpirationDate($startDate, $accessPermission) {
+    $parts = explode(' ', $accessPermission);
+    $duration = (int)$parts[0];
+    $unit = $parts[1];
+    $interval = ($unit === 'Week') ? "weeks" : "months";
+    return date('Y-m-d', strtotime("+$duration $interval", strtotime($startDate)));
+}
 
-// Handle POST requests (approve/update)
+$currentDate = date('Y-m-d');
+
+// Handle expired users
+$stmt = $conn->prepare("SELECT id, date, access_permission FROM users");
+$stmt->execute();
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+    $expirationDate = getExpirationDate($row['date'], $row['access_permission']);
+    if ($currentDate > $expirationDate) {
+        $deleteStmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+        $deleteStmt->bind_param("i", $row['id']);
+        $deleteStmt->execute();
+        $deleteStmt->close();
+    }
+}
+$stmt->close();
+
+// Handle POST actions (approve/unapprove)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header('Content-Type: application/json');
     
-    if (isset($_POST['action']) && $_POST['action'] === 'approve' && isset($_POST['id'])) {
-        $id = $_POST['id'];
-        $accessPermission = $_POST['accessPermission'];
-
-        $stmt = $conn->prepare("UPDATE users SET access_permission = ? WHERE id = ?");
-        $stmt->bind_param("si", $accessPermission, $id);
-        $success = $stmt->execute();
-        echo json_encode(['success' => $success, 'error' => $success ? '' : $stmt->error]);
-        $stmt->close();
-        $conn->close();
-        exit;
+    if (isset($_POST['action'])) {
+        if ($_POST['action'] === 'approve' && isset($_POST['id'])) {
+            $id = $_POST['id'];
+            $newPermission = $_POST['accessPermission'];
+            $stmt = $conn->prepare("UPDATE users SET access_permission = ?, date = ? WHERE id = ?");
+            $newDate = date('Y-m-d');
+            $stmt->bind_param("ssi", $newPermission, $newDate, $id);
+            $success = $stmt->execute();
+            echo json_encode(['success' => $success, 'error' => $success ? '' : $stmt->error]);
+            $stmt->close();
+        } elseif ($_POST['action'] === 'unapprove' && isset($_POST['id'])) {
+            $id = $_POST['id'];
+            $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $success = $stmt->execute();
+            echo json_encode(['success' => $success, 'error' => $success ? '' : $stmt->error]);
+            $stmt->close();
+        } elseif ($_POST['action'] === 'approve_all' && isset($_POST['ids'])) {
+            $ids = json_decode($_POST['ids'], true);
+            $newPermission = $_POST['accessPermission'];
+            $newDate = date('Y-m-d');
+            $success = true;
+            foreach ($ids as $id) {
+                $stmt = $conn->prepare("UPDATE users SET access_permission = ?, date = ? WHERE id = ?");
+                $stmt->bind_param("ssi", $newPermission, $newDate, $id);
+                if (!$stmt->execute()) $success = false;
+                $stmt->close();
+            }
+            echo json_encode(['success' => $success, 'error' => $success ? '' : 'Error approving some users']);
+        } elseif ($_POST['action'] === 'unapprove_all' && isset($_POST['ids'])) {
+            $ids = json_decode($_POST['ids'], true);
+            $success = true;
+            foreach ($ids as $id) {
+                $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
+                $stmt->bind_param("i", $id);
+                if (!$stmt->execute()) $success = false;
+                $stmt->close();
+            }
+            echo json_encode(['success' => $success, 'error' => $success ? '' : 'Error unapproving some users']);
+        }
     }
+    $conn->close();
+    exit;
 }
 
-// Fetch all users
-$sql = "SELECT id, date, academic_year, full_name, id_number, department, year, semester, phone, username, remember_me, access_permission, profile_image FROM users";
-$result = $conn->query($sql);
+$deptStmt = $conn->prepare("SELECT DISTINCT department FROM users ORDER BY department");
+$deptStmt->execute();
+$deptResult = $deptStmt->get_result();
+$departments = [];
+while ($row = $deptResult->fetch_assoc()) {
+    $departments[] = $row['department'];
+}
+$deptStmt->close();
+
+$yearStmt = $conn->prepare("SELECT DISTINCT academic_year FROM users ORDER BY academic_year");
+$yearStmt->execute();
+$yearResult = $yearStmt->get_result();
+$academic_years = [];
+while ($row = $yearResult->fetch_assoc()) {
+    $academic_years[] = $row['academic_year'];
+}
+$yearStmt->close();
+
+// Handle search parameters
+$search_department = isset($_GET['department']) ? $_GET['department'] : '';
+$search_academic_year = isset($_GET['academic_year']) ? $_GET['academic_year'] : '';
+
+$sql = "SELECT id, date, academic_year, full_name, id_number, department, year, semester, access_permission, profile_image FROM users WHERE 1=1";
+$params = [];
+$types = '';
+
+if ($search_department !== '') {
+    $sql .= " AND department = ?";
+    $params[] = $search_department;
+    $types .= 's';
+}
+
+if ($search_academic_year !== '') {
+    $sql .= " AND academic_year = ?";
+    $params[] = $search_academic_year;
+    $types .= 's';
+}
+
+$stmt = $conn->prepare($sql);
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$result = $stmt->get_result();
 
 $users = [];
-$users_to_delete = [];
-if ($result === false) {
-    echo "Query failed: " . $conn->error;
-} elseif ($result->num_rows > 0) {
+$notifications = [];
+$oneWeek = 7 * 24 * 60 * 60;
+
+if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        // Validate date
-        if (!DateTime::createFromFormat('Y-m-d', $row['date'])) {
-            continue; // Skip invalid dates
+        $expirationDate = getExpirationDate($row['date'], $row['access_permission']);
+        $remainingSeconds = strtotime($expirationDate) - strtotime($currentDate);
+        $remainingDays = floor($remainingSeconds / (24 * 60 * 60));
+        
+        $row['expiration_date'] = $expirationDate;
+        $row['remaining_days'] = $remainingDays;
+        
+        if ($remainingDays <= 7 && $remainingDays >= 0) {
+            $notifications[] = "User {$row['full_name']} has $remainingDays days left until access expires!";
         }
-
-        // Calculate expiration date
-        $start_date = new DateTime($row['date']);
-        $months = (int)$row['access_permission'];
-        $expiration_date = clone $start_date;
-        $expiration_date->modify("+{$months} months");
-
-        // Calculate days until expiration
-        $interval = $current_date->diff($expiration_date);
-        $days_remaining = $interval->days * ($interval->invert ? -1 : 1);
-
-        if ($days_remaining < 0) {
-            // User has expired
-            $users_to_delete[] = $row['id'];
-        } elseif ($days_remaining <= 7) {
-            // User expires within 7 days
-            $row['days_remaining'] = $days_remaining;
-            $row['expiration_date'] = $expiration_date->format('Y-m-d');
-            $users[] = $row;
-        }
+        $users[] = $row;
     }
 }
 
-// Delete expired users
-if (!empty($users_to_delete)) {
-    $ids = implode(',', array_map('intval', $users_to_delete)); // Sanitize IDs
-    $delete_sql = "DELETE FROM users WHERE id IN ($ids)";
-    if (!$conn->query($delete_sql)) {
-        echo "Delete failed: " . $conn->error;
-    }
-}
+// Calculate total displayed users
+$total_displayed_users = count($users);
+error_log("user approve.php - Total displayed users: $total_displayed_users");
 
+$stmt->close();
 $conn->close();
 ?>
 
@@ -93,265 +167,64 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Approval</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: #fff;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background-color: #2c3e50;
-            padding: 15px 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        h1 {
-            color: #ecf0f1;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-size: 28px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .user-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 20px;
-        }
-
-        .user-card {
-            background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            padding: 20px;
-            transition: all 0.3s ease;
-            min-height: 480px;
-            max-width: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            border: 1px solid #dfe6e9;
-            overflow: hidden;
-        }
-
-        .user-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .profile-img {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            object-fit: contain;
-            margin: 0 auto 15px;
-            border: 3px solid #3498db;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            background: #f5f5f5;
-            display: block;
-        }
-
-        .user-info {
-            margin: 8px 0;
-            font-size: 15px;
-            line-height: 1.4;
-            color: #2d3436;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-
-        .user-info span {
-            font-weight: bold;
-            color: #2980b9;
-            margin-right: 5px;
-        }
-
-        .button-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-            justify-content: flex-start;
-        }
-
-        .btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 13px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            flex: 1 1 auto;
-        }
-
-        .btn-approve {
-            background: linear-gradient(45deg, #f1c40f, #e67e22);
-            color: white;
-        }
-
-        .btn:hover {
-            opacity: 0.95;
-            transform: scale(1.08);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #fff;
-            padding: 25px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 550px;
-            position: relative;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            overflow-y: auto;
-            max-height: 80vh;
-        }
-
-        .close {
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #7f8c8d;
-            transition: color 0.3s;
-        }
-
-        .close:hover {
-            color: #e74c3c;
-        }
-
-        .form-group {
-            margin: 15px 0;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: #2c3e50;
-            font-weight: bold;
-        }
-
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #dcdcdc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 15px;
-        }
-
-        .btn-save {
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            color: white;
-            width: 100%;
-            padding: 12px;
-            margin-top: 20px;
-            font-size: 16px;
-        }
-
-        .empty-message {
-            text-align: center;
-            font-size: 18px;
-            color: #7f8c8d;
-            padding: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .user-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            }
-            .user-card {
-                min-height: 460px;
-                max-width: 100%;
-                padding: 15px;
-            }
-            .profile-img {
-                width: 120px;
-                height: 120px;
-                margin: 0 auto 10px;
-            }
-            .user-info {
-                font-size: 14px;
-            }
-            .button-group {
-                flex-direction: column;
-            }
-            .btn {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .user-grid {
-                grid-template-columns: 1fr;
-            }
-            .user-card {
-                min-height: 440px;
-                max-width: 100%;
-                padding: 10px;
-            }
-            .profile-img {
-                width: 100px;
-                height: 100px;
-            }
-            .user-info {
-                font-size: 13px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../css/user approve.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>User Approval</h1>
+            WELCOME TO USER APPROVAL SYSTEM - THIS PAGE IS USEFUL TO CONTROL USERS WHO SHOULD USE THIS SYSTEM AND WHO SHOULD NOT YOU CAN DECIDE HERE.
         </div>
+        <div class="controls">
+            <div class="action-buttons">
+                <button class="btn btn-approve-all" onclick="approveAll()"><i class="fas fa-check-circle"></i> Approve All</button>
+                <button class="btn btn-unapprove-all" onclick="unapproveAll()"><i class="fas fa-times-circle"></i> Unapprove All</button>
+            </div>
+            <form class="search-form" method="GET" action="">
+                <select name="department">
+                    <option value="">All Departments</option>
+                    <?php foreach ($departments as $dept): ?>
+                        <option value="<?php echo htmlspecialchars($dept); ?>" <?php echo $search_department === $dept ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($dept); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="academic_year">
+                    <option value="">All Academic Years</option>
+                    <?php foreach ($academic_years as $year): ?>
+                        <option value="<?php echo htmlspecialchars($year); ?>" <?php echo $search_academic_year === $year ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($year); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit"><i class="fas fa-search"></i> Search</button>
+            </form>
+        </div>
+        <?php if (!empty($notifications)): ?>
+            <div class="notifications">
+                <?php foreach ($notifications as $notification): ?>
+                    <p><?php echo htmlspecialchars($notification); ?></p>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
         <div class="user-grid" id="userGrid">
             <?php if (empty($users)): ?>
-                <div class="empty-message">No users require approval at this time.</div>
+                <p>No users found matching the search criteria.</p>
             <?php else: ?>
                 <?php foreach ($users as $user): ?>
-                    <div class="user-card" data-id="<?php echo $user['id']; ?>" data-days-remaining="<?php echo $user['days_remaining']; ?>">
+                    <div class="user-card <?php echo $user['remaining_days'] <= 7 && $user['remaining_days'] >= 0 ? 'warning' : ''; ?>" data-id="<?php echo $user['id']; ?>">
                         <?php if (!empty($user['profile_image'])): ?>
-                            <img src="/bookstore/book/<?php echo htmlspecialchars($user['profile_image']); ?>" 
-                                 alt="Profile" class="profile-img">
+                            <img src="/bookstore/book/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile" class="profile-img">
                         <?php else: ?>
-                            <img src="https://via.placeholder.com/140" alt="Default Profile" class="profile-img">
+                            <img src="https://via.placeholder.com/100" alt="Default Profile" class="profile-img">
                         <?php endif; ?>
+                        <div class="user-info">
+                            <span>Full Name:</span> <?php echo htmlspecialchars($user['full_name']); ?>
+                        </div>
                         <div class="user-info">
                             <span>Date:</span> <?php echo htmlspecialchars($user['date']); ?>
                         </div>
                         <div class="user-info">
-                            <span>Full Name:</span> <?php echo htmlspecialchars($user['full_name']); ?>
+                            <span>Academic Year:</span> <?php echo htmlspecialchars($user['academic_year']); ?>
                         </div>
                         <div class="user-info">
                             <span>ID Number:</span> <?php echo htmlspecialchars($user['id_number']); ?>
@@ -360,22 +233,26 @@ $conn->close();
                             <span>Department:</span> <?php echo htmlspecialchars($user['department']); ?>
                         </div>
                         <div class="user-info">
-                            <span>Phone:</span> <?php echo htmlspecialchars($user['phone']); ?>
+                            <span>Year:</span> <?php echo htmlspecialchars($user['year']); ?>
                         </div>
                         <div class="user-info">
-                            <span>Username:</span> <?php echo htmlspecialchars($user['username']); ?>
+                            <span>Semester:</span> <?php echo htmlspecialchars($user['semester']); ?>
                         </div>
                         <div class="user-info">
-                            <span>Access Permission:</span> <?php echo htmlspecialchars($user['access_permission']); ?> Months
+                            <span>Access Permission:</span> <?php echo htmlspecialchars($user['access_permission']); ?>
                         </div>
                         <div class="user-info">
                             <span>Expires On:</span> <?php echo htmlspecialchars($user['expiration_date']); ?>
                         </div>
                         <div class="user-info">
-                            <span>Days Remaining:</span> <?php echo $user['days_remaining']; ?>
+                            <span>Remaining Days:</span> <?php echo $user['remaining_days'] >= 0 ? $user['remaining_days'] : 'Expired'; ?>
+                        </div>
+                        <div class="checkbox">
+                            <input type="checkbox" class="select-user" data-id="<?php echo $user['id']; ?>"> Select User
                         </div>
                         <div class="button-group">
-                            <button class="btn btn-approve" onclick="approveUser(<?php echo $user['id']; ?>)">Approve</button>
+                            <button class="btn btn-approve" onclick="approveUser(<?php echo $user['id']; ?>)"><i class="fas fa-check"></i> Approve</button>
+                            <button class="btn btn-unapprove" onclick="unapproveUser(<?php echo $user['id']; ?>)"><i class="fas fa-trash"></i> Unapprove</button>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -386,52 +263,37 @@ $conn->close();
     <div id="approveModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">×</span>
-            <h2>Approve User</h2>
+            <h2>Approve User Access</h2>
             <form id="approveForm">
                 <input type="hidden" id="approveId" name="id">
                 <div class="form-group">
-                    <label for="approveAccessPermission">Extend Access Permission</label>
+                    <label for="approveAccessPermission">New Access Permission</label>
                     <select id="approveAccessPermission" name="accessPermission" required>
-                        <option value="1">1 Month</option>
-                        <option value="2">2 Months</option>
-                        <option value="3">3 Months</option>
-                        <option value="4">4 Months</option>
-                        <option value="5">5 Months</option>
-                        <option value="6">6 Months</option>
-                        <option value="7">7 Months</option>
-                        <option value="8">8 Months</option>
-                        <option value="9">9 Months</option>
-                        <option value="10">10 Months</option>
-                        <option value="11">11 Months</option>
-                        <option value="12">12 Months</option>
+                        <option value="1 Week">1 Week</option>
+                        <option value="1 Month">1 Month</option>
+                        <option value="2 Months">2 Months</option>
+                        <option value="3 Months">3 Months</option>
+                        <option value="4 Months">4 Months</option>
+                        <option value="5 Months">5 Months</option>
+                        <option value="6 Months">6 Months</option>
+                        <option value="7 Months">7 Months</option>
+                        <option value="8 Months">8 Months</option>
+                        <option value="9 Months">9 Months</option>
+                        <option value="10 Months">10 Months</option>
+                        <option value="11 Months">11 Months</option>
+                        <option value="12 Months">12 Months</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-save">Approve</button>
+                <button type="submit" class="btn btn-save">Save Changes</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Simulate notification for users with 1 week remaining
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.user-card');
-            cards.forEach(card => {
-                const daysRemaining = parseInt(card.getAttribute('data-days-remaining'));
-                if (daysRemaining === 7) {
-                    const username = card.querySelector('.user-info:nth-child(6)').textContent.replace('Username: ', '');
-                    alert(`Notification: User ${username}'s access expires in 1 week. Please approve or it will be deleted.`);
-                    console.log(`Notification sent for user ${username}: Access expires in 1 week.`);
-                }
-            });
-        });
-
         function approveUser(id) {
-            const card = document.querySelector(`.user-card[data-id="${id}"]`);
             const modal = document.getElementById('approveModal');
             const form = document.getElementById('approveForm');
-
             document.getElementById('approveId').value = id;
-
             modal.style.display = 'flex';
 
             form.onsubmit = function(e) {
@@ -446,21 +308,7 @@ $conn->close();
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const newAccessPermission = formData.get('accessPermission');
-                        const startDate = new Date(card.querySelector('.user-info:nth-child(1)').textContent.replace('Date: ', ''));
-                        const expirationDate = new Date(startDate);
-                        expirationDate.setMonth(startDate.getMonth() + parseInt(newAccessPermission));
-                        
-                        // Update card display
-                        card.querySelector('.user-info:nth-child(7)').textContent = `Access Permission: ${newAccessPermission} Months`;
-                        card.querySelector('.user-info:nth-child(8)').textContent = `Expires On: ${expirationDate.toISOString().split('T')[0]}`;
-                        const daysRemaining = Math.ceil((expirationDate - new Date()) / (1000 * 60 * 60 * 24));
-                        card.querySelector('.user-info:nth-child(9)').textContent = `Days Remaining: ${daysRemaining}`;
-                        
-                        // Remove card after a short delay to show update
-                        setTimeout(() => card.remove(), 1000);
-                        closeModal();
-                        alert('User approved successfully!');
+                        location.reload();
                     } else {
                         alert('Error approving user: ' + data.error);
                     }
@@ -470,6 +318,91 @@ $conn->close();
                     alert('An error occurred while approving the user.');
                 });
             };
+        }
+
+        function unapproveUser(id) {
+            if (confirm('Are you sure you want to unapprove and delete this user?')) {
+                fetch(window.location.href, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=unapprove&id=${id}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error unapproving user: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while unapproving the user.');
+                });
+            }
+        }
+
+        function approveAll() {
+            const selectedIds = Array.from(document.querySelectorAll('.select-user:checked')).map(cb => cb.dataset.id);
+            if (selectedIds.length === 0) {
+                alert('Please select at least one user to approve.');
+                return;
+            }
+            const modal = document.getElementById('approveModal');
+            const form = document.getElementById('approveForm');
+            document.getElementById('approveId').value = '';
+            modal.style.display = 'flex';
+
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                formData.append('action', 'approve_all');
+                formData.append('ids', JSON.stringify(selectedIds));
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error approving users: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while approving users.');
+                });
+            };
+        }
+
+        function unapproveAll() {
+            const selectedIds = Array.from(document.querySelectorAll('.select-user:checked')).map(cb => cb.dataset.id);
+            if (selectedIds.length === 0) {
+                alert('Please select at least one user to unapprove.');
+                return;
+            }
+            if (confirm('Are you sure you want to unapprove and delete all selected users?')) {
+                fetch(window.location.href, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=unapprove_all&ids=${JSON.stringify(selectedIds)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error unapproving users: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while unapproving users.');
+                });
+            }
         }
 
         function closeModal() {

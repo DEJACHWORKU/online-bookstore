@@ -9,7 +9,7 @@
 </head>
 <body>
     <?php
-   
+    session_start();
     $servername = "localhost";
     $username = "root";
     $password = "";
@@ -17,15 +17,27 @@
 
     $conn = new mysqli($servername, $username, $password, $dbname);
     if ($conn->connect_error) {
+        error_log("Connection failed: " . $conn->connect_error);
         die("Connection failed: " . $conn->connect_error);
     }
 
+    // Count comments
     $comment_count = 0;
     $result = $conn->query("SELECT COUNT(*) as count FROM comment"); 
     if ($result && $result->num_rows > 0) {
         $row = $result->fetch_assoc();
         $comment_count = $row['count'];
     }
+
+    // Initial count of users displayed on user approve.php (without filters for initial load)
+    $approval_count = 0;
+    $result = $conn->query("SELECT COUNT(*) as total FROM users");
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $approval_count = $row['total'];
+    }
+    error_log("Dashboard - Initial approval count (total users): $approval_count");
+
     $conn->close();
     ?>
 
@@ -56,7 +68,17 @@
                         <?php endif; ?>
                     </span>
                 </a>
-                <a href="user/user approve.php" class="menu-item">User Approval</a>
+                <a href="user/user approve.php" class="menu-item">
+                    User Approval
+                    <span class="approval-count" data-count="<?php echo $approval_count; ?>" style="position: relative; display: inline-block; margin-left: 5px;">
+                        <i class="fas fa-bell notification-icon"></i>
+                        <?php if ($approval_count > 0): ?>
+                            <span class="notification-badge" style="position: absolute; top: -8px; right: -8px; background-color: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; font-weight: bold;">
+                                <?php echo $approval_count; ?>
+                            </span>
+                        <?php endif; ?>
+                    </span>
+                </a>
                 <a href="index.php" class="menu-item logout">Logout</a>
             </div>
         </div>
@@ -88,36 +110,29 @@
                 hamburger.style.display = 'none';
             });
 
-            // Handle regular menu item clicks
             menuItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
                     menuItems.forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
-                    
                     contentFrame.classList.remove('active');
-                    
                     setTimeout(() => {
                         contentFrame.src = this.getAttribute('href');
                         contentFrame.onload = () => {
                             contentFrame.classList.add('active');
                         };
                     }, 200);
-                    
                     sidebar.classList.add('hidden');
                     contentArea.classList.add('full-width');
                     hamburger.style.display = 'block';
                 });
             });
 
-            // Handle logout click
             logoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = this.getAttribute('href');
             });
 
-            // Close sidebar when clicking outside
             document.addEventListener('click', function(e) {
                 if (!sidebar.classList.contains('hidden') && 
                     !sidebar.contains(e.target) && 
@@ -128,7 +143,6 @@
                 }
             });
 
-            // Handle window resize
             window.addEventListener('resize', function() {
                 if (sidebar.classList.contains('hidden')) {
                     contentArea.classList.add('full-width');
@@ -139,11 +153,11 @@
                 }
             });
 
-            // Function to update comment count
             function updateCommentCount() {
                 fetch('get_comment_count.php')
                     .then(response => response.json())
                     .then(data => {
+                        console.log('Comment count:', data.count);
                         const countElement = document.querySelector('.comment-count');
                         if (countElement) {
                             countElement.setAttribute('data-count', data.count);
@@ -174,9 +188,53 @@
                     .catch(error => console.error('Error fetching comment count:', error));
             }
 
-            // Initial call and periodic update (every 30 seconds)
+            function updateApprovalCount() {
+                // Fetch with current filters if available
+                const url = new URL('get_approval_count.php', window.location.origin);
+                const params = new URLSearchParams(window.location.search);
+                if (params.has('department')) url.searchParams.set('department', params.get('department'));
+                if (params.has('academic_year')) url.searchParams.set('academic_year', params.get('academic_year'));
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Approval count from fetch:', data.count);
+                        const countElement = document.querySelector('.approval-count');
+                        if (countElement) {
+                            countElement.setAttribute('data-count', data.count);
+                            const countBadge = countElement.querySelector('.notification-badge');
+                            if (data.count > 0) {
+                                if (!countBadge) {
+                                    const newBadge = document.createElement('span');
+                                    newBadge.className = 'notification-badge';
+                                    newBadge.style.position = 'absolute';
+                                    newBadge.style.top = '-8px';
+                                    newBadge.style.right = '-8px';
+                                    newBadge.style.backgroundColor = 'red';
+                                    newBadge.style.color = 'white';
+                                    newBadge.style.borderRadius = '50%';
+                                    newBadge.style.padding = '2px 6px';
+                                    newBadge.style.fontSize = '12px';
+                                    newBadge.style.fontWeight = 'bold';
+                                    newBadge.textContent = data.count;
+                                    countElement.appendChild(newBadge);
+                                } else {
+                                    countBadge.textContent = data.count;
+                                }
+                            } else if (countBadge) {
+                                countBadge.remove();
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error fetching approval count:', error));
+            }
+
             updateCommentCount();
-            setInterval(updateCommentCount, 30000);
+            updateApprovalCount();
+            setInterval(() => {
+                updateCommentCount();
+                updateApprovalCount();
+            }, 30000); // Update every 30 seconds
         });
     </script>
 </body>
