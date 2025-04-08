@@ -21,7 +21,7 @@
         }
 
         header {
-            background: linear-gradient(to right, #2c3e50, #4a627a);
+            background-color: #2c3e50;
             padding: 1rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             position: fixed;

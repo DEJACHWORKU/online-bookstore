@@ -66,11 +66,7 @@ $conn->close();
 <body>
     <div class="container">
         <div class="header">
-            <h1>Manage Librarians</h1>
-            <div class="header-buttons">
-                <button class="header-btn" onclick="goBack()">Go Back</button>
-                <button class="header-btn btn-logout" onclick="logout()">Logout</button>
-            </div>
+            <h1>Manage Librarians full information </h1>
         </div>
         <div class="librarian-grid" id="librarianGrid">
             <?php foreach ($librarians as $librarian): ?>
@@ -274,16 +270,6 @@ $conn->close();
 
         function closeModal() {
             document.getElementById('editModal').style.display = 'none';
-        }
-
-        function goBack() {
-            window.history.back();
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                alert('Logging out...');
-            }
         }
 
         window.onclick = function(event) {

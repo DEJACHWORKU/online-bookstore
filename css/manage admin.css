@@ -77,7 +77,7 @@ h1 {
     padding: 15px;
     transition: all 0.3s ease;
     height: 400px;
-    width: 260px;
+    width: 400px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

@@ -44,7 +44,7 @@ $conn->close();
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f8f9fa, #e2f0d9);
+            background: white;
             color: #333;
             display: flex;
             justify-content: center;

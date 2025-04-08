@@ -66,15 +66,23 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   <link rel="stylesheet" href="../css/manage user.css">
+ <link rel="stylesheet" href="../css/manage user.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Manage Users</h1>
-            <div class="header-buttons">
-                <button class="header-btn" onclick="goBack()">Go Back</button>
-                <button class="header-btn btn-logout" onclick="logout()">Logout</button>
+        </div>
+        <div class="search-container">
+            <div class="search-group">
+                <label for="searchDepartment">Department:</label>
+                <input type="text" id="searchDepartment" placeholder="Enter department" oninput="filterUsers()">
+             
+            </div>
+            <div class="search-group">
+                <label for="searchAcademicYear">Academic Year:</label>
+                <input type="text" id="searchAcademicYear" placeholder="Enter academic year" oninput="filterUsers()">
+   
             </div>
         </div>
         <div class="user-grid" id="userGrid">
@@ -86,7 +94,6 @@ $conn->close();
                     <?php else: ?>
                         <img src="https://via.placeholder.com/140" alt="Default Profile" class="profile-img">
                     <?php endif; ?>
-                    
                     <div class="user-info">
                         <span>Date:</span> <?php echo htmlspecialchars($user['date']); ?>
                     </div>
@@ -118,9 +125,8 @@ $conn->close();
                         <span>Remember Me:</span> <?php echo htmlspecialchars($user['remember_me'] ?: 'Not set'); ?>
                     </div>
                     <div class="user-info">
-                        <span>Access Permission:</span> <?php echo htmlspecialchars($user['access_permission']); ?> Month<?php echo $user['access_permission'] > 1 ? 's' : ''; ?>
+                        <span>Access Permission:</span> <?php echo htmlspecialchars($user['access_permission']); ?>
                     </div>
-
                     <div class="button-group">
                         <button class="btn btn-edit" onclick="editUser(<?php echo $user['id']; ?>)">Edit</button>
                         <button class="btn btn-delete" onclick="deleteUser(<?php echo $user['id']; ?>)">Delete</button>
@@ -211,6 +217,26 @@ $conn->close();
     </div>
 
     <script>
+        function filterUsers() {
+            const searchDepartment = document.getElementById('searchDepartment').value.toLowerCase();
+            const searchAcademicYear = document.getElementById('searchAcademicYear').value.toLowerCase();
+            const cards = document.querySelectorAll('.user-card');
+
+            cards.forEach(card => {
+                const department = card.querySelector('.user-info:nth-child(6)').textContent.toLowerCase().replace('department: ', '');
+                const academicYear = card.querySelector('.user-info:nth-child(3)').textContent.toLowerCase().replace('academic year: ', '');
+
+                const matchesDepartment = searchDepartment === '' || department.includes(searchDepartment);
+                const matchesAcademicYear = searchAcademicYear === '' || academicYear.includes(searchAcademicYear);
+
+                if (matchesDepartment && matchesAcademicYear) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
         function editUser(id) {
             const card = document.querySelector(`.user-card[data-id="${id}"]`);
             const modal = document.getElementById('editModal');
@@ -256,6 +282,7 @@ $conn->close();
                         card.querySelector('.user-info:nth-child(12)').textContent = `Access Permission: ${formData.get('accessPermission')} Month${formData.get('accessPermission') > 1 ? 's' : ''}`;
                         closeModal();
                         alert('User updated successfully!');
+                        filterUsers();
                     } else {
                         alert('Error updating user: ' + data.error);
                     }
@@ -348,16 +375,6 @@ $conn->close();
 
         function closeModal() {
             document.getElementById('editModal').style.display = 'none';
-        }
-
-        function goBack() {
-            window.history.back();
-        }
-
-        function logout() {
-            if (confirm('Are you sure you want to logout?')) {
-                alert('Logging out...');
-            }
         }
 
         window.onclick = function(event) {

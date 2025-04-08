@@ -54,7 +54,6 @@ h1 {
 }
 
 .header-btn:hover {
-    transform: scale(1.05);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -64,20 +63,20 @@ h1 {
 }
 
 .librarian-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, max-content));
-    gap: 25px;
-    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 30px;
+    justify-content: flex-start;
 }
 
 .librarian-card {
     background: #fff;
     border-radius: 15px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    padding: 15px;
+    padding: 20px;
     transition: all 0.3s ease;
     height: 400px;
-    width: 260px;
+    width: 400px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -85,8 +84,19 @@ h1 {
     overflow: hidden;
 }
 
+/* Unique spacing using margins for each card */
+.librarian-card:nth-child(odd) {
+    margin-right: 10px; 
+    margin-bottom: 30px;
+}
+
+.librarian-card:nth-child(even) {
+    margin-right: 10px; /* Smaller gap on even cards */
+    margin-bottom: 40px;
+}
+
+
 .librarian-card:hover {
-    transform: translateY(-8px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -157,7 +167,6 @@ h1 {
 
 .btn:hover {
     opacity: 0.95;
-    transform: scale(1.08);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -228,15 +237,19 @@ h1 {
 
 @media (max-width: 768px) {
     .librarian-grid {
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 20px;
         padding: 15px;
+        justify-content: center; /* Center cards on smaller screens */
     }
 
     .librarian-card {
         width: 100%;
         max-width: 260px;
-        margin: 0 auto;
+        margin: 0 auto 20px; /* Uniform bottom margin for small screens */
+    }
+
+    .librarian-card:nth-child(odd),
+    .librarian-card:nth-child(even) {
+        margin-right: 0; /* Remove right margins on small screens */
     }
 }
 
@@ -245,7 +258,7 @@ h1 {
         display: none;
     }
     .librarian-grid {
-        grid-template-columns: repeat(auto-fit, minmax(260px, max-content));
+        display: block; /* Switch to block for printing */
         padding: 0;
     }
     .librarian-card {
@@ -255,6 +268,7 @@ h1 {
         width: 260px;
         padding: 15px;
         page-break-inside: avoid;
+        margin: 0 0 20px 0; /* Consistent spacing for print */
     }
     .profile-img {
         width: 120px;

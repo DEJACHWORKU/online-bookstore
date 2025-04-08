@@ -36,8 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($email)) {
         $errors['email'] = "Valid email is required.";
     }
-    if (!preg_match("/^[0-9]{10,15}$/", $phone) || empty($phone)) {
-        $errors['phone'] = "Phone number must contain 10-15 digits only.";
+    if (!preg_match("/^[0-9]*$/", $phone) || empty($phone)) {
+        $errors['phone'] = "Phone number must contain only digits and cannot be empty.";
     }
     if (empty($username)) {
         $errors['username'] = "Username is required.";
