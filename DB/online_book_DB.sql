@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 08, 2025 at 06:07 AM
+-- Generation Time: Apr 09, 2025 at 01:10 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -45,7 +45,8 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `full_name`, `admin_id`, `email`, `phone`, `username`, `password`, `remember_me`, `profile_image`, `created_at`) VALUES
-(18, 'INT FAT DFT', 'Ugr/2345/13', 'dagiman216@gmail.com', '0995785658', 'Dagi1234', '$2y$10$j.jzjx6ES3ml4MM6g8lgCuRopndoQltJAHu3mC2Od6AlknstUeq8G', 'mom', 'uploads/profile_images/67f3e4cd74396.jpg', '2025-04-07 14:44:29');
+(20, 'DAGIM WORKU TASSEW', 'UGR/105434/43', 'dagiman216@gmail.com', '0998989898', 'DAgi4356', '$2y$10$l3dPnzZ7FQwcH6NsbfLALuL4YhSAixk1RJ9.Jh64WXWpXsGiq1cdO', 'GOOD DAY', 'uploads/profile_images/67f547c90a1b2.jpg', '2025-04-08 15:59:05'),
+(21, 'DAGIM RKU TASSEW', 'UGR/1434/43', 'dagiman16@gmail.com', '0998989809', 'D@#4356', '$2y$10$aKBJ2nULm4DBl.X9A934G.KQO0T43b.GtbZSrUWMIr0Tt/jgX9Rke', 'GOOD DAY', 'uploads/profile_images/67f55a8b3499a.jpg', '2025-04-08 17:19:07');
 
 -- --------------------------------------------------------
 
@@ -120,12 +121,31 @@ INSERT INTO `books` (`id`, `date`, `title`, `description`, `department`, `author
 --
 
 CREATE TABLE `book_ratings` (
-  `id` int(11) NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
   `book_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `rating` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `book_ratings`
+--
+
+INSERT INTO `book_ratings` (`id`, `book_id`, `user_id`, `rating`, `created_at`) VALUES
+(1, 70, 1, 2, '2025-04-09 09:49:53'),
+(3, 62, 1, 3, '2025-04-09 09:57:38'),
+(4, 62, 1, 3, '2025-04-09 10:06:32'),
+(5, 70, 1, 5, '2025-04-09 10:06:39'),
+(6, 70, 1, 5, '2025-04-09 10:06:59'),
+(7, 70, 1, 5, '2025-04-09 10:07:05'),
+(8, 70, 1, 5, '2025-04-09 10:07:12'),
+(9, 70, 1, 5, '2025-04-09 10:07:17'),
+(10, 70, 1, 5, '2025-04-09 10:07:23'),
+(11, 70, 1, 5, '2025-04-09 10:07:29'),
+(12, 70, 1, 3, '2025-04-09 10:07:34'),
+(13, 70, 1, 5, '2025-04-09 10:07:39'),
+(14, 69, 1, 5, '2025-04-09 10:10:57');
 
 -- --------------------------------------------------------
 
@@ -187,7 +207,7 @@ INSERT INTO `comment` (`id`, `full_name`, `username`, `department`, `subject`, `
 
 CREATE TABLE `librarian` (
   `id` int(11) NOT NULL,
-  `full_name` varchar(10) NOT NULL,
+  `full_name` varchar(50) NOT NULL,
   `personal_id` varchar(50) NOT NULL,
   `email` varchar(100) NOT NULL,
   `phone` varchar(20) NOT NULL,
@@ -203,7 +223,11 @@ CREATE TABLE `librarian` (
 --
 
 INSERT INTO `librarian` (`id`, `full_name`, `personal_id`, `email`, `phone`, `username`, `password`, `remember_me`, `profile_image`, `created_at`) VALUES
-(8, 'INT', '1234bcd/g', 'dagiman216@gmail.com', '0995785658', 'Dagi1234', '$2y$10$JsNHbYBbZBu2OalBob5wfe5yvHJv4LdA8iDSg6I6supVtTikmXnzW', 'mom', 'uploads/profile_images/67f3e4b23ca4f.jpg', '2025-04-07 14:44:02');
+(13, 'DAGIM WORKU TASSEW', 'UGR/143/13', 'dagiman216@gmail.com', '0987654321', 'DAgi4356', '$2y$10$wpL6yMRIFIqf65Q0yO2axu681esPzQcjCcgI3/rj1B1FWk4vi95Qu', 'GOOD DAY', 'uploads/profile_images/67f5539b45279.jpg', '2025-04-08 16:49:31'),
+(14, 'DAGIM WORKU TAEW', 'UGR/10343/13', 'dagiman16@gmail.com', '9089765479', 'D$#@768', '$2y$10$om1nCUxj2c584mVLen5Gk.KZJRy4rAc7LlyJd9gsAdqQINz2WrJNG', 'GOOD DAY', 'uploads/profile_images/67f558c82b396.jpg', '2025-04-08 17:11:36'),
+(15, 'DAGIM WORKU TSEW', 'UGR/1043/13', 'dagiman1@gmail.com', '9087654356', 'D$#@68', '$2y$10$nBgZ2itIKYmUasxqpB48f.mW9PKHZohd2BL5XDLxVhu1/OKS/NyyK', 'GOOD DAY', 'uploads/profile_images/67f5591994f40.jpg', '2025-04-08 17:12:57'),
+(16, 'DAGIM RKU TSEW', 'UGR/343/13', 'dagiman160@gmail.com', '9809897609', 'D$#768', '$2y$10$p9KYoRxWwoBU14KFSnJCde81FBGf0hC9Nhg7DhNqFgD8HaMkmGmZm', 'GOOD DAY', '', '2025-04-08 17:14:03'),
+(17, 'DIM WORKU TSEW', 'UGR/1030043/13', 'dagiman1600@gmail.com', '098976543', 'D$#@76878', '$2y$10$c4iOX7Wzh1RDWSHqiiTfHezEVpIr79k041n/0CbbuMfwisEyOJZM.', 'GOOD DAY', '', '2025-04-08 17:14:44');
 
 -- --------------------------------------------------------
 
@@ -226,7 +250,7 @@ CREATE TABLE `notifications` (
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
   `date` date NOT NULL,
   `academic_year` varchar(4) NOT NULL,
   `full_name` varchar(100) NOT NULL,
@@ -239,7 +263,7 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `profile_image` varchar(255) NOT NULL,
   `remember_me` varchar(100) NOT NULL,
-  `access_permission` enum('1 months','2 months','3 months','4 months','5 months','6 months','7 months','8 months','9 months','10 months','11 months','12 months') NOT NULL,
+  `access_permission` varchar(20) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -248,7 +272,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `date`, `academic_year`, `full_name`, `id_number`, `department`, `year`, `semester`, `phone`, `username`, `password`, `profile_image`, `remember_me`, `access_permission`, `created_at`) VALUES
-(11, '2025-04-08', '2024', 'Dejch Worku Tasew', 'UGR/10343/13', 'IT', '2nd', '1st', '0995785658', 'Dagi1234', '$2y$10$a0ibVVnN0wqQec9Hm6ce0uw8LNzOhWnKtWzFZSUx/n9a6jgvFOuK6', 'users/user_67f4a03cf0faf.jpg', 'mom', '6 months', '2025-04-08 04:04:13');
+(3, '2025-04-09', '2034', 'Salamalak Kasaw Tgabu', 'UGR/12387/98', 'IT', '3rd', '1st', '0997867564', 'SALEa#2', '$2y$10$Pq0RSA.3c.cmqC3wm2jbJefHGThyOqq.tD3biW9pZNkDTXDS6WmY2', 'users/user_67f651d29a763.jpg', '1234567', '1 Week', '2025-04-09 10:54:10'),
+(4, '2025-04-09', '2023', 'Salamal Kasaw Tgabu', 'UGR/1237/98', 'IT', '5th', '1st', '0990967564', 'SALEa#@', '$2y$10$aySiGCkxaId.qsGLVyPUreHe77tjJrN5rdolapWOIMD5HnRvc6n.W', 'users/user_67f6520befea3.jpg', 'MOM', '1 Month', '2025-04-09 10:55:08'),
+(5, '2025-04-16', '2034', 'Salama Kasaw Tgabu', 'UGR/12309/98', 'cs', '3rd', '2nd', '0989867564', 'SALEa#2##', '$2y$10$YoMwqfNZJndujq8XAEURGujBbDVqnfp76eXNrflZqb2ySQmXpWl/.', 'users/user_67f6524900333.jpg', 'good', '4 Months', '2025-04-09 10:56:09');
 
 --
 -- Indexes for dumped tables
@@ -276,7 +302,8 @@ ALTER TABLE `books`
 -- Indexes for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_book_id` (`book_id`);
 
 --
 -- Indexes for table `categories`
@@ -317,7 +344,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `authors`
@@ -335,7 +362,7 @@ ALTER TABLE `books`
 -- AUTO_INCREMENT for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -353,7 +380,7 @@ ALTER TABLE `comment`
 -- AUTO_INCREMENT for table `librarian`
 --
 ALTER TABLE `librarian`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -365,7 +392,17 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `book_ratings`
+--
+ALTER TABLE `book_ratings`
+  ADD CONSTRAINT `fk_book_id` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
