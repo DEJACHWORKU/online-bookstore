@@ -48,7 +48,6 @@
     <div class="container">
         <div class="sidebar">
             <div class="menu">
-                <a href="view-profile.php" class="menu-item active">Your Profile</a>
                 <a href="user/admin register form.php" class="menu-item">Add Admin</a>
                 <a href="user/librarian register form.php" class="menu-item">Add Librarian</a>
                 <a href="user/user register form.php" class="menu-item">Add User</a>
@@ -79,11 +78,12 @@
                         <?php endif; ?>
                     </span>
                 </a>
+                <a href="user.php">Go to bookstore</a>
                 <a href="index.php" class="menu-item logout">Logout</a>
             </div>
         </div>
         <div class="content-area">
-            <iframe id="contentFrame" class="content-frame active" src="view-profile.php"></iframe>
+            <iframe id="contentFrame" class="content-frame active" src="user/admin register form.php"></iframe> <!-- Default to first menu item -->
         </div>
     </div>
     
@@ -102,6 +102,10 @@
                 contentArea.classList.remove('full-width');
             }
             initSidebar();
+
+            // Set the first menu item as active and load its content by default
+            const firstMenuItem = menuItems[0];
+            firstMenuItem.classList.add('active');
 
             hamburger.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -189,7 +193,6 @@
             }
 
             function updateApprovalCount() {
-                // Fetch with current filters if available
                 const url = new URL('get_approval_count.php', window.location.origin);
                 const params = new URLSearchParams(window.location.search);
                 if (params.has('department')) url.searchParams.set('department', params.get('department'));

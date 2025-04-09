@@ -91,7 +91,25 @@
             background: #2980b9;
             font-weight: bold;
         }
-
+        .menu a {
+            color: #ecf0f1;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .menu a[href="index.php"]:hover {
+            background: linear-gradient(90deg, #2980b9, #3498db);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+        }
+        
+        .menu a.active {
+            background-color: #332da6;
+            color: white;
+        }
         .menu-item.logout {
             background: #e74c3c;
         }

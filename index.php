@@ -34,6 +34,23 @@
         return $count;
     }
 
+    function countUsers() {
+        global $servername, $username, $password, $dbname;
+        $count = 0;
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        if ($conn->connect_error) {
+            return 0;
+        }
+        $sql = "SELECT COUNT(*) as total FROM users";
+        $result = $conn->query($sql);
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $count = $row['total'];
+        }
+        $conn->close();
+        return $count;
+    }
+
     function getActiveNotifications() {
         global $servername, $username, $password, $dbname;
         $notifications = array();
@@ -73,6 +90,7 @@
     }
 
     $totalBooks = countBooks();
+    $totalUsers = countUsers(); // Fetch the total number of users
     $activeNotifications = getActiveNotifications();
     $notificationCount = count($activeNotifications);
     ?>
@@ -131,7 +149,7 @@
             <div class="stats-box">
                 <i class='bx bx-user'></i>
                 <h3>Total Users</h3>
-                <p class="counter" data-target="1500">0</p>
+                <p class="counter" data-target="<?php echo $totalUsers; ?>">0</p> <!-- Display fetched user count -->
             </div>
             <div class="stats-box">
                 <i class='bx bx-book'></i>
