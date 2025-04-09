@@ -93,7 +93,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors['rememberMe'] = "Remember Me is required";
     }
 
-    // Updated validPermissions to use full text values
     $validPermissions = [
         '1 Week', '1 Month', '2 Months', '3 Months', '4 Months', '5 Months',
         '6 Months', '7 Months', '8 Months', '9 Months', '10 Months', '11 Months', '12 Months'
@@ -152,8 +151,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($errors)) {
         $profileImagePath = "";
         if ($profileImage && $profileImage['error'] === UPLOAD_ERR_OK) {
-            $base_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/';
-            $image_dir = $base_dir . 'users/';
+            // Changed to relative path that works with your HTML structure
+            $image_dir = '../book/users/';
             $image_web_path = 'users/';
             
             if (!is_dir($image_dir)) {
@@ -168,6 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $profileImagePath = $image_path;
             } else {
                 $errors['profileImage'] = "Failed to upload profile image! Please check file permissions.";
+                error_log("Upload failed. Directory: " . $image_dir . " Permissions: " . substr(sprintf('%o', fileperms($image_dir)), -4));
             }
         }
 
@@ -193,7 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $input['username'],
                 $hashedPassword,
                 $input['rememberMe'],
-                $input['accessPermission'], // Now stores full text like "1 Week"
+                $input['accessPermission'],
                 $profileImagePath
             );
             
@@ -402,7 +402,14 @@ $conn->close();
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw err;
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     document.getElementById('form-message').style.color = 'green';
@@ -420,10 +427,16 @@ $conn->close();
                             inputElement.classList.add('is-invalid');
                         }
                     }
+                    
+                    if (data.errors.database) {
+                        console.error("Database error:", data.errors.database);
+                    }
                 }
             })
             .catch(error => {
-                document.getElementById('form-message').textContent = "An error occurred";
+                console.error("Error:", error);
+                document.getElementById('form-message').style.color = 'red';
+                document.getElementById('form-message').textContent = "An error occurred. Please check console for details.";
             })
             .finally(() => {
                 submitBtn.disabled = false;
