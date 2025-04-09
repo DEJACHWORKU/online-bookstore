@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 09, 2025 at 06:23 PM
+-- Generation Time: Apr 09, 2025 at 06:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -121,31 +121,12 @@ INSERT INTO `books` (`id`, `date`, `title`, `description`, `department`, `author
 --
 
 CREATE TABLE `book_ratings` (
-  `id` int(11) UNSIGNED NOT NULL,
+  `id` int(11) NOT NULL,
   `book_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `rating` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `book_ratings`
---
-
-INSERT INTO `book_ratings` (`id`, `book_id`, `user_id`, `rating`, `created_at`) VALUES
-(1, 70, 1, 2, '2025-04-09 09:49:53'),
-(3, 62, 1, 3, '2025-04-09 09:57:38'),
-(4, 62, 1, 3, '2025-04-09 10:06:32'),
-(5, 70, 1, 5, '2025-04-09 10:06:39'),
-(6, 70, 1, 5, '2025-04-09 10:06:59'),
-(7, 70, 1, 5, '2025-04-09 10:07:05'),
-(8, 70, 1, 5, '2025-04-09 10:07:12'),
-(9, 70, 1, 5, '2025-04-09 10:07:17'),
-(10, 70, 1, 5, '2025-04-09 10:07:23'),
-(11, 70, 1, 5, '2025-04-09 10:07:29'),
-(12, 70, 1, 3, '2025-04-09 10:07:34'),
-(13, 70, 1, 5, '2025-04-09 10:07:39'),
-(14, 69, 1, 5, '2025-04-09 10:10:57');
 
 -- --------------------------------------------------------
 
@@ -303,7 +284,7 @@ ALTER TABLE `books`
 --
 ALTER TABLE `book_ratings`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_book_id` (`book_id`);
+  ADD UNIQUE KEY `book_id` (`book_id`,`user_id`);
 
 --
 -- Indexes for table `categories`
@@ -362,7 +343,7 @@ ALTER TABLE `books`
 -- AUTO_INCREMENT for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -402,7 +383,7 @@ ALTER TABLE `users`
 -- Constraints for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  ADD CONSTRAINT `fk_book_id` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `book_id_fk` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
