@@ -3,7 +3,7 @@ session_start();
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "userDB";
+$dbname = "online_book_DB";
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -15,32 +15,18 @@ $signin_username = $signin_password = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin-submit'])) {
     $signin_username = trim($_POST['signin-username']);
     $signin_password = trim($_POST['signin-password']);
-    if (empty($signin_username)) {
-        $signin_username_error = "Username is required.";
-    } elseif (strlen($signin_username) < 6) {
-        $signin_username_error = "Username must be at least 6 characters.";
+    $stmt = $conn->prepare("SELECT * FROM user WHERE username = ? AND password = ?");
+    $stmt->bind_param("ss", $signin_username, $signin_password);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $_SESSION['user_id'] = $signin_username;
+        header("Location: index.php");
+        exit();
+    } else {
+        $signin_password_error = "Incorrect username or password.";
     }
-    if (empty($signin_password)) {
-        $signin_password_error = "Password is required.";
-    } elseif (strlen($signin_password) < 6) {
-        $signin_password_error = "Password must be at least 6 characters.";
-    }
-
-    if (empty($signin_username_error) && empty($signin_password_error)) {
-        $stmt = $conn->prepare("SELECT * FROM user WHERE username = ? AND password = ?");
-        $stmt->bind_param("ss", $signin_username, $signin_password);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            $_SESSION['user_id'] = $signin_username;
-            header("Location: index.php");
-            exit();
-        } else {
-            $signin_password_error = "Incorrect username or password.";
-        }
-        $stmt->close();
-    }
+    $stmt->close();
 }
 ?>
 
@@ -59,20 +45,66 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin-submit'])) {
         <form method="POST" action="">
             <div class="form-group">
                 <label for="signin-username">Username:</label>
-                <input type="text" name="signin-username" id="signin-username" placeholder="Enter your username" required value="<?php echo htmlspecialchars($signin_username); ?>">
+                <input type="text" name="signin-username" id="signin-username" placeholder="Enter your username" value="<?php echo htmlspecialchars($signin_username); ?>">
                 <div class="signin-error error-message"><?php echo $signin_username_error; ?></div>
             </div>
             <div class="form-group">
                 <label for="signin-password">Password:</label>
-                <input type="password" name="signin-password" id="signin-password" placeholder="Enter your password" required>
+                <input type="password" name="signin-password" id="signin-password" placeholder="Enter your password">
                 <div class="signin-error error-message"><?php echo $signin_password_error; ?></div>
             </div>
             <button class="btn" type="submit" name="signin-submit">Login</button>
+            <a href="forgot_password.php" class="forgot-password">Forgot Password?</a>
         </form>
-        <?php if ($signin_password_error): ?>
-            <div class="error-message"><?php echo $signin_password_error; ?></div>
-        <?php endif; ?>
     </div>
 </div>
+
+<script>
+function toggleForms() {
+    const signupForm = document.getElementById('signup');
+    const signinForm = document.getElementById('signin');
+    if (signupForm.style.display === 'none') {
+        signupForm.style.display = 'block';
+        signinForm.style.display = 'none';
+    } else {
+        signupForm.style.display = 'none';
+        signinForm.style.display = 'block';
+    }
+}
+
+window.addEventListener('resize', function() {
+    const formsContainer = document.querySelector('.container');
+    if (window.innerWidth < 768) {
+        formsContainer.style.flexDirection = 'column'; 
+    } else {
+        formsContainer.style.flexDirection = 'row'; 
+    }
+});
+
+window.dispatchEvent(new Event('resize'));
+
+document.getElementById('scroll-down').addEventListener('click', function() {
+    window.scrollBy({
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+});
+
+window.addEventListener('scroll', function() {
+    const scrollTopBtn = document.getElementById('scroll-top');
+    if (window.pageYOffset > 300) {
+      scrollTopBtn.classList.add('active');
+    } else {
+      scrollTopBtn.classList.remove('active');
+    }
+});
+
+document.getElementById('scroll-top').addEventListener('click', function() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+});
+</script>
 </body>
 </html>

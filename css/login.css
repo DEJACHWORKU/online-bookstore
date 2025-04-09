@@ -15,27 +15,25 @@ body {
     100% { background-position: 100% 50%; }
 }
 
-
 .container {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     margin: 20px;
-
     width: 400px;
-    border-radius: 25px; /* Increased radius */
+    border-radius: 25px;
     overflow: hidden;
     -webkit-box-reflect: below 2px linear-gradient(transparent, #0005);
     box-shadow: 0 0 15px hsl(258, 91%, 30%), 0 0 15px hsl(260, 59%, 47%), 0 0 25px #03a0af, 0 0 100px hsl(120, 1%, 14%);
     backdrop-filter: blur(10px);
-    border: 10px solid hsla(256, 85%, 3%, 0.769); /* Light border */
+    border: 10px solid hsla(256, 85%, 3%, 0.769);
 }
 
 .form {
     width: 100%;
     padding: 40px;
-    border-radius: 25px; 
+    border-radius: 25px;
     background-color: rgba(255, 255, 255, 0.9);
     box-shadow: 0 15px 60px #1bd4ec;
 }
@@ -95,12 +93,17 @@ h2 {
     transform: translateY(-2px);
 }
 
-.success-message {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 10px;
-    border: 1px solid #c3e6cb;
-    border-radius: 5px;
-    margin-bottom: 20px;
+.forgot-password {
+    display: block;
     text-align: center;
+    margin-top: 15px;
+    color: #ff6f61;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s;
+}
+
+.forgot-password:hover {
+    color: #de4a8b;
+    text-decoration: underline;
 }
