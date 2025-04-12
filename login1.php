@@ -1,9 +1,10 @@
 <?php
 session_start();
+
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "online_book_DB";
+$dbname = "online_book_Db"; // Consistent case
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -17,8 +18,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin-submit'])) {
     $signin_username = trim($_POST['signin-username']);
     $signin_password = trim($_POST['signin-password']);
     
-    // Prepare and execute the query to check the users table
-    $stmt = $conn->prepare("SELECT username, password FROM users WHERE username = ?");
+    // Query id, username, and password
+    $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
     $stmt->bind_param("s", $signin_username);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -26,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin-submit'])) {
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         if (password_verify($signin_password, $user['password'])) {
-            $_SESSION['user_id'] = $user['username'];
+            $_SESSION['user_id'] = $user['id']; // Store id (integer)
             $_SESSION['logged_in'] = true;
             header("Location: user.php");
             exit();
@@ -49,6 +50,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Login</title>
     <link rel="stylesheet" href="css/login.css">
+  
 </head>
 <body>
 <div class="container">
@@ -108,8 +110,8 @@ $conn->close();
             setTimeout(() => {
                 element.textContent = "";
                 element.classList.remove('fade-out');
-            }, 500); // Match transition duration
-        }, 5000); // Display for 5 seconds
+            }, 500);
+        }, 5000);
     }
 
     document.addEventListener('DOMContentLoaded', () => {

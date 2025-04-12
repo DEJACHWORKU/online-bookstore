@@ -1,3 +1,58 @@
+<?php
+session_start();
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "online_book_DB"; 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    error_log("Connection failed: " . $conn->connect_error);
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Count comments
+$comment_count = 0;
+$result = $conn->query("SELECT COUNT(*) as count FROM comment"); 
+if ($result && $result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $comment_count = $row['count'];
+}
+
+// Count users with 30 days or less remaining access
+$approval_count = 0;
+$currentDate = date('Y-m-d');
+$sql = "SELECT date, access_permission FROM users";
+$result = $conn->query($sql);
+
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $accessPermission = $row['access_permission'];
+        $startDate = $row['date'];
+        
+        if ($accessPermission === 'Approved') {
+            $expirationDate = date('Y-m-d', strtotime("+30 days", strtotime($startDate)));
+        } else {
+            $parts = explode(' ', $accessPermission);
+            $duration = (int)$parts[0];
+            $unit = $parts[1];
+            $interval = ($unit === 'Week') ? "weeks" : "months";
+            $expirationDate = date('Y-m-d', strtotime("+$duration $interval", strtotime($startDate)));
+        }
+        
+        $remainingSeconds = strtotime($expirationDate) - strtotime($currentDate);
+        $remainingDays = floor($remainingSeconds / (24 * 60 * 60));
+        
+        if ($remainingDays <= 30) {
+            $approval_count++;
+        }
+    }
+}
+error_log("Dashboard - Approval count (30 days or less): $approval_count");
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,39 +63,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <?php
-    session_start();
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "online_book_DB"; 
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if ($conn->connect_error) {
-        error_log("Connection failed: " . $conn->connect_error);
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    // Count comments
-    $comment_count = 0;
-    $result = $conn->query("SELECT COUNT(*) as count FROM comment"); 
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $comment_count = $row['count'];
-    }
-
-    // Initial count of users displayed on user approve.php (without filters for initial load)
-    $approval_count = 0;
-    $result = $conn->query("SELECT COUNT(*) as total FROM users");
-    if ($result && $result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $approval_count = $row['total'];
-    }
-    error_log("Dashboard - Initial approval count (total users): $approval_count");
-
-    $conn->close();
-    ?>
-
     <div class="header">
         Welcome to Admin Dashboard - System Over Control Page
     </div>
@@ -83,7 +105,7 @@
             </div>
         </div>
         <div class="content-area">
-            <iframe id="contentFrame" class="content-frame active" src="user/admin register form.php"></iframe> <!-- Default to first menu item -->
+            <iframe id="contentFrame" class="content-frame active" src="user/admin register form.php"></iframe>
         </div>
     </div>
     
@@ -103,7 +125,6 @@
             }
             initSidebar();
 
-            // Set the first menu item as active and load its content by default
             const firstMenuItem = menuItems[0];
             firstMenuItem.classList.add('active');
 
@@ -161,7 +182,6 @@
                 fetch('get_comment_count.php')
                     .then(response => response.json())
                     .then(data => {
-                        console.log('Comment count:', data.count);
                         const countElement = document.querySelector('.comment-count');
                         if (countElement) {
                             countElement.setAttribute('data-count', data.count);
@@ -193,15 +213,9 @@
             }
 
             function updateApprovalCount() {
-                const url = new URL('get_approval_count.php', window.location.origin);
-                const params = new URLSearchParams(window.location.search);
-                if (params.has('department')) url.searchParams.set('department', params.get('department'));
-                if (params.has('academic_year')) url.searchParams.set('academic_year', params.get('academic_year'));
-
-                fetch(url)
+                fetch('get_approval_count.php')
                     .then(response => response.json())
                     .then(data => {
-                        console.log('Approval count from fetch:', data.count);
                         const countElement = document.querySelector('.approval-count');
                         if (countElement) {
                             countElement.setAttribute('data-count', data.count);
@@ -237,7 +251,7 @@
             setInterval(() => {
                 updateCommentCount();
                 updateApprovalCount();
-            }, 30000); // Update every 30 seconds
+            }, 30000);
         });
     </script>
 </body>

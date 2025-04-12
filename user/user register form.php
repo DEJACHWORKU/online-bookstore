@@ -33,7 +33,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $profileImage = $_FILES['profileImage'] ?? null;
 
-    if (empty($input['date'])) $errors['date'] = "Date is required";
+    if (empty($input['date'])) {
+        $errors['date'] = "Date is required";
+    }
 
     if (empty($input['academicYear'])) {
         $errors['academicYear'] = "Academic year is required";
@@ -151,7 +153,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($errors)) {
         $profileImagePath = "";
         if ($profileImage && $profileImage['error'] === UPLOAD_ERR_OK) {
-            // Changed to relative path that works with your HTML structure
             $image_dir = '../book/users/';
             $image_web_path = 'users/';
             
@@ -341,7 +342,7 @@ $conn->close();
                 <div id="accessPermission-error" class="error-message"></div>
             </div>
             
-            <button type="submit" id="submitBtn">Register</button>
+            <button type="submit" id="submitBtn" style="grid-column: span 2;">Register</button>
             <div id="form-message" style="grid-column: span 2;"></div>
         </form>
     </div>
@@ -392,8 +393,9 @@ $conn->close();
             const formData = new FormData(form);
             const submitBtn = document.getElementById('submitBtn');
             
+            // Clear previous errors
             document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('input, select').forEach(el => el.classList.remove('is-invalid'));
             
             submitBtn.disabled = true;
             submitBtn.textContent = "Processing...";
@@ -419,24 +421,27 @@ $conn->close();
                     document.getElementById('uploadText').style.display = 'block';
                     hideSuccessMessage();
                 } else {
-                    for (const [field, error] of Object.entries(data.errors)) {
-                        const errorElement = document.getElementById(`${field}-error`);
-                        const inputElement = document.getElementById(field);
-                        if (errorElement && inputElement) {
-                            errorElement.textContent = error;
-                            inputElement.classList.add('is-invalid');
+                    // Display errors for each field
+                    if (data.errors) {
+                        for (const [field, error] of Object.entries(data.errors)) {
+                            const errorElement = document.getElementById(`${field}-error`);
+                            const inputElement = document.getElementById(field);
+                            if (errorElement && inputElement) {
+                                errorElement.textContent = error;
+                                inputElement.classList.add('is-invalid');
+                            } else if (field === 'database') {
+                                // Show database errors in the form message area
+                                document.getElementById('form-message').style.color = 'red';
+                                document.getElementById('form-message').textContent = error;
+                            }
                         }
-                    }
-                    
-                    if (data.errors.database) {
-                        console.error("Database error:", data.errors.database);
                     }
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
                 document.getElementById('form-message').style.color = 'red';
-                document.getElementById('form-message').textContent = "An error occurred. Please check console for details.";
+                document.getElementById('form-message').textContent = "An error occurred. Please try again.";
             })
             .finally(() => {
                 submitBtn.disabled = false;
@@ -444,47 +449,13 @@ $conn->close();
             });
         });
 
-        // Input validation clearing
-        document.getElementById('academicYear').addEventListener('input', function() {
-            if (/^\d{4}$/.test(this.value)) {
+        // Input validation clearing as user types
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('input', function() {
                 this.classList.remove('is-invalid');
-            }
-        });
-
-        document.getElementById('fullName').addEventListener('input', function() {
-            if (/^[a-zA-Z\s]+$/.test(this.value)) {
-                this.classList.remove('is-invalid');
-            }
-        });
-
-        document.getElementById('idNumber').addEventListener('input', function() {
-            this.classList.remove('is-invalid');
-        });
-
-        document.getElementById('department').addEventListener('input', function() {
-            if (/^[a-zA-Z\s]+$/.test(this.value)) {
-                this.classList.remove('is-invalid');
-            }
-        });
-
-        document.getElementById('phone').addEventListener('input', function() {
-            if (/^\d{10}$/.test(this.value)) {
-                this.classList.remove('is-invalid');
-            }
-        });
-
-        document.getElementById('username').addEventListener('input', function() {
-            this.classList.remove('is-invalid');
-        });
-
-        document.getElementById('password').addEventListener('input', function() {
-            if (this.value.length >= 6) {
-                this.classList.remove('is-invalid');
-            }
-        });
-
-        document.getElementById('rememberMe').addEventListener('input', function() {
-            this.classList.remove('is-invalid');
+                const errorElement = document.getElementById(`${this.id}-error`);
+                if (errorElement) errorElement.textContent = '';
+            });
         });
     </script>
 </body>

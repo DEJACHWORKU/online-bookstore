@@ -244,3 +244,42 @@ button:hover {
         margin-bottom: 1rem;
     }
 }
+.error-message {
+    color: red;
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+.is-invalid {
+    border-color: red !important;
+}
+.form-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.image-upload-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 2px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin: 0 auto;
+    overflow: hidden;
+}
+#form-message {
+    text-align: center;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+}

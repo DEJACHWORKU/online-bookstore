@@ -1,118 +1,115 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
+    header("Location: login1.php");
+    exit();
+}
+
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "online_book_Db";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$user_id = $_SESSION['user_id'];
+
+$user_stmt = $conn->prepare("SELECT full_name, profile_image FROM users WHERE id = ?");
+$user_stmt->bind_param("i", $user_id);
+$user_stmt->execute();
+$user_result = $user_stmt->get_result();
+$user = $user_result->fetch_assoc();
+$full_name = $user ? htmlspecialchars($user['full_name']) : 'User';
+$profile_image = !empty($user['profile_image']) ? '/bookstore/book/' . htmlspecialchars($user['profile_image']) : 'https://via.placeholder.com/50';
+$user_stmt->close();
+
+$search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
+$books = [];
+
+$query = "SELECT * FROM books WHERE 1=1";
+$params = [];
+$types = "";
+
+if ($search_query) {
+    $search_terms = array_filter(array_map('trim', explode(',', $search_query)));
+    
+    if (!empty($search_terms)) {
+        $title_term = $search_terms[0] ?? '';
+        $author_term = $search_terms[1] ?? '';
+        $dept_term = $search_terms[2] ?? '';
+        
+        if ($title_term) {
+            $query .= " AND (title LIKE ? OR SOUNDEX(title) = SOUNDEX(?))";
+            $params[] = "%$title_term%";
+            $params[] = $title_term;
+            $types .= "ss";
+        }
+        if ($author_term) {
+            $query .= " AND (author LIKE ? OR SOUNDEX(author) = SOUNDEX(?))";
+            $params[] = "%$author_term%";
+            $params[] = $author_term;
+            $types .= "ss";
+        }
+        if ($dept_term) {
+            $query .= " AND (department LIKE ? OR SOUNDEX(department) = SOUNDEX(?))";
+            $params[] = "%$dept_term%";
+            $params[] = $dept_term;
+            $types .= "ss";
+        }
+    }
+    
+    $query .= " ORDER BY date DESC";
+} else {
+    $query .= " ORDER BY date DESC";
+}
+
+if (!empty($params)) {
+    $stmt = $conn->prepare($query);
+    if ($stmt) {
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+        $stmt->close();
+    }
+} else {
+    $result = $conn->query($query);
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+    }
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>user page</title>
+    <title>User Page</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/userpage.css">
 </head>
 <body>
-    <?php
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "online_book_Db";
-
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    session_start();
-    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 1;
-
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_id'], $_POST['rating'])) {
-        $book_id = $_POST['book_id'];
-        $rating = $_POST['rating'];
-        $check_stmt = $conn->prepare("SELECT COUNT(*) FROM book_ratings WHERE book_id = ? AND user_id = ?");
-        $check_stmt->bind_param("ii", $book_id, $user_id);
-        $check_stmt->execute();
-        $check_stmt->bind_result($count);
-        $check_stmt->fetch();
-        $check_stmt->close();
-
-        if ($count == 0) {
-            $stmt = $conn->prepare("INSERT INTO book_ratings (book_id, user_id, rating) VALUES (?, ?, ?)");
-            $stmt->bind_param("iii", $book_id, $user_id, $rating);
-            $stmt->execute();
-            $stmt->close();
-            echo "<script>alert('Thank you for your feedback!');</script>";
-        }
-    }
-
-    $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
-    $books = [];
-    
-    $query = "SELECT b.*, AVG(r.rating) as avg_rating FROM books b LEFT JOIN book_ratings r ON b.id = r.book_id WHERE 1=1";
-    $params = [];
-    $types = "";
-
-    if ($search_query) {
-        $search_terms = array_filter(array_map('trim', explode(',', $search_query)));
-        
-        if (!empty($search_terms)) {
-            $title_term = $search_terms[0] ?? '';
-            $author_term = $search_terms[1] ?? '';
-            $dept_term = $search_terms[2] ?? '';
-            
-            if ($title_term) {
-                $query .= " AND b.title LIKE ?";
-                $params[] = "%$title_term%";
-                $types .= "s";
-            }
-            if ($author_term) {
-                $query .= " AND b.author LIKE ?";
-                $params[] = "%$author_term%";
-                $types .= "s";
-            }
-            if ($dept_term) {
-                $query .= " AND b.department LIKE ?";
-                $params[] = "%$dept_term%";
-                $types .= "s";
-            }
-        }
-        
-        $query .= " GROUP BY b.id ORDER BY avg_rating DESC LIMIT 1";
-    } else {
-        $query .= " GROUP BY b.id ORDER BY avg_rating DESC, b.date DESC";
-    }
-
-    if (!empty($params)) {
-        $stmt = $conn->prepare($query);
-        if ($stmt) {
-            $stmt->bind_param($types, ...$params);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            while ($row = $result->fetch_assoc()) {
-                $books[] = $row;
-            }
-            $stmt->close();
-        }
-    } else {
-        $result = $conn->query($query);
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $books[] = $row;
-            }
-        }
-    }
-
-    $rated_books = [];
-    $rate_stmt = $conn->prepare("SELECT book_id FROM book_ratings WHERE user_id = ?");
-    $rate_stmt->bind_param("i", $user_id);
-    $rate_stmt->execute();
-    $rate_result = $rate_stmt->get_result();
-    while ($row = $rate_result->fetch_assoc()) {
-        $rated_books[] = $row['book_id'];
-    }
-    $rate_stmt->close();
-
-    $conn->close();
-    ?>
-
     <header id="header">
-        <h1><i class="icon">📚</i> Online Bookstore</h1>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="<?php echo $profile_image; ?>" alt="User Profile">
+            </div>
+            <div class="user-info">
+                <span><?php echo $full_name; ?></span>
+                <a href="profile.php">Details</a>
+            </div>
+        </div>
         <div class="hamburger">
             <i class="fas fa-bars"></i>
         </div>
@@ -120,7 +117,6 @@
             <a href="index.php">Go home <i class="fas fa-home"></i></a>
             <a href="view_book_list.php">Go Book List <i class="fas fa-book-open"></i></a>
             <a href="comment.php">Comments <i class="fas fa-comments"></i></a>
-            <a href="profile.php">Your profile <i class="fas fa-user-circle"></i></a>
             <button class="logout">Logout <i class="fas fa-sign-out-alt"></i></button>
         </nav>
         <div class="overlay"></div>
@@ -163,31 +159,40 @@
                             <p class="book-meta"><span class="label">Author:</span> <?php echo htmlspecialchars($book['author']); ?></p>
                             <p class="book-meta"><span class="label">Department:</span> <?php echo htmlspecialchars($book['department']); ?></p>
                             <p class="book-meta"><span class="label">Published:</span> <?php echo date('M d, Y', strtotime($book['date'])); ?></p>
-                            <p class="book-meta"><span class="label">Rating:</span> 
-                                <span class="avg-rating"><?php echo $book['avg_rating'] ? number_format($book['avg_rating'], 1) : 'No ratings'; ?></span>
-                            </p>
-                            <?php if (!in_array($book['id'], $rated_books)): ?>
-                            <div class="rating-container">
-                                <div class="star-rating">
-                                    <?php for ($i = 5; $i >= 1; $i--): ?>
-                                        <input type="radio" name="rating-<?php echo $book['id']; ?>" id="star<?php echo $i; ?>-<?php echo $book['id']; ?>" value="<?php echo $i; ?>">
-                                        <label for="star<?php echo $i; ?>-<?php echo $book['id']; ?>"><i class="fas fa-star"></i></label>
-                                    <?php endfor; ?>
-                                </div>
-                                <button class="submit-rating" data-book-id="<?php echo $book['id']; ?>">Submit</button>
-                            </div>
-                            <?php else: ?>
-                            <p class="book-meta"><span class="label">Your Rating:</span> Submitted</p>
-                            <?php endif; ?>
                             <p class="book-description"><span class="label">Book Description:</span> <?php echo htmlspecialchars(substr($book['description'], 0, 100) . (strlen($book['description']) > 100 ? '...' : '')); ?></p>
                             <div class="book-actions">
-                                <?php if (isset($book['is_read']) && $book['is_read']): ?>
-                                    <a href="/bookstore/book/<?php echo htmlspecialchars($book['file']); ?>" target="_blank" class="read-btn" rel="noopener noreferrer">
+                                <?php 
+                                $file_path = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $book['file'];
+                                $file_exists = !empty($book['file']) && file_exists($file_path);
+                                $file_extension = !empty($book['file']) ? strtolower(pathinfo($book['file'], PATHINFO_EXTENSION)) : '';
+                                $is_pdf = $file_extension === 'pdf';
+                                ?>
+                                <?php if ($file_exists && isset($book['is_read']) && $book['is_read'] && $is_pdf): ?>
+                                    <a href="read_book.php?file=<?php echo rawurlencode($book['file']); ?>" 
+                                       target="_blank" 
+                                       class="read-btn" 
+                                       rel="noopener noreferrer"
+                                       onclick="if (!confirm('Opening book for reading...')) return false;">
                                         <i class="fas fa-book-open"></i> Read
                                     </a>
                                 <?php endif; ?>
-                                <?php if (isset($book['is_download']) && $book['is_download']): ?>
-                                    <a href="/bookstore/book/<?php echo htmlspecialchars($book['file']); ?>" download="<?php echo htmlspecialchars($book['title'] . '.pdf'); ?>" class="download-btn">
+                                <?php if ($file_exists && isset($book['is_download']) && $book['is_download']): ?>
+                                    <a href="download_book.php?file=<?php echo rawurlencode($book['file']); ?>&title=<?php echo rawurlencode($book['title']); ?>" 
+                                       class="download-btn">
+                                        <i class="fas fa-download"></i> Download
+                                    </a>
+                                <?php endif; ?>
+                                <?php if (!$file_exists || ($book['is_read'] && !$is_pdf)): ?>
+                                    <a href="#" 
+                                       class="read-btn disabled" 
+                                       onclick="alert('Error: The file is not available or not a PDF. Only PDFs can be read. Check the file in /bookstore/book/.'); return false;">
+                                        <i class="fas fa-book-open"></i> Read
+                                    </a>
+                                <?php endif; ?>
+                                <?php if (!$file_exists): ?>
+                                    <a href="#" 
+                                       class="download-btn disabled" 
+                                       onclick="alert('Error: The file is not available for download. Check the file in /bookstore/book/.'); return false;">
                                         <i class="fas fa-download"></i> Download
                                     </a>
                                 <?php endif; ?>
@@ -253,15 +258,16 @@
             });
 
             function submitSearch() {
+                const searchValue = searchInput.value.trim();
                 const form = document.createElement('form');
                 form.method = 'GET';
                 form.style.display = 'none';
                 
-                if (searchInput.value.trim()) {
+                if (searchValue) {
                     const hiddenField = document.createElement('input');
                     hiddenField.type = 'hidden';
                     hiddenField.name = 'search';
-                    hiddenField.value = searchInput.value.trim();
+                    hiddenField.value = searchValue;
                     form.appendChild(hiddenField);
                 }
                 
@@ -274,25 +280,10 @@
                 if (e.key === 'Enter') submitSearch();
             });
 
-            document.querySelectorAll('.submit-rating').forEach(button => {
-                button.addEventListener('click', function() {
-                    const bookId = this.getAttribute('data-book-id');
-                    const ratingInputs = document.querySelectorAll(`input[name="rating-${bookId}"]:checked`);
-                    if (ratingInputs.length > 0) {
-                        const rating = ratingInputs[0].value;
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.style.display = 'none';
-                        form.innerHTML = `
-                            <input type="hidden" name="book_id" value="${bookId}">
-                            <input type="hidden" name="rating" value="${rating}">
-                        `;
-                        document.body.appendChild(form);
-                        form.submit();
-                    } else {
-                        alert('Please select a rating before submitting.');
-                    }
-                });
+            searchInput.addEventListener('input', function() {
+                if (!this.value.trim()) {
+                    window.location.href = window.location.pathname;
+                }
             });
 
             function adjustFooterAnimation() {

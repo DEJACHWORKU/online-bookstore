@@ -41,15 +41,36 @@ body.menu-open {
   z-index: 1000;
 }
 
-#header h1 {
-  font-size: 1.8rem;
+.header-content {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-#header h1 .icon {
-  font-size: 1.5rem;
+.logo-container img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-info span {
+  font-weight: 500;
+}
+
+.user-info a {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.user-info a:hover {
+  text-decoration: underline;
 }
 
 .hamburger {
@@ -198,7 +219,7 @@ body.menu-open {
   flex: 1;
   padding: 0.75rem;
   border: none;
-  outline: none; 
+  outline: none;
   font-size: 1rem;
 }
 
@@ -252,6 +273,8 @@ body.menu-open {
   transition: var(--transition);
   display: flex;
   flex-direction: column;
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
 }
 
 .book-card:hover {
@@ -332,53 +355,10 @@ body.menu-open {
   background-color: var(--secondary-color);
 }
 
-.rating-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 0.5rem 0;
-}
-
-.star-rating {
-  display: flex;
-  direction: rtl;
-}
-
-.star-rating input {
-  display: none;
-}
-
-.star-rating label {
-  font-size: 1.2rem;
-  color: #ccc;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.star-rating label:hover,
-.star-rating label:hover ~ label,
-.star-rating input:checked ~ label {
-  color: var(--warning-color);
-}
-
-.submit-rating {
-  padding: 0.5rem 1rem;
-  background-color: var(--accent-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.submit-rating:hover {
-  background-color: #29b6f6;
-}
-
-.avg-rating {
-  color: var(--warning-color);
-  font-weight: 500;
+.read-btn.disabled, .download-btn.disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  pointer-events: auto;
 }
 
 .no-books {
@@ -406,12 +386,10 @@ body.menu-open {
 
 footer {
   background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-
   margin-top: 2rem;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
   position: relative;
-
-  height: 2.5rem; /* Fixed minimal height */
+  height: 2.5rem;
 }
 
 .footer-text {
@@ -422,16 +400,16 @@ footer {
 }
 
 .footer-text marquee {
-  font-size: 1.2rem; /* Increased text size */
+  font-size: 1.2rem;
   font-weight: 800;
- color: white;
+  color: white;
   display: inline-block;
   width: 100%;
-  font-family: 'Poppins', sans-serif; /* Attractive font (ensure it's loaded) */
+  font-family: 'Poppins', sans-serif;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
-  line-height: 2rem; 
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  line-height: 2rem;
 }
 
 .footer-text marquee:hover {
@@ -439,8 +417,8 @@ footer {
 }
 
 @keyframes slideLeft {
-  0% { transform: translateX(100%); } /* Start from right */
-  100% { transform: translateX(-100%); } /* End at left */
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
 }
 
 .scroll-top {
@@ -478,10 +456,6 @@ footer {
       padding: 1rem;
   }
   
-  #header h1 {
-      font-size: 1.5rem;
-  }
-  
   .search-section {
       padding: 1rem;
       margin: 0.5rem;
@@ -498,11 +472,6 @@ footer {
       right: 1rem;
   }
   
-  .rating-container {
-      flex-direction: column;
-      align-items: flex-start;
-  }
-  
   footer {
       padding: 0.3rem;
       height: 1.8rem;
@@ -517,11 +486,6 @@ footer {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-.book-card {
-  animation: fadeIn 0.5s ease forwards;
-  opacity: 0;
 }
 
 .book-card:nth-child(1) { animation-delay: 0.1s; }

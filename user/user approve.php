@@ -1,5 +1,5 @@
 <?php
-session_start(); // Start session to share data if needed
+session_start();
 
 $servername = "localhost";
 $username = "root";
@@ -13,6 +13,9 @@ if ($conn->connect_error) {
 }
 
 function getExpirationDate($startDate, $accessPermission) {
+    if ($accessPermission === 'Approved') {
+        return date('Y-m-d', strtotime("+30 days", strtotime($startDate)));
+    }
     $parts = explode(' ', $accessPermission);
     $duration = (int)$parts[0];
     $unit = $parts[1];
@@ -22,7 +25,6 @@ function getExpirationDate($startDate, $accessPermission) {
 
 $currentDate = date('Y-m-d');
 
-// Handle expired users
 $stmt = $conn->prepare("SELECT id, date, access_permission FROM users");
 $stmt->execute();
 $result = $stmt->get_result();
@@ -38,7 +40,6 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Handle POST actions (approve/unapprove)
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header('Content-Type: application/json');
     
@@ -105,7 +106,6 @@ while ($row = $yearResult->fetch_assoc()) {
 }
 $yearStmt->close();
 
-// Handle search parameters
 $search_department = isset($_GET['department']) ? $_GET['department'] : '';
 $search_academic_year = isset($_GET['academic_year']) ? $_GET['academic_year'] : '';
 
@@ -134,7 +134,7 @@ $result = $stmt->get_result();
 
 $users = [];
 $notifications = [];
-$oneWeek = 7 * 24 * 60 * 60;
+$approval_count = 0;
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
@@ -142,17 +142,19 @@ if ($result->num_rows > 0) {
         $remainingSeconds = strtotime($expirationDate) - strtotime($currentDate);
         $remainingDays = floor($remainingSeconds / (24 * 60 * 60));
         
-        $row['expiration_date'] = $expirationDate;
-        $row['remaining_days'] = $remainingDays;
-        
-        if ($remainingDays <= 7 && $remainingDays >= 0) {
-            $notifications[] = "User {$row['full_name']} has $remainingDays days left until access expires!";
+        if ($remainingDays <= 30) {
+            $row['expiration_date'] = $expirationDate;
+            $row['remaining_days'] = $remainingDays;
+            
+            if ($remainingDays >= 0) {
+                $notifications[] = "User {$row['full_name']} has $remainingDays days left until access expires!";
+            }
+            $users[] = $row;
+            $approval_count++;
         }
-        $users[] = $row;
     }
 }
 
-// Calculate total displayed users
 $total_displayed_users = count($users);
 error_log("user approve.php - Total displayed users: $total_displayed_users");
 
@@ -168,11 +170,13 @@ $conn->close();
     <title>User Approval</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/user approve.css">
+ 
 </head>
 <body>
     <div class="container">
         <div class="header">
-            WELCOME TO USER APPROVAL SYSTEM - THIS PAGE IS USEFUL TO CONTROL USERS WHO SHOULD USE THIS SYSTEM AND WHO SHOULD NOT YOU CAN DECIDE HERE.
+            WELCOME TO USER APPROVAL SYSTEM - THIS PAGE SHOWS USERS WITH 30 DAYS OR LESS REMAINING ACCESS
+            <span class="notification-count"><?php echo $approval_count; ?></span>
         </div>
         <div class="controls">
             <div class="action-buttons">
@@ -208,10 +212,10 @@ $conn->close();
         <?php endif; ?>
         <div class="user-grid" id="userGrid">
             <?php if (empty($users)): ?>
-                <p>No users found matching the search criteria.</p>
+                <p>No users found with 30 days or less remaining access.</p>
             <?php else: ?>
                 <?php foreach ($users as $user): ?>
-                    <div class="user-card <?php echo $user['remaining_days'] <= 7 && $user['remaining_days'] >= 0 ? 'warning' : ''; ?>" data-id="<?php echo $user['id']; ?>">
+                    <div class="user-card" data-id="<?php echo $user['id']; ?>">
                         <?php if (!empty($user['profile_image'])): ?>
                             <img src="/bookstore/book/<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile" class="profile-img">
                         <?php else: ?>
@@ -269,19 +273,7 @@ $conn->close();
                 <div class="form-group">
                     <label for="approveAccessPermission">New Access Permission</label>
                     <select id="approveAccessPermission" name="accessPermission" required>
-                        <option value="1 Week">1 Week</option>
-                        <option value="1 Month">1 Month</option>
-                        <option value="2 Months">2 Months</option>
-                        <option value="3 Months">3 Months</option>
-                        <option value="4 Months">4 Months</option>
-                        <option value="5 Months">5 Months</option>
-                        <option value="6 Months">6 Months</option>
-                        <option value="7 Months">7 Months</option>
-                        <option value="8 Months">8 Months</option>
-                        <option value="9 Months">9 Months</option>
-                        <option value="10 Months">10 Months</option>
-                        <option value="11 Months">11 Months</option>
-                        <option value="12 Months">12 Months</option>
+                        <option value="Approved" selected>Approved (30 days)</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-save">Save Changes</button>

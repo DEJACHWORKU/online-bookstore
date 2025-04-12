@@ -1,7 +1,5 @@
 <?php
 session_start();
-header('Cache-Control: no-cache, must-revalidate');
-header('Content-Type: application/json');
 
 $servername = "localhost";
 $username = "root";
@@ -9,45 +7,42 @@ $password = "";
 $dbname = "online_book_DB";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
+
 if ($conn->connect_error) {
-    error_log("get_approval_count - Connection failed: " . $conn->connect_error);
-    echo json_encode(['count' => 0, 'error' => 'Database connection failed']);
-    exit;
+    die(json_encode(['count' => 0]));
 }
 
-// Use the same filters as user/user approve.php
-$search_department = isset($_GET['department']) ? $_GET['department'] : '';
-$search_academic_year = isset($_GET['academic_year']) ? $_GET['academic_year'] : '';
-
-$sql = "SELECT COUNT(*) as total FROM users WHERE 1=1";
-$params = [];
-$types = '';
-
-if ($search_department !== '') {
-    $sql .= " AND department = ?";
-    $params[] = $search_department;
-    $types .= 's';
+function getExpirationDate($startDate, $accessPermission) {
+    if ($accessPermission === 'Approved') {
+        return date('Y-m-d', strtotime("+30 days", strtotime($startDate)));
+    }
+    $parts = explode(' ', $accessPermission);
+    $duration = (int)$parts[0];
+    $unit = $parts[1];
+    $interval = ($unit === 'Week') ? "weeks" : "months";
+    return date('Y-m-d', strtotime("+$duration $interval", strtotime($startDate)));
 }
 
-if ($search_academic_year !== '') {
-    $sql .= " AND academic_year = ?";
-    $params[] = $search_academic_year;
-    $types .= 's';
-}
+$currentDate = date('Y-m-d');
+$count = 0;
 
-$stmt = $conn->prepare($sql);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
-}
+$stmt = $conn->prepare("SELECT date, access_permission FROM users");
 $stmt->execute();
 $result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$approval_count = $row['total'];
 
-error_log("get_approval_count - Total displayed users: $approval_count, Filters: Dept=$search_department, Year=$search_academic_year");
+while ($row = $result->fetch_assoc()) {
+    $expirationDate = getExpirationDate($row['date'], $row['access_permission']);
+    $remainingSeconds = strtotime($expirationDate) - strtotime($currentDate);
+    $remainingDays = floor($remainingSeconds / (24 * 60 * 60));
+    
+    if ($remainingDays <= 30) {
+        $count++;
+    }
+}
 
 $stmt->close();
 $conn->close();
 
-echo json_encode(['count' => $approval_count]);
+header('Content-Type: application/json');
+echo json_encode(['count' => $count]);
 ?>
