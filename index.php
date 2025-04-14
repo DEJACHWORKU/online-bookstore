@@ -90,7 +90,7 @@
     }
 
     $totalBooks = countBooks();
-    $totalUsers = countUsers(); // Fetch the total number of users
+    $totalUsers = countUsers();
     $activeNotifications = getActiveNotifications();
     $notificationCount = count($activeNotifications);
     ?>

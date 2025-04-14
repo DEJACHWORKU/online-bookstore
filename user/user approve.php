@@ -170,12 +170,23 @@ $conn->close();
     <div class="container">
         <div class="header">
             WELCOME TO USER APPROVAL SYSTEM - THIS PAGE SHOWS USERS WITH 30 DAYS OR LESS REMAINING ACCESS
-            <span class="notification-count"><?php echo $approval_count; ?></span>
         </div>
         <div class="controls">
             <div class="action-buttons">
-                <button class="btn btn-approve-all" onclick="approveAll()"><i class="fas fa-check-circle"></i> Approve All</button>
-                <button class="btn btn-unapprove-all" onclick="unapproveAll()"><i class="fas fa-times-circle"></i> Unapprove All</button>
+                <button class="btn btn-select-all" onclick="toggleSelectAll()">
+                    <i class="fas fa-check-square"></i> 
+                    <span id="selectAllText">Select All</span>
+                </button>
+                <button class="btn btn-approve-all" onclick="approveAll()">
+                    <i class="fas fa-check-circle"></i> Approve All
+                </button>
+                <button class="btn btn-unapprove-all" onclick="unapproveAll()">
+                    <i class="fas fa-times-circle"></i> Unapprove All
+                </button>
+                <div class="selected-counter">
+                    <i class="fas fa-users"></i>
+                    <span id="selectedCount">0</span> user(s) selected
+                </div>
             </div>
             <form class="search-form" method="GET" action="">
                 <select name="department">
@@ -288,6 +299,33 @@ $conn->close();
     </div>
 
     <script>
+        let isAllSelected = false;
+
+        function toggleSelectAll() {
+            isAllSelected = !isAllSelected;
+            const checkboxes = document.querySelectorAll('.select-user');
+            const selectAllButton = document.querySelector('#selectAllText');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isAllSelected;
+            });
+            
+            selectAllButton.textContent = isAllSelected ? 'Deselect All' : 'Select All';
+            updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+            const selectedCount = document.querySelectorAll('.select-user:checked').length;
+            document.getElementById('selectedCount').textContent = selectedCount;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const checkboxes = document.querySelectorAll('.select-user');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+        });
+
         function approveUser(id) {
             const modal = document.getElementById('approveModal');
             const form = document.getElementById('approveForm');
@@ -308,6 +346,7 @@ $conn->close();
                 .then(data => {
                     if (data.success) {
                         location.reload();
+                        updateSelectedCount();
                     } else {
                         alert('Error approving user: ' + data.error);
                     }
@@ -330,6 +369,7 @@ $conn->close();
                 .then(data => {
                     if (data.success) {
                         location.reload();
+                        updateSelectedCount();
                     } else {
                         alert('Error unapproving user: ' + data.error);
                     }
@@ -367,6 +407,7 @@ $conn->close();
                 .then(data => {
                     if (data.success) {
                         location.reload();
+                        updateSelectedCount();
                     } else {
                         alert('Error approving users: ' + data.error);
                     }
@@ -394,6 +435,7 @@ $conn->close();
                 .then(data => {
                     if (data.success) {
                         location.reload();
+                        updateSelectedCount();
                     } else {
                         alert('Error unapproving users: ' + data.error);
                     }

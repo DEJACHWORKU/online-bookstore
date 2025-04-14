@@ -272,3 +272,53 @@ body {
         margin-bottom: 3px;
     }
 }
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-select-all {
+    background-color: #4a90e2;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-select-all:hover {
+    background-color: #357abd;
+}
+
+.selected-counter {
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease-in;
+}
+
+.selected-counter i {
+    font-size: 16px;
+}
+
+#selectedCount {
+    font-weight: 700;
+    font-size: 18px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
