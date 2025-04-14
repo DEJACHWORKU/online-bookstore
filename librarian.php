@@ -46,7 +46,7 @@ $base_path = '/bookstore/book/Librarian/';
             <a href="librarian profile.php" class="view-details">View Details</a>
         </div>
         <nav class="nav-menu">
-            <a href="login1.php" class="store-link"><i class="fas fa-store"></i> Go to Store</a>
+            <a href="login1.php" class=""><i class="fas fa-store"></i> Go to Store</a>
             <a href="#" data-page="dep't.php"><i class="fas fa-building"></i> Add Department</a>
             <a href="#" data-page="add book.php"><i class="fas fa-book-medical"></i> Add Book</a>
             <a href="#" data-page="user/user register form.php"><i class="fas fa-user-plus"></i> Add User</a>

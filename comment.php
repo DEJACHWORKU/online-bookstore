@@ -62,7 +62,7 @@
             </div>
             <div class="input-box">
                 <input type="text" name="department" placeholder="Department" required>
-                <input type="text" name="subject" placeholder="Email Subject" required>
+                <input type="text" name="subject" placeholder="Message Subject" required>
             </div>
             <textarea name="message" placeholder="Your Message" required></textarea>
             <div class="button-container">

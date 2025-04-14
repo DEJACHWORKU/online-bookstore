@@ -133,7 +133,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $users = [];
-$notifications = [];
 $approval_count = 0;
 
 if ($result->num_rows > 0) {
@@ -145,10 +144,6 @@ if ($result->num_rows > 0) {
         if ($remainingDays <= 30) {
             $row['expiration_date'] = $expirationDate;
             $row['remaining_days'] = $remainingDays;
-            
-            if ($remainingDays >= 0) {
-                $notifications[] = "User {$row['full_name']} has $remainingDays days left until access expires!";
-            }
             $users[] = $row;
             $approval_count++;
         }
@@ -202,13 +197,6 @@ $conn->close();
                 <button type="submit"><i class="fas fa-search"></i> Search</button>
             </form>
         </div>
-        <?php if (!empty($notifications)): ?>
-            <div class="notifications">
-                <?php foreach ($notifications as $notification): ?>
-                    <p><?php echo htmlspecialchars($notification); ?></p>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
         <div class="user-grid" id="userGrid">
             <?php if (empty($users)): ?>
                 <p>No users found with 30 days or less remaining access.</p>
@@ -248,7 +236,14 @@ $conn->close();
                             <span>Expires On:</span> <?php echo htmlspecialchars($user['expiration_date']); ?>
                         </div>
                         <div class="user-info">
-                            <span>Remaining Days:</span> <?php echo $user['remaining_days'] >= 0 ? $user['remaining_days'] : 'Expired'; ?>
+                            <span>Remaining Days:</span> 
+                            <?php 
+                            if ($user['remaining_days'] >= 0) {
+                                echo $user['remaining_days'] . ' days left';
+                            } else {
+                                echo 'Expired';
+                            }
+                            ?>
                         </div>
                         <div class="checkbox">
                             <input type="checkbox" class="select-user" data-id="<?php echo $user['id']; ?>"> Select User
