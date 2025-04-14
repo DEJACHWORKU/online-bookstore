@@ -1,3 +1,18 @@
+<?php
+session_start();
+
+// Check if the user is logged in as a librarian
+if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'Librarian') {
+    header("Location: login0.php");
+    exit();
+}
+
+// Use session data with fallbacks
+$librarian_name = isset($_SESSION['full_name']) && !empty($_SESSION['full_name']) ? $_SESSION['full_name'] : "Librarian";
+$profile_image = isset($_SESSION['profile_image']) && !empty($_SESSION['profile_image']) ? $_SESSION['profile_image'] : null;
+$base_path = '/bookstore/book/Librarian/';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,179 +20,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Librarian Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            color: #333;
-            overflow-x: hidden;
-        }
-
-        header {
-            background-color: #2c3e50;
-            padding: 1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        header h1 {
-            color: #fff;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-        }
-
-        header h1 i {
-            color: #3498db;
-        }
-
-        .hamburger {
-            display: none;
-            cursor: pointer;
-            color: #fff;
-            font-size: 1.5rem;
-            padding: 0.5rem;
-        }
-
-        .nav-menu {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-menu a {
-            color: #fff;
-            text-decoration: none;
-            padding: 0.5rem 0.8rem;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            background: rgba(255,255,255,0.05);
-            white-space: nowrap;
-        }
-
-        .nav-menu a:hover {
-            background: rgba(255,255,255,0.15);
-        }
-
-        .nav-menu a.active {
-            background: #3498db;
-        }
-
-        .logout {
-            background: linear-gradient(to right, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            padding: 0.5rem 0.8rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .content-container {
-            margin-top: 60px;
-            padding: 1rem;
-            height: calc(100vh - 60px);
-        }
-
-        .iframe-container {
-            width: 100%;
-            height: 100%;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        #contentFrame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        @media (max-width: 992px) {
-            .nav-menu a, .logout {
-                padding: 0.5rem;
-                font-size: 0.8rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hamburger {
-                display: block;
-                order: -1; /* Move to left side */
-                margin-right: auto;
-            }
-
-            header h1 {
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .nav-menu {
-                position: fixed;
-                top: 60px;
-                left: -280px; /* Start off-screen to the left */
-                width: 250px; /* Fixed width for the menu */
-                background: #2c3e50;
-                flex-direction: column;
-                padding: 1rem;
-                transition: left 0.3s ease;
-                gap: 0.5rem;
-                height: calc(100vh - 60px);
-                overflow-y: auto;
-                box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-            }
-
-            .nav-menu.active {
-                left: 0; /* Slide in from left */
-            }
-
-            .nav-menu a, .logout {
-                width: 100%;
-                padding: 0.8rem 1rem;
-                border-radius: 5px;
-                text-align: left; /* Left-align text */
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .nav-menu a i, .logout i {
-                width: 20px;
-                text-align: center;
-            }
-        }
-    </style>
+   <link rel="stylesheet" href="css/librarian.css">
 </head>
 <body>
     <header id="header">
         <div class="hamburger">
             <i class="fas fa-bars"></i>
         </div>
-        <h1><i class="fas fa-book"></i> Librarian Dashboard</h1>
+        <div class="profile-container">
+            <?php if ($profile_image && file_exists($_SERVER['DOCUMENT_ROOT'] . $base_path . $profile_image)): ?>
+                <img src="<?php echo htmlspecialchars($base_path . $profile_image); ?>" 
+                     alt="Profile image of <?php echo htmlspecialchars($librarian_name); ?>" 
+                     class="profile-image">
+            <?php else: ?>
+                <div class="profile-image initials">
+                    <?php 
+                        $initials = '';
+                        $names = explode(' ', trim($librarian_name));
+                        foreach ($names as $n) {
+                            $initials .= strtoupper(substr($n, 0, 1));
+                            if (strlen($initials) >= 2) break;
+                        }
+                        echo htmlspecialchars($initials);
+                    ?>
+                </div>
+            <?php endif; ?>
+            <a href="librarian profile.php" class="view-details">View Details</a>
+        </div>
         <nav class="nav-menu">
             <a href="user.php"><i class="fas fa-store"></i> Go to Store</a>
             <a href="#" data-page="dep't.php"><i class="fas fa-building"></i> Add Department</a>
             <a href="#" data-page="add book.php"><i class="fas fa-book-medical"></i> Add Book</a>
             <a href="#" data-page="user/user register form.php"><i class="fas fa-user-plus"></i> Add User</a>
-            <a href="#" data-page="view labra profile.php"><i class="fas fa-user-circle"></i> Your Profile</a>
             <a href="menu.php"><i class="fas fa-cog"></i> Go to Manage</a>
             <button class="logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </nav>
@@ -204,7 +78,24 @@
             });
 
             document.querySelector('.logout').addEventListener('click', function() {
-                window.location.href = 'index.php';
+                fetch('logout.php', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = 'index.php';
+                    } else {
+                        console.error('Logout failed');
+                        // Fallback redirect
+                        window.location.href = 'index.php';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during logout:', error);
+                    // Fallback redirect
+                    window.location.href = 'index.php';
+                });
             });
 
             navLinks.forEach(link => {

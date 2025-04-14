@@ -17,15 +17,42 @@ if ($conn->connect_error) {
 }
 
 $user_id = $_SESSION['user_id'];
+$user_type = isset($_SESSION['user_type']) ? $_SESSION['user_type'] : 'user';
 
-$user_stmt = $conn->prepare("SELECT full_name, profile_image FROM users WHERE id = ?");
-$user_stmt->bind_param("i", $user_id);
-$user_stmt->execute();
-$user_result = $user_stmt->get_result();
-$user = $user_result->fetch_assoc();
-$full_name = $user ? htmlspecialchars($user['full_name']) : 'User';
-$profile_image = !empty($user['profile_image']) ? '/bookstore/book/' . htmlspecialchars($user['profile_image']) : 'https://via.placeholder.com/50';
-$user_stmt->close();
+if ($user_type === 'user') {
+    $user_stmt = $conn->prepare("SELECT full_name, profile_image FROM users WHERE id = ?");
+} elseif ($user_type === 'admin') {
+    $user_stmt = $conn->prepare("SELECT full_name, profile_image FROM admin WHERE id = ?");
+} elseif ($user_type === 'librarian') {
+    $user_stmt = $conn->prepare("SELECT full_name, profile_image FROM librarian WHERE id = ?");
+} else {
+    $user_stmt = false;
+}
+
+$full_name = 'User';
+$profile_image = 'https://via.placeholder.com/50';
+
+if ($user_stmt) {
+    $user_stmt->bind_param("i", $user_id);
+    $user_stmt->execute();
+    $user_result = $user_stmt->get_result();
+    if ($user_result->num_rows > 0) {
+        $user = $user_result->fetch_assoc();
+        $full_name = htmlspecialchars($user['full_name'] ?? 'User');
+        if ($user_type === 'admin') {
+            $base_path = '/bookstore/book/Admin/';
+        } elseif ($user_type === 'librarian') {
+            $base_path = '/bookstore/book/Librarian/';
+        } else {
+            $base_path = '/bookstore/book/';
+        }
+        $image_path = !empty($user['profile_image']) ? $_SERVER['DOCUMENT_ROOT'] . $base_path . $user['profile_image'] : '';
+        $profile_image = (!empty($user['profile_image']) && file_exists($image_path)) 
+            ? $base_path . htmlspecialchars($user['profile_image']) 
+            : 'https://via.placeholder.com/50';
+    }
+    $user_stmt->close();
+}
 
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 $books = [];
@@ -45,12 +72,15 @@ if ($search_query) {
         $first = true;
         foreach ($search_terms as $index => $term) {
             if (!$first) $query .= " OR ";
-            $query .= "(title LIKE ? OR SOUNDEX(title) = SOUNDEX(?) OR author LIKE ? OR SOUNDEX(author) = SOUNDEX(?) OR department LIKE ? OR SOUNDEX(department) = SOUNDEX(?))";
+            $query .= "(title LIKE ? OR author LIKE ? OR department LIKE ? 
+                      OR SOUNDEX(title) = SOUNDEX(?) 
+                      OR SOUNDEX(author) = SOUNDEX(?) 
+                      OR SOUNDEX(department) = SOUNDEX(?))";
+            $params[] = "%$term%";
+            $params[] = "%$term%";
             $params[] = "%$term%";
             $params[] = $term;
-            $params[] = "%$term%";
             $params[] = $term;
-            $params[] = "%$term%";
             $params[] = $term;
             $types .= "ssssss";
             $first = false;
@@ -59,7 +89,9 @@ if ($search_query) {
     }
 }
 
-$query .= " ORDER BY COALESCE((SELECT AVG(rating) FROM book_ratings WHERE book_id = b.id), 0) DESC, date DESC";
+$query .= " ORDER BY 
+           COALESCE((SELECT AVG(rating) FROM book_ratings WHERE book_id = b.id), 0) DESC, 
+           date DESC";
 
 $stmt = $conn->prepare($query);
 if ($stmt) {
@@ -83,6 +115,7 @@ $conn->close();
     <title>User Page</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/userpage.css">
+
 </head>
 <body>
     <header id="header">
@@ -92,7 +125,9 @@ $conn->close();
             </div>
             <div class="user-info">
                 <span><?php echo $full_name; ?></span>
-                <a href="profile.php">Details</a>
+                <?php if ($user_type === 'user'): ?>
+                    <a href="user profile.php">Details</a>
+                <?php endif; ?>
             </div>
         </div>
         <div class="hamburger">
@@ -112,6 +147,7 @@ $conn->close();
             <div class="search-input-container">
                 <label for="search-input" class="search-label">Search by:</label>
                 <input type="text" name="search" id="search-input" class="search-input" placeholder="title, author, department" value="<?php echo htmlspecialchars($search_query); ?>">
+                <button type="button" class="clear-search" title="Clear Search"><i class="fas fa-sync-alt"></i></button>
                 <button type="submit" class="search-icon"><i class="fas fa-search"></i></button>
             </div>
         </div>
@@ -202,6 +238,7 @@ $conn->close();
             const logoutBtn = document.querySelector('.logout');
             const searchInput = document.querySelector('.search-input');
             const searchIcon = document.querySelector('.search-icon');
+            const clearSearchBtn = document.querySelector('.clear-search');
 
             function toggleMenu() {
                 navMenu.classList.toggle('active');
@@ -222,7 +259,14 @@ $conn->close();
 
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', function() {
-                    window.location.href = 'logout.php';
+                    fetch('logout.php', {
+                        method: 'POST'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = 'index.php';
+                        }
+                    });
                 });
             }
 
@@ -239,10 +283,19 @@ $conn->close();
                 window.location.href = window.location.pathname + (searchValue ? '?search=' + encodeURIComponent(searchValue) : '');
             }
 
+            function clearSearch() {
+                searchInput.value = '';
+                window.location.href = window.location.pathname;
+            }
+
             searchIcon.addEventListener('click', submitSearch);
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') submitSearch();
             });
+
+            if (clearSearchBtn) {
+                clearSearchBtn.addEventListener('click', clearSearch);
+            }
 
             document.querySelectorAll('.star-rating').forEach(ratingContainer => {
                 const bookId = ratingContainer.getAttribute('data-book-id');
@@ -254,7 +307,7 @@ $conn->close();
                     star.addEventListener('mouseover', () => {
                         const value = parseInt(star.getAttribute('data-value'));
                         stars.forEach(s => {
-                            s.classList.toggle('hover', parseInt(s.get JAMstackAttribute('data-value')) <= value);
+                            s.classList.toggle('hover', parseInt(s.getAttribute('data-value')) <= value);
                         });
                     });
 

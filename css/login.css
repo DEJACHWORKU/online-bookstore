@@ -74,13 +74,11 @@ h2 {
 .error-message {
     color: red;
     font-size: 0.9em;
-    margin-top: 5px;
-    opacity: 1;
-    transition: opacity 0.5s ease-out;
+    min-height: 1.5em;
 }
-
 .error-message.fade-out {
     opacity: 0;
+    transition: opacity 0.5s ease;
 }
 
 .btn {

@@ -161,16 +161,18 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Registration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="../css/admin register.css">
+  <link rel="stylesheet" href="../css/admin register.css">
 </head>
 <body>
     <div class="container">
         <h1 class="title">Admin Registration Form</h1>
         
         <form id="registrationForm" method="POST" enctype="multipart/form-data">
-            <label for="profileImage">Profile Image (PNG/JPG, max 5MB):</label>
-            <input type="file" id="profileImage" name="profileImage" accept="image/png, image/jpeg, image/jpg">
-            <div class="error-message" id="profileImage-error"></div>
+            <div class="form-group">
+                <label for="profileImage">Profile Image (PNG/JPG, max 5MB):</label>
+                <input type="file" id="profileImage" name="profileImage" accept="image/png, image/jpeg, image/jpg">
+                <div class="error-message" id="profileImage-error"></div>
+            </div>
             
             <div class="form-row">
                 <div class="form-group">
@@ -236,6 +238,7 @@ $conn->close();
                     <label for="rememberMe">Remember Me</label>
                     <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter preference">
                     <i class="fas fa-check-circle input-icon"></i>
+                    <div class="error-message"></div>
                 </div>
             </div>
             

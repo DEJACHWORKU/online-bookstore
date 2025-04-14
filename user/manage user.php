@@ -16,6 +16,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'delete' && isset($_POST['id'])) {
             $id = $_POST['id'];
+            
+            // First, get the profile image path to delete the file
+            $stmt = $conn->prepare("SELECT profile_image FROM users WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
+            $stmt->close();
+            
+            // Delete the profile image file if it exists
+            if (!empty($user['profile_image'])) {
+                $imagePath = __DIR__ . "/bookstore/book/" . $user['profile_image'];
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+            
+            // Delete the user record from the database
             $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
             $stmt->bind_param("i", $id);
             $success = $stmt->execute();
@@ -66,7 +84,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Users</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   <link rel="stylesheet" href="../css/manage user.css">
+    <link rel="stylesheet" href="../css/manage user.css">
 </head>
 <body>
     <div class="container">
@@ -296,7 +314,7 @@ $conn->close();
         }
 
         function deleteUser(id) {
-            if (confirm('Are you sure you want to delete this user?')) {
+            if (confirm('Are you sure you want to delete this user? This will permanently remove all user data and their profile image.')) {
                 fetch(window.location.href, {
                     method: 'POST',
                     headers: {
@@ -308,7 +326,7 @@ $conn->close();
                 .then(data => {
                     if (data.success) {
                         document.querySelector(`.user-card[data-id="${id}"]`).remove();
-                        alert('User deleted successfully!');
+                        alert('User and associated data deleted successfully!');
                     } else {
                         alert('Error deleting user: ' + data.error);
                     }
@@ -328,9 +346,7 @@ $conn->close();
                 <html>
                     <head>
                         <title>User Details</title>
-                        <style>
-                            body{font-family:Arial,sans-serif;padding:15px;margin:0;background:#fff}.user-card{background:#fff;border-radius:15px;border:1px solid #dfe6e9;padding:20px;min-height:480px;max-width:300px;display:flex;flex-direction:column;justify-content:space-between}.profile-img{width:140px;height:140px;border-radius:50%;object-fit:contain;margin:0 auto 15px;border:3px solid #3498db;box-shadow:0 2px 4px rgba(0,0,0,0.1);display:block}.user-info{margin:8px 0;font-size:15px;line-height:1.4;color:#2d3436}.user-info span{font-weight:bold;color:#2980b9;margin-right:5px}
-                        </style>
+                        <link rel="stylesheet" href="../css/manage user.css">
                     </head>
                     <body>
                         ${card.outerHTML}

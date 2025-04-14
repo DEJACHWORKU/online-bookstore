@@ -1,21 +1,10 @@
 <?php
-session_start();
-
-if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in'] || !isset($_SESSION['user_id'])) {
-    header("Location: login1.php");
-    exit();
-}
-
-if (!isset($_GET['file']) || empty($_GET['file'])) {
-    header("Location: userpage.php");
-    exit();
-}
 
 $file = urldecode($_GET['file']);
 $file_path = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $file;
 
 if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) !== 'pdf') {
-    header("Location: userpage.php");
+    header("Location: user.php");
     exit();
 }
 ?>

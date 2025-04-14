@@ -1,9 +1,11 @@
 <?php
 session_start();
 
-if (isset($_SESSION['logged_in'])) {
-    header("Location: admin dashboard.php");
-    exit();
+if (isset($_SESSION['logged_in']) && isset($_SESSION['user_id']) && isset($_SESSION['role'])) {
+    if ($_SESSION['role'] === 'Librarian') {
+        header("Location: librarian.php");
+        exit();
+    }
 }
 
 $servername = "localhost";
@@ -31,21 +33,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin-submit'])) {
     }
     
     if (empty($signin_username_error) && empty($signin_password_error)) {
-        $sql = "SELECT id, username, password, full_name, profile_image FROM Admin WHERE username = ?";
-        $stmt = $conn->prepare($sql);
+        $stmt = $conn->prepare("SELECT id, username, password, full_name, profile_image FROM Librarian WHERE username = ?");
         $stmt->bind_param("s", $signin_username);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
-            $admin = $result->fetch_assoc();
-            if (password_verify($signin_password, $admin['password'])) {
-                $_SESSION['user_id'] = $admin['id'];
-                $_SESSION['username'] = $admin['username'];
-                $_SESSION['full_name'] = $admin['full_name'];
-                $_SESSION['profile_image'] = $admin['profile_image'];
+            $user = $result->fetch_assoc();
+            if (password_verify($signin_password, $user['password'])) {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['full_name'] = $user['full_name'];
+                $_SESSION['profile_image'] = $user['profile_image'];
+                $_SESSION['role'] = 'Librarian';
                 $_SESSION['logged_in'] = true;
-                header("Location: admin dashboard.php");
+                header("Location: librarian.php");
                 exit();
             } else {
                 $signin_password_error = "Invalid username or password.";
@@ -64,18 +66,18 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
+    <title>Login Page</title>
     <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
 <div class="container">
     <div id="signin" class="form">
-        <h2>Admin Login</h2>
-        <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+        <h2>LIBRARIAN Login</h2>
+        <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" onsubmit="return validateForm()">
             <div class="form-group">
                 <label for="signin-username">Username:</label>
                 <input type="text" name="signin-username" id="signin-username" 
-                       placeholder="Enter admin username" 
+                       placeholder="Enter your username" 
                        value="<?php echo htmlspecialchars($signin_username); ?>" 
                        required>
                 <div class="error-message"><?php echo $signin_username_error; ?></div>
@@ -83,7 +85,7 @@ $conn->close();
             <div class="form-group">
                 <label for="signin-password">Password:</label>
                 <input type="password" name="signin-password" id="signin-password" 
-                       placeholder="Enter admin password" required>
+                       placeholder="Enter your password" required>
                 <div class="error-message"><?php echo $signin_password_error; ?></div>
             </div>
             <button class="btn" type="submit" name="signin-submit">Login</button>
@@ -93,43 +95,42 @@ $conn->close();
 </div>
 
 <script>
+    function validateForm() {
+        let username = document.getElementById('signin-username').value;
+        let password = document.getElementById('signin-password').value;
+        let usernameError = document.querySelector('#signin-username + .error-message');
+        let passwordError = document.querySelector('#signin-password + .error-message');
+        let valid = true;
+
+        if (!username.trim()) {
+            usernameError.textContent = "Username is required.";
+            fadeOutError(usernameError);
+            valid = false;
+        }
+
+        if (!password.trim()) {
+            passwordError.textContent = "Password is required.";
+            fadeOutError(passwordError);
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    function fadeOutError(element) {
+        setTimeout(() => {
+            element.classList.add('fade-out');
+            setTimeout(() => {
+                element.textContent = "";
+                element.classList.remove('fade-out');
+            }, 500);
+        }, 5000);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        const form = document.querySelector('form');
-        
-        form.addEventListener('submit', (e) => {
-            let valid = true;
-            const username = document.getElementById('signin-username').value.trim();
-            const password = document.getElementById('signin-password').value.trim();
-            const usernameError = document.querySelector('#signin-username + .error-message');
-            const passwordError = document.querySelector('#signin-password + .error-message');
-            
-            usernameError.textContent = '';
-            passwordError.textContent = '';
-            
-            if (!username) {
-                usernameError.textContent = "Username is required.";
-                valid = false;
-            }
-            
-            if (!password) {
-                passwordError.textContent = "Password is required.";
-                valid = false;
-            }
-            
-            if (!valid) {
-                e.preventDefault();
-            }
-        });
-        
         document.querySelectorAll('.error-message').forEach(error => {
             if (error.textContent) {
-                setTimeout(() => {
-                    error.style.opacity = '0';
-                    setTimeout(() => {
-                        error.textContent = '';
-                        error.style.opacity = '1';
-                    }, 500);
-                }, 5000);
+                fadeOutError(error);
             }
         });
     });

@@ -16,9 +16,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'delete' && isset($_POST['id'])) {
             $id = $_POST['id'];
+            
+            // Fetch the profile image path before deletion
+            $stmt = $conn->prepare("SELECT profile_image FROM Librarian WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $librarian = $result->fetch_assoc();
+            $stmt->close();
+            
+            // Delete the librarian record from the database
             $stmt = $conn->prepare("DELETE FROM Librarian WHERE id = ?");
             $stmt->bind_param("i", $id);
             $success = $stmt->execute();
+            
+            // If database deletion is successful, delete the profile image file
+            if ($success && !empty($librarian['profile_image'])) {
+                $imagePath = $_SERVER['DOCUMENT_ROOT'] . "/bookstore/book/Librarian/" . $librarian['profile_image'];
+                if (file_exists($imagePath)) {
+                    unlink($imagePath); // Delete the file
+                }
+            }
+            
             echo json_encode(['success' => $success, 'error' => $success ? '' : $stmt->error]);
             $stmt->close();
         } elseif ($_POST['action'] === 'update' && isset($_POST['id'])) {
@@ -66,7 +85,7 @@ $conn->close();
 <body>
     <div class="container">
         <div class="header">
-            <h1>Manage Librarians full information </h1>
+            <h1>Manage Librarians full information</h1>
         </div>
         <div class="librarian-grid" id="librarianGrid">
             <?php foreach ($librarians as $librarian): ?>
@@ -129,11 +148,11 @@ $conn->close();
                 </div>
                 <div class="form-group">
                     <label for="editUsername">Username</label>
-                    <input typeAuctioneer="text" id="editUsername" name="username" required>
+                    <input type="text" id="editUsername" name="username" required>
                 </div>
                 <div class="form-group">
                     <label for="editRememberMe">Remember Me</label>
-                    <input type="text" id="editRememberMe" name="rememberMe">
+                    <input type="text" id помещения="rememberMe">
                 </div>
                 <button type="submit" class="btn btn-save">Save Changes</button>
             </form>
@@ -220,43 +239,7 @@ $conn->close();
                 <html>
                     <head>
                         <title>Librarian Details</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; padding: 15px; margin: 0; background: #fff; }
-                            .librarian-card {
-                                background: #fff;
-                                border-radius: 15px;
-                                border: 1px solid #dfe6e9;
-                                padding: 15px;
-                                height: 400px;
-                                width: 260px;
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: space-between;
-                                overflow: hidden;
-                            }
-                            .profile-img {
-                                width: 120px;
-                                height: 120px;
-                                border-radius: 50%;
-                                object-fit: cover;
-                                object-position: center;
-                                margin: 0 auto 10px;
-                                border: 3px solid #3498db;
-                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                                display: block;
-                            }
-                            .librarian-info {
-                                margin: 6px 0;
-                                font-size: 16px;
-                                line-height: 1.3;
-                                color: #2d3436;
-                            }
-                            .librarian-info span {
-                                font-weight: bold;
-                                color: #2980b9;
-                                margin-right: 5px;
-                            }
-                        </style>
+                        <link rel="stylesheet" href="../css/manage librarian.css">
                     </head>
                     <body>
                         ${card.outerHTML}

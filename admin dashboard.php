@@ -1,9 +1,15 @@
 <?php
 session_start();
+
+if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "online_book_DB"; 
+$dbname = "online_book_Db"; // Updated to match view-comment.php
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -11,15 +17,28 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Count comments
+$admin_name = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : "Admin User";
+$profile_image = isset($_SESSION['profile_image']) ? $_SESSION['profile_image'] : null;
+
+$sql = "SELECT profile_image FROM Admin WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    $admin = $result->fetch_assoc();
+    $profile_image = $admin['profile_image'];
+    $_SESSION['profile_image'] = $profile_image;
+}
+$stmt->close();
+
 $comment_count = 0;
-$result = $conn->query("SELECT COUNT(*) as count FROM comment"); 
+$result = $conn->query("SELECT COUNT(*) as count FROM comment");
 if ($result && $result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $comment_count = $row['count'];
 }
 
-// Count users with 30 days or less remaining access
 $approval_count = 0;
 $currentDate = date('Y-m-d');
 $sql = "SELECT date, access_permission FROM users";
@@ -59,16 +78,36 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="css/admin dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/admin dashboard.css">
 </head>
 <body>
     <div class="header">
-        Welcome to Admin Dashboard - System Over Control Page
+        <div class="profile-container">
+            <?php if ($profile_image && file_exists($_SERVER['DOCUMENT_ROOT'] . "/bookstore/book/Admin/" . $profile_image)): ?>
+                <img src="/bookstore/book/Admin/<?php echo htmlspecialchars($profile_image); ?>" 
+                     alt="Profile image of <?php echo htmlspecialchars($admin_name); ?>" 
+                     class="profile-image">
+            <?php else: ?>
+                <div class="profile-image initials">
+                    <?php 
+                        $initials = '';
+                        $names = explode(' ', $admin_name);
+                        foreach ($names as $n) {
+                            $initials .= strtoupper(substr($n, 0, 1));
+                            if (strlen($initials) >= 2) break;
+                        }
+                        echo htmlspecialchars($initials);
+                    ?>
+                </div>
+            <?php endif; ?>
+            <a href="admin profile.php" class="profile-button">View Details</a>
+        </div>
+        <span class="header-text">Welcome to Admin Dashboard - System Over Control Page</span>
     </div>
-    <div class="hamburger">☰</div>
+    <div class="hamburger" aria-label="Show menu">☰</div>
     <div class="container">
-        <div class="sidebar">
+        <div class="sidebar active">
             <div class="menu">
                 <a href="user/admin register form.php" class="menu-item">Add Admin</a>
                 <a href="user/librarian register form.php" class="menu-item">Add Librarian</a>
@@ -101,7 +140,7 @@ $conn->close();
                     </span>
                 </a>
                 <a href="user.php">Go to bookstore</a>
-                <a href="index.php" class="menu-item logout">Logout</a>
+                <a href="logout.php" class="menu-item logout">Logout</a>
             </div>
         </div>
         <div class="content-area">
@@ -118,21 +157,16 @@ $conn->close();
             const contentFrame = document.getElementById('contentFrame');
             const contentArea = document.querySelector('.content-area');
 
-            function initSidebar() {
-                sidebar.classList.remove('hidden'); 
-                hamburger.style.display = 'none';   
-                contentArea.classList.remove('full-width');
-            }
-            initSidebar();
+            sidebar.classList.add('active');
+            hamburger.style.display = 'none';
 
             const firstMenuItem = menuItems[0];
             firstMenuItem.classList.add('active');
 
             hamburger.addEventListener('click', function(e) {
                 e.stopPropagation();
-                sidebar.classList.remove('hidden');
-                contentArea.classList.remove('full-width');
-                hamburger.style.display = 'none';
+                sidebar.classList.toggle('active');
+                hamburger.style.display = sidebar.classList.contains('active') ? 'none' : 'block';
             });
 
             menuItems.forEach(item => {
@@ -147,8 +181,7 @@ $conn->close();
                             contentFrame.classList.add('active');
                         };
                     }, 200);
-                    sidebar.classList.add('hidden');
-                    contentArea.classList.add('full-width');
+                    sidebar.classList.remove('active');
                     hamburger.style.display = 'block';
                 });
             });
@@ -159,22 +192,11 @@ $conn->close();
             });
 
             document.addEventListener('click', function(e) {
-                if (!sidebar.classList.contains('hidden') && 
+                if (sidebar.classList.contains('active') && 
                     !sidebar.contains(e.target) && 
                     !hamburger.contains(e.target)) {
-                    sidebar.classList.add('hidden');
-                    contentArea.classList.add('full-width');
+                    sidebar.classList.remove('active');
                     hamburger.style.display = 'block';
-                }
-            });
-
-            window.addEventListener('resize', function() {
-                if (sidebar.classList.contains('hidden')) {
-                    contentArea.classList.add('full-width');
-                    hamburger.style.display = 'block';
-                } else {
-                    contentArea.classList.remove('full-width');
-                    hamburger.style.display = 'none';
                 }
             });
 
@@ -245,6 +267,13 @@ $conn->close();
                     })
                     .catch(error => console.error('Error fetching approval count:', error));
             }
+
+            // Listen for messages from iframe (e.g., view-comment.php)
+            window.addEventListener('message', (event) => {
+                if (event.data === 'updateCommentCount') {
+                    updateCommentCount();
+                }
+            });
 
             updateCommentCount();
             updateApprovalCount();

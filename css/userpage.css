@@ -211,13 +211,13 @@ body.menu-open {
 
 .search-label {
   padding: 0 1rem;
-  min-width: 300px;
   font-weight: 500;
   color: var(--secondary-color);
   white-space: nowrap;
 }
 
 .search-input {
+  width: 40%;
   flex: 1;
   padding: 0.4rem 1rem;
   border: none;
@@ -622,4 +622,22 @@ footer {
   margin-top: 5px;
   color: #555;
   font-size: 0.9rem;
+}
+.search-container {
+  position: relative;
+}
+.clear-search {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 10px;
+  color: #666;
+  font-size: 1.2em;
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.clear-search:hover {
+  color: #000;
 }

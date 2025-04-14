@@ -37,7 +37,7 @@
     $result = $conn->query($sql);
 
     $comments = [];
-    if ($result->num_rows > 0) {
+    if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $comments[] = $row;
         }
@@ -66,7 +66,10 @@
                             <p><strong>Department:</strong> <?php echo htmlspecialchars($comment['department']); ?></p>
                             <p><strong>Subject:</strong> <?php echo htmlspecialchars($comment['subject']); ?></p>
                             <p class="message"><strong>Message:</strong> <?php echo nl2br(htmlspecialchars($comment['message'])); ?></p>
-                            <button class="delete-btn" onclick="approveDelete(<?php echo $comment['id']; ?>)">Approve </button>
+                            <button class="delete-btn" onclick="approveDelete(<?php echo $comment['id']; ?>)">Approve</button>
+                        </div>
+                        <div class="countdown-notification" id="countdown-<?php echo $comment['id']; ?>">
+                            Deleting in <span class="countdown-timer">5</span> seconds
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -76,15 +79,31 @@
 
     <script>
         function approveDelete(commentId) {
-            if (confirm('Are you sure you want to approve and delete this comment? It will be removed after 10 seconds.')) {
+            if (confirm('Are you sure you want to approve and delete this comment? It will be removed in 5 seconds.')) {
                 const card = document.querySelector(`.comment-card[data-id="${commentId}"]`);
+                const countdownElement = document.getElementById(`countdown-${commentId}`).querySelector('.countdown-timer');
                 card.classList.add('approved');
-                
-                setTimeout(() => {
-                    window.location.href = `view-comment.php?delete_id=${commentId}`;
-                }, 10000); // 10 seconds
+
+                let seconds = 5;
+                countdownElement.textContent = seconds;
+
+                const countdown = setInterval(() => {
+                    seconds--;
+                    countdownElement.textContent = seconds;
+                    if (seconds <= 0) {
+                        clearInterval(countdown);
+                        window.location.href = `view-comment.php?delete_id=${commentId}`;
+                    }
+                }, 1000);
             }
         }
+
+    
+        window.addEventListener('load', () => {
+            if (window.parent) {
+                window.parent.postMessage('updateCommentCount', '*');
+            }
+        });
     </script>
 </body>
 </html>

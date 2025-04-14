@@ -1,10 +1,16 @@
 <?php
 session_start();
 
+// Redirect to user.php if already logged in
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    header("Location: user.php");
+    exit();
+}
+
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "online_book_Db"; // Consistent case
+$dbname = "online_book_Db";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -18,7 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin-submit'])) {
     $signin_username = trim($_POST['signin-username']);
     $signin_password = trim($_POST['signin-password']);
     
-    // Query id, username, and password
+    // Initialize error flag
+    $login_error = false;
+
+    // Check users table
     $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
     $stmt->bind_param("s", $signin_username);
     $stmt->execute();
@@ -27,17 +36,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['signin-submit'])) {
     if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
         if (password_verify($signin_password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id']; // Store id (integer)
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_type'] = 'user';
             $_SESSION['logged_in'] = true;
             header("Location: user.php");
             exit();
         } else {
-            $signin_password_error = "Incorrect password.";
+            $login_error = true;
         }
-    } else {
-        $signin_username_error = "Username not found.";
     }
     $stmt->close();
+
+    // Check admin table if users table fails
+    if (!$login_error && $result->num_rows == 0) {
+        $stmt = $conn->prepare("SELECT id, username, password FROM admin WHERE username = ?");
+        $stmt->bind_param("s", $signin_username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $admin = $result->fetch_assoc();
+            if (password_verify($signin_password, $admin['password'])) {
+                $_SESSION['user_id'] = $admin['id'];
+                $_SESSION['user_type'] = 'admin';
+                $_SESSION['logged_in'] = true;
+                header("Location: user.php");
+                exit();
+            } else {
+                $login_error = true;
+            }
+        }
+        $stmt->close();
+    }
+
+    // Check librarian table if both previous tables fail
+    if (!$login_error && $result->num_rows == 0) {
+        $stmt = $conn->prepare("SELECT id, username, password FROM librarian WHERE username = ?");
+        $stmt->bind_param("s", $signin_username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $librarian = $result->fetch_assoc();
+            if (password_verify($signin_password, $librarian['password'])) {
+                $_SESSION['user_id'] = $librarian['id'];
+                $_SESSION['user_type'] = 'librarian';
+                $_SESSION['logged_in'] = true;
+                header("Location: user.php");
+                exit();
+            } else {
+                $login_error = true;
+            }
+        }
+        $stmt->close();
+    }
+
+    // Set error message if login failed
+    if ($login_error || $result->num_rows == 0) {
+        $signin_password_error = "Invalid username or password.";
+    }
 }
 
 $conn->close();
@@ -50,7 +107,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Login</title>
     <link rel="stylesheet" href="css/login.css">
-  
+    
 </head>
 <body>
 <div class="container">
@@ -85,20 +142,24 @@ $conn->close();
         let passwordError = document.querySelector('#signin-password + .error-message');
         let valid = true;
 
+        // Clear server-side errors unless they are the invalid login message
+        if (!usernameError.textContent.startsWith('Invalid')) {
+            usernameError.textContent = "";
+        }
+        if (!passwordError.textContent.startsWith('Invalid')) {
+            passwordError.textContent = "";
+        }
+
         if (!username.trim()) {
             usernameError.textContent = "Username is required.";
             fadeOutError(usernameError);
             valid = false;
-        } else {
-            usernameError.textContent = "";
         }
 
         if (!password.trim()) {
             passwordError.textContent = "Password is required.";
             fadeOutError(passwordError);
             valid = false;
-        } else {
-            passwordError.textContent = "";
         }
 
         return valid;
