@@ -77,7 +77,7 @@ $conn->close();
             <div class="menu-bar">
                 <a href="index.php" class="menu-btn home-btn">Go Home</a>
                 <h1>Book <span>Notifications</span></h1>
-                <a href="user.php" class="menu-btn store-btn">Go Bookstore</a>
+                <a href="user.php" class="menu-btn store-btn">Go To Bookstore</a>
             </div>
         </div>
         

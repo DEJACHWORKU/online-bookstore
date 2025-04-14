@@ -53,7 +53,7 @@ if (isset($admin['remember_me'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4361ee;
+            --primary-color: #2c3e50;
             --secondary-color: #3f37c9;
             --accent-color: #4895ef;
             --light-color: #f8f9fa;

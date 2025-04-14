@@ -139,7 +139,7 @@ $conn->close();
                         <?php endif; ?>
                     </span>
                 </a>
-                <a href="user.php">Go to bookstore</a>
+                <a href="login1.php">Go to bookstore</a>
                 <a href="logout.php" class="menu-item logout">Logout</a>
             </div>
         </div>

@@ -1,13 +1,11 @@
 <?php
 session_start();
 
-// Check if the user is logged in as a librarian
 if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'Librarian') {
     header("Location: login0.php");
     exit();
 }
 
-// Use session data with fallbacks
 $librarian_name = isset($_SESSION['full_name']) && !empty($_SESSION['full_name']) ? $_SESSION['full_name'] : "Librarian";
 $profile_image = isset($_SESSION['profile_image']) && !empty($_SESSION['profile_image']) ? $_SESSION['profile_image'] : null;
 $base_path = '/bookstore/book/Librarian/';
@@ -20,7 +18,7 @@ $base_path = '/bookstore/book/Librarian/';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Librarian Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   <link rel="stylesheet" href="css/librarian.css">
+    <link rel="stylesheet" href="css/librarian.css">
 </head>
 <body>
     <header id="header">
@@ -48,7 +46,7 @@ $base_path = '/bookstore/book/Librarian/';
             <a href="librarian profile.php" class="view-details">View Details</a>
         </div>
         <nav class="nav-menu">
-            <a href="user.php"><i class="fas fa-store"></i> Go to Store</a>
+            <a href="login1.php" class="store-link"><i class="fas fa-store"></i> Go to Store</a>
             <a href="#" data-page="dep't.php"><i class="fas fa-building"></i> Add Department</a>
             <a href="#" data-page="add book.php"><i class="fas fa-book-medical"></i> Add Book</a>
             <a href="#" data-page="user/user register form.php"><i class="fas fa-user-plus"></i> Add User</a>
@@ -86,14 +84,10 @@ $base_path = '/bookstore/book/Librarian/';
                     if (response.ok) {
                         window.location.href = 'index.php';
                     } else {
-                        console.error('Logout failed');
-                        // Fallback redirect
                         window.location.href = 'index.php';
                     }
                 })
                 .catch(error => {
-                    console.error('Error during logout:', error);
-                    // Fallback redirect
                     window.location.href = 'index.php';
                 });
             });

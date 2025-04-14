@@ -170,7 +170,6 @@ $conn->close();
     <title>User Approval</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/user approve.css">
- 
 </head>
 <body>
     <div class="container">
@@ -273,7 +272,19 @@ $conn->close();
                 <div class="form-group">
                     <label for="approveAccessPermission">New Access Permission</label>
                     <select id="approveAccessPermission" name="accessPermission" required>
-                        <option value="Approved" selected>Approved (30 days)</option>
+                        <option value="" disabled selected>Select duration</option>
+                        <option value="1 Month">1 Month</option>
+                        <option value="2 Months">2 Months</option>
+                        <option value="3 Months">3 Months</option>
+                        <option value="4 Months">4 Months</option>
+                        <option value="5 Months">5 Months</option>
+                        <option value="6 Months">6 Months</option>
+                        <option value="7 Months">7 Months</option>
+                        <option value="8 Months">8 Months</option>
+                        <option value="9 Months">9 Months</option>
+                        <option value="10 Months">10 Months</option>
+                        <option value="11 Months">11 Months</option>
+                        <option value="12 Months">12 Months</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-save">Save Changes</button>
@@ -286,6 +297,7 @@ $conn->close();
             const modal = document.getElementById('approveModal');
             const form = document.getElementById('approveForm');
             document.getElementById('approveId').value = id;
+            document.getElementById('approveAccessPermission').value = '';
             modal.style.display = 'flex';
 
             form.onsubmit = function(e) {
@@ -343,6 +355,7 @@ $conn->close();
             const modal = document.getElementById('approveModal');
             const form = document.getElementById('approveForm');
             document.getElementById('approveId').value = '';
+            document.getElementById('approveAccessPermission').value = '';
             modal.style.display = 'flex';
 
             form.onsubmit = function(e) {

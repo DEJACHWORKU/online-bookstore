@@ -1,14 +1,11 @@
 <?php
-
 $file = urldecode($_GET['file']);
 $file_path = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $file;
-
 if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) !== 'pdf') {
     header("Location: user.php");
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,12 +13,19 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Read Book</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   <link rel="stylesheet" href="css/read book.css">
+    <link rel="stylesheet" href="css/read book.css">
 </head>
 <body>
     <header>
         <div class="header-content">
             <a href="user.php" title="Back to Books"><i class="fas fa-arrow-left"></i> <span>Go Back</span></a>
+        </div>
+        <div class="eye-care-container">
+            <button class="eye-care-btn" id="eyeCareToggle" title="Toggle Eye Care Mode"><i class="fas fa-eye"></i></button>
+            <div class="intensity-control" id="intensityControl" style="display: none;">
+                <label for="intensitySlider">Eye Care Intensity:</label>
+                <input type="range" id="intensitySlider" min="0" max="100" value="50">
+            </div>
         </div>
         <div class="timer-container" id="timerDisplay">
             <i class="fas fa-clock"></i>
@@ -39,7 +43,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
             <button class="timer-btn" id="resetTimer" title="Reset Timer"><i class="fas fa-redo"></i></button>
         </div>
     </header>
-
     <main>
         <div class="pdf-container" id="pdfViewer"></div>
         <div class="page-info" id="pageInfo"></div>
@@ -53,11 +56,9 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
             <button id="closeAlarm">Good Work!</button>
         </div>
     </main>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.worker.min.js';
-
         document.addEventListener('DOMContentLoaded', () => {
             const pdfContainer = document.getElementById('pdfViewer');
             const prevPageBtn = document.getElementById('prevPage');
@@ -75,6 +76,9 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
             const secondsInput = document.getElementById('seconds');
             const alarmPopup = document.getElementById('alarmPopup');
             const closeAlarmBtn = document.getElementById('closeAlarm');
+            const eyeCareToggle = document.getElementById('eyeCareToggle');
+            const intensityControl = document.getElementById('intensityControl');
+            const intensitySlider = document.getElementById('intensitySlider');
             let pdfDoc = null;
             let pageNum = 1;
             let pageRendering = false;
@@ -86,7 +90,9 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
             let isTimerRunning = false;
             const bookKey = '<?php echo htmlspecialchars($file); ?>';
             const storageKey = `alarmTime_${bookKey}`;
-
+            const eyeCareStorageKey = `eyeCareSettings_${bookKey}`;
+            let isEyeCareActive = false;
+            let eyeCareIntensity = 50;
             pdfContainer.addEventListener('contextmenu', (e) => e.preventDefault());
             document.addEventListener('keydown', (e) => {
                 if ((e.ctrlKey || e.metaKey) && ['c', 'p', 's'].includes(e.key)) {
@@ -100,19 +106,16 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
             });
             document.addEventListener('copy', (e) => e.preventDefault());
             document.addEventListener('dragstart', (e) => e.preventDefault());
-
             function formatTime(seconds) {
                 const hrs = Math.floor(seconds / 3600);
                 const mins = Math.floor((seconds % 3600) / 60);
                 const secs = seconds % 60;
                 return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
-
             function updateProgress() {
                 const progress = totalTime > 0 ? (1 - remainingTime / totalTime) * 100 : 0;
                 timerProgress.style.width = `${progress}%`;
             }
-
             function setTimer() {
                 const hours = parseInt(hoursInput.value || 0, 10);
                 const minutes = parseInt(minutesInput.value || 0, 10);
@@ -134,7 +137,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                 isTimerRunning = false;
                 updateProgress();
             }
-
             function startTimer() {
                 if (!isTimerRunning && remainingTime > 0) {
                     isTimerRunning = true;
@@ -158,7 +160,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                     timerControl.title = 'Pause Timer';
                 }
             }
-
             function pauseTimer() {
                 if (isTimerRunning) {
                     isTimerRunning = false;
@@ -168,7 +169,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                     timerControl.title = 'Resume Timer';
                 }
             }
-
             function toggleTimer() {
                 if (isTimerRunning) {
                     pauseTimer();
@@ -176,7 +176,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                     startTimer();
                 }
             }
-
             function resetTimer() {
                 clearInterval(timerInterval);
                 isTimerRunning = false;
@@ -193,7 +192,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                 secondsInput.value = '';
                 localStorage.removeItem(storageKey);
             }
-
             const savedAlarm = localStorage.getItem(storageKey);
             if (savedAlarm) {
                 const { time, total, running } = JSON.parse(savedAlarm);
@@ -216,7 +214,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                 timerControl.style.display = 'none';
                 resetTimerBtn.style.display = 'none';
             }
-
             setTimerBtn.addEventListener('click', setTimer);
             timerControl.addEventListener('click', toggleTimer);
             resetTimerBtn.addEventListener('click', resetTimer);
@@ -224,29 +221,75 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                 alarmPopup.classList.remove('show');
                 resetTimer();
             });
-
+            function applyEyeCareFilter(intensity) {
+                const filterValue = `sepia(${intensity}%) brightness(${90 - intensity / 5}%) contrast(100%)`;
+                document.body.style.filter = filterValue;
+                pdfContainer.classList.add('eye-care-mode');
+                if (pdfDoc) {
+                    renderPage(pageNum);
+                }
+            }
+            function removeEyeCareFilter() {
+                document.body.style.filter = 'none';
+                pdfContainer.classList.remove('eye-care-mode');
+                if (pdfDoc) {
+                    renderPage(pageNum);
+                }
+            }
+            function updateEyeCareSettings() {
+                if (isEyeCareActive) {
+                    applyEyeCareFilter(eyeCareIntensity);
+                    intensityControl.style.display = 'flex';
+                    eyeCareToggle.classList.add('active');
+                } else {
+                    removeEyeCareFilter();
+                    intensityControl.style.display = 'none';
+                    eyeCareToggle.classList.remove('active');
+                }
+                localStorage.setItem(eyeCareStorageKey, JSON.stringify({
+                    active: isEyeCareActive,
+                    intensity: eyeCareIntensity
+                }));
+            }
+            eyeCareToggle.addEventListener('click', () => {
+                isEyeCareActive = !isEyeCareActive;
+                updateEyeCareSettings();
+            });
+            intensitySlider.addEventListener('input', () => {
+                eyeCareIntensity = parseInt(intensitySlider.value, 10);
+                if (isEyeCareActive) {
+                    applyEyeCareFilter(eyeCareIntensity);
+                }
+                localStorage.setItem(eyeCareStorageKey, JSON.stringify({
+                    active: isEyeCareActive,
+                    intensity: eyeCareIntensity
+                }));
+            });
+            const savedEyeCareSettings = localStorage.getItem(eyeCareStorageKey);
+            if (savedEyeCareSettings) {
+                const { active, intensity } = JSON.parse(savedEyeCareSettings);
+                isEyeCareActive = active;
+                eyeCareIntensity = intensity;
+                intensitySlider.value = intensity;
+                updateEyeCareSettings();
+            }
             function renderPage(num) {
                 pageRendering = true;
                 pdfDoc.getPage(num).then(page => {
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     const viewport = page.getViewport({ scale: scale });
-
                     const outputScale = window.devicePixelRatio || 1;
                     canvas.width = Math.floor(viewport.width * outputScale);
                     canvas.height = Math.floor(viewport.height * outputScale);
                     canvas.style.width = "100%";
                     canvas.style.height = "auto";
-
                     canvas.style.backgroundColor = '#ffffff';
-
                     const transform = outputScale !== 1
                         ? [outputScale, 0, 0, outputScale, 0, 0]
                         : null;
-
                     pdfContainer.innerHTML = '';
                     pdfContainer.appendChild(canvas);
-
                     const textLayerDiv = document.createElement('div');
                     textLayerDiv.className = 'textLayer';
                     textLayerDiv.style.width = `${viewport.width}px`;
@@ -254,7 +297,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                     textLayerDiv.style.transform = `scale(${canvas.width / viewport.width}, ${canvas.height / viewport.height})`;
                     textLayerDiv.style.transformOrigin = '0 0';
                     pdfContainer.appendChild(textLayerDiv);
-
                     const renderContext = {
                         canvasContext: context,
                         viewport: viewport,
@@ -267,26 +309,22 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                         textLayerMode: 2,
                         annotationLayerMode: 0
                     };
-
                     page.render(renderContext).promise.then(() => {
                         pageRendering = false;
                         if (pageNumPending !== null) {
                             renderPage(pageNumPending);
                             pageNumPending = null;
                         }
-
                         pageInfo.textContent = `Page ${num} of ${pdfDoc.numPages}`;
                         pageInfo.classList.add('show');
                         setTimeout(() => {
                             pageInfo.classList.remove('show');
                         }, 2000);
                     });
-
                     prevPageBtn.disabled = num <= 1;
                     nextPageBtn.disabled = num >= pdfDoc.numPages;
                 });
             }
-
             function queueRenderPage(num) {
                 if (pageRendering) {
                     pageNumPending = num;
@@ -294,7 +332,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                     renderPage(num);
                 }
             }
-
             pdfjsLib.getDocument({
                 url: '/bookstore/book/<?php echo htmlspecialchars($file); ?>',
                 cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/cmaps/',
@@ -309,25 +346,21 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                 pdfContainer.innerHTML = '<div class="error-message">Unable to load the book. Please try again later.</div>';
                 console.error('PDF loading error:', error);
             });
-
             prevPageBtn.addEventListener('click', () => {
                 if (pageNum <= 1) return;
                 pageNum--;
                 queueRenderPage(pageNum);
             });
-
             nextPageBtn.addEventListener('click', () => {
                 if (pageNum >= pdfDoc.numPages) return;
                 pageNum++;
                 queueRenderPage(pageNum);
             });
-
             window.addEventListener('resize', () => {
                 if (pdfDoc) {
                     renderPage(pageNum);
                 }
             });
-
             window.addEventListener('orientationchange', () => {
                 setTimeout(() => {
                     if (pdfDoc) {

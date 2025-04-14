@@ -25,10 +25,8 @@ $user = $result->fetch_assoc();
 $stmt->close();
 $conn->close();
 
-// Handle profile image
 $profile_image = !empty($user['profile_image']) ? '/bookstore/book/' . htmlspecialchars($user['profile_image']) : 'https://via.placeholder.com/200';
 
-// Handle remember_me value
 $remember_me = 'Not set';
 if (isset($user['remember_me'])) {
     $rm_value = strtolower(trim($user['remember_me']));
@@ -41,9 +39,12 @@ if (isset($user['remember_me'])) {
     }
 }
 
-// Format access permission
-$access_permission = $user['access_permission'];
-$access_display = ($access_permission == '0.25') ? '1 Week' : "$access_permission Month" . ($access_permission > 1 ? 's' : '');
+$access_permission = floatval($user['access_permission']);
+if ($access_permission == 0.25) {
+    $access_display = '1 Week';
+} else {
+    $access_display = number_format($access_permission, 0) . ' Month' . ($access_permission == 1 ? '' : 's');
+}
 ?>
 
 <!DOCTYPE html>
@@ -55,7 +56,7 @@ $access_display = ($access_permission == '0.25') ? '1 Week' : "$access_permissio
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary-color: #4361ee;
+            --primary-color: #2c3e50;
             --secondary-color: #3f37c9;
             --accent-color: #4895ef;
             --light-color: #f8f9fa;
