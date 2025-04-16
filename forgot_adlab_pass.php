@@ -205,7 +205,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 
                 <div class="form-group">
-                    <label for="new_remember_me">New Security Question Answer (Optional)</label>
+                    <label for="new_remember_me">New Remember Me Question Answer (Optional)</label>
                     <input type="text" name="new_remember_me" id="new_remember_me" placeholder="Enter new security answer">
                     <i class="fas fa-check-circle input-icon"></i>
                     <span class="error"><?php echo $new_remember_me_err; ?></span>
