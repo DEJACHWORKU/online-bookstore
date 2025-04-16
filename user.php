@@ -58,8 +58,8 @@ $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
 $books = [];
 
 $query = "SELECT b.*, 
-                 (SELECT AVG(rating) FROM book_ratings WHERE book_id = b.id) as avg_rating,
-                 (SELECT COUNT(rating) FROM book_ratings WHERE book_id = b.id) as rating_count,
+                 COALESCE((SELECT AVG(rating) FROM book_ratings WHERE book_id = b.id), 0) as avg_rating,
+                 COALESCE((SELECT COUNT(rating) FROM book_ratings WHERE book_id = b.id), 0) as rating_count,
                  (SELECT rating FROM book_ratings WHERE book_id = b.id AND user_id = ?) as user_rating
           FROM books b WHERE 1=1";
 $params = [$user_id];
@@ -89,9 +89,7 @@ if ($search_query) {
     }
 }
 
-$query .= " ORDER BY 
-           COALESCE((SELECT AVG(rating) FROM book_ratings WHERE book_id = b.id), 0) DESC, 
-           date DESC";
+$query .= " ORDER BY avg_rating DESC, rating_count DESC, date DESC";
 
 $stmt = $conn->prepare($query);
 if ($stmt) {
@@ -145,7 +143,7 @@ $conn->close();
         <div class="search-container">
             <div class="search-input-container">
                 <label for="search-input" class="search-label">Search by:</label>
-                <input type="text" name="search" id="search-input" class="search-input" placeholder="title, author, department" value="<?php echo htmlspecialchars($search_query); ?>">
+                <input type="text" name="search" id="search-input" class="search-input" placeholder="Search by title, author, or department" value="<?php echo htmlspecialchars($search_query); ?>">
                 <button type="button" class="clear-search" title="Clear Search"><i class="fas fa-sync-alt"></i></button>
                 <button type="submit" class="search-icon"><i class="fas fa-search"></i></button>
             </div>
@@ -178,8 +176,8 @@ $conn->close();
                             <p class="book-description"><span class="label">Description:</span> <?php echo htmlspecialchars(substr($book['description'], 0, 100) . (strlen($book['description']) > 100 ? '...' : '')); ?></p>
                             <div class="book-rating">
                                 <span class="label">Rating:</span>
-                                <span class="average-rating"><?php echo $book['avg_rating'] ? round($book['avg_rating'], 1) : 'Not rated'; ?></span>
-                                <span class="rating-count">(<?php echo $book['rating_count'] ? $book['rating_count'] : 0; ?> ratings)</span>
+                                <span class="average-rating"><?php echo ($book['avg_rating'] > 0) ? round($book['avg_rating'], 1) : '0.0'; ?></span>
+                                <span class="rating-count">(<?php echo $book['rating_count']; ?> ratings)</span>
                                 <?php if (is_null($book['user_rating'])): ?>
                                     <div class="star-rating" data-book-id="<?php echo $book['id']; ?>">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
@@ -188,7 +186,7 @@ $conn->close();
                                         <button class="submit-rating" disabled>Submit Rating</button>
                                     </div>
                                 <?php else: ?>
-                                    <div class="user-rating">Your rating: <?php echo $book['user_rating']; ?></div>
+                                    <div class="user-rating">Your rating: <?php echo $book['user_rating']; ?> stars</div>
                                 <?php endif; ?>
                             </div>
                             <div class="book-actions">
@@ -345,11 +343,14 @@ $conn->close();
                         .then(data => {
                             if (data.success) {
                                 const ratingContainer = document.querySelector(`.star-rating[data-book-id="${bookId}"]`).parentElement;
+                                const currentCount = parseInt(ratingContainer.querySelector('.rating-count').textContent.match(/\d+/)[0]);
+                                const newCount = currentCount + 1;
+                                const newAvgRating = parseFloat(data.avg_rating).toFixed(1);
                                 ratingContainer.innerHTML = `
                                     <span class="label">Rating:</span>
-                                    <span class="average-rating">${parseFloat(data.avg_rating).toFixed(1)}</span>
-                                    <span class="rating-count">(${data.rating_count} ratings)</span>
-                                    <div class="user-rating">Your rating: ${selectedRating}</div>
+                                    <span class="average-rating">${newAvgRating > 0 ? newAvgRating : '0.0'}</span>
+                                    <span class="rating-count">(${newCount} ratings)</span>
+                                    <div class="user-rating">Your rating: ${selectedRating} stars</div>
                                 `;
                                 const feedback = document.createElement('div');
                                 feedback.className = 'feedback-message';

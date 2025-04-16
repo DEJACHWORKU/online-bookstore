@@ -11,7 +11,8 @@ if ($conn->connect_error) {
 }
 
 $fullname = $department = $form_username = $academic_year = $remember_me = "";
-$fullname_err = $department_err = $username_err = $academic_year_err = $remember_me_err = $password_err = $confirm_password_err = "";
+$fullname_err = $department_err = $username_err = $academic_year_err = $remember_me_err = "";
+$password_err = $confirm_password_err = $new_remember_me_err = "";
 $show_password_fields = false;
 $success_message = "";
 
@@ -62,34 +63,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['remember_me'] = $remember_me;
                 $_SESSION['username'] = $form_username;
             } else {
+                // Check each field individually to provide specific error messages
                 $stmt_fullname = $conn->prepare("SELECT full_name FROM users WHERE full_name = ?");
                 $stmt_fullname->bind_param("s", $normalized_fullname);
                 $stmt_fullname->execute();
-                if ($stmt_fullname->get_result()->num_rows === 0) $fullname_err = "Full name does not match";
+                if ($stmt_fullname->get_result()->num_rows === 0) $fullname_err = "Full name is incorrect";
                 $stmt_fullname->close();
 
                 $stmt_department = $conn->prepare("SELECT department FROM users WHERE department = ?");
                 $stmt_department->bind_param("s", $department);
                 $stmt_department->execute();
-                if ($stmt_department->get_result()->num_rows === 0) $department_err = "Department does not match";
+                if ($stmt_department->get_result()->num_rows === 0) $department_err = "Department is incorrect";
                 $stmt_department->close();
 
                 $stmt_username = $conn->prepare("SELECT username FROM users WHERE username = ?");
                 $stmt_username->bind_param("s", $form_username);
                 $stmt_username->execute();
-                if ($stmt_username->get_result()->num_rows === 0) $username_err = "Username does not match";
+                if ($stmt_username->get_result()->num_rows === 0) $username_err = "Username is incorrect";
                 $stmt_username->close();
 
                 $stmt_academic_year = $conn->prepare("SELECT academic_year FROM users WHERE academic_year = ?");
                 $stmt_academic_year->bind_param("s", $academic_year);
                 $stmt_academic_year->execute();
-                if ($stmt_academic_year->get_result()->num_rows === 0) $academic_year_err = "Academic year does not match";
+                if ($stmt_academic_year->get_result()->num_rows === 0) $academic_year_err = "Academic year is incorrect";
                 $stmt_academic_year->close();
 
                 $stmt_remember_me = $conn->prepare("SELECT remember_me FROM users WHERE remember_me = ?");
                 $stmt_remember_me->bind_param("s", $remember_me);
                 $stmt_remember_me->execute();
-                if ($stmt_remember_me->get_result()->num_rows === 0) $remember_me_err = "Security answer does not match";
+                if ($stmt_remember_me->get_result()->num_rows === 0) $remember_me_err = "Security answer is incorrect";
                 $stmt_remember_me->close();
             }
             $stmt->close();
@@ -98,6 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $form_username = trim($_POST['username'] ?? '');
         $new_password = trim($_POST['new_password'] ?? '');
         $confirm_password = trim($_POST['confirm_password'] ?? '');
+        $new_remember_me = trim($_POST['new_remember_me'] ?? '');
         
         if (empty($new_password)) $password_err = "New password is required";
         elseif (strlen($new_password) < 6) $password_err = "Password must be at least 6 characters";
@@ -105,13 +108,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (empty($confirm_password)) $confirm_password_err = "Confirm password is required";
         elseif ($new_password !== $confirm_password) $confirm_password_err = "Passwords do not match";
 
-        if (empty($password_err) && empty($confirm_password_err)) {
+        if (!empty($new_remember_me) && strlen($new_remember_me) < 3) {
+            $new_remember_me_err = "Security answer must be at least 3 characters";
+        }
+
+        if (empty($password_err) && empty($confirm_password_err) && empty($new_remember_me_err)) {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("UPDATE users SET password = ? WHERE username = ?");
-            $stmt->bind_param("ss", $hashed_password, $form_username);
+            if (!empty($new_remember_me)) {
+                $stmt = $conn->prepare("UPDATE users SET password = ?, remember_me = ? WHERE username = ?");
+                $stmt->bind_param("sss", $hashed_password, $new_remember_me, $form_username);
+            } else {
+                $stmt = $conn->prepare("UPDATE users SET password = ? WHERE username = ?");
+                $stmt->bind_param("ss", $hashed_password, $form_username);
+            }
             
             if ($stmt->execute() && $stmt->affected_rows === 1) {
-                $success_message = "Password reset successfully!";
+                $success_message = "Password reset successfully!" . (!empty($new_remember_me) ? " Security question updated." : "");
                 session_unset();
                 session_destroy();
                 $show_password_fields = false;
@@ -133,7 +145,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password</title>
-  <link rel="stylesheet" href="css/forgot user.css">
+    <link rel="stylesheet" href="css/forgot user.css">
 </head>
 <body>
     <div class="container">
@@ -194,6 +206,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <span class="error"><?php echo $confirm_password_err; ?></span>
                 </div>
                 
+                <div class="form-group">
+                    <label for="new_remember_me">New Security Question Answer (Optional)</label>
+                    <input type="text" name="new_remember_me" id="new_remember_me" placeholder="Enter new security answer">
+                    <span class="error"><?php echo $new_remember_me_err; ?></span>
+                </div>
+                
                 <button type="submit" class="btn">Reset Password</button>
                 <a href="index.php" class="back-link">Back to Login</a>
             </form>
@@ -239,8 +257,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         function validatePasswordForm() {
             let newPass = document.getElementById('new_password').value;
             let confirmPass = document.getElementById('confirm_password').value;
+            let newRememberMe = document.getElementById('new_remember_me').value;
             let errorSpanNew = document.getElementById('new_password').nextElementSibling.nextElementSibling;
             let errorSpanConfirm = document.getElementById('confirm_password').nextElementSibling.nextElementSibling;
+            let errorSpanRememberMe = document.getElementById('new_remember_me').nextElementSibling;
             let valid = true;
             
             if (!newPass.trim()) {
@@ -267,6 +287,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 errorSpanConfirm.textContent = "";
             }
             
+            if (newRememberMe.trim() && newRememberMe.length < 3) {
+                errorSpanRememberMe.textContent = "Security answer must be at least 3 characters";
+                fadeOutError(errorSpanRememberMe);
+                valid = false;
+            } else {
+                errorSpanRememberMe.textContent = "";
+            }
+            
             return valid;
         }
 
@@ -288,6 +316,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }, 500); 
             }, 5000);
         }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.error').forEach(error => {
                 if (error.textContent) {

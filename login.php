@@ -87,7 +87,7 @@ $conn->close();
                 <div class="error-message"><?php echo $signin_password_error; ?></div>
             </div>
             <button class="btn" type="submit" name="signin-submit">Login</button>
-            <a href="forgot_adlab_pass.php" class="forgot-password">Forgot Password?</a>
+            <a href="forgot_adlab_pass.php" class="forgot-password">change/Forgot your Password?</a>
         </form>
     </div>
 </div>

@@ -175,8 +175,7 @@ $conn->close();
             <div class="action-buttons">
                 <button class="btn btn-select-all" onclick="toggleSelectAll()">
                     <i class="fas fa-check-square"></i> 
-                    <span id="selectAllText">Select All</span>
-                </button>
+                    <span id="selectAllText">Select All</span></button>
                 <button class="btn btn-approve-all" onclick="approveAll()">
                     <i class="fas fa-check-circle"></i> Approve All
                 </button>
@@ -257,8 +256,7 @@ $conn->close();
                             ?>
                         </div>
                         <div class="checkbox">
-                            <input type="checkbox" class="select-user" data-id="<?php echo $user['id']; ?>"> Select User
-                        </div>
+                            <input type="checkbox" class="select-user" data-id="<?php echo $user['id']; ?>"> Select User</div>
                         <div class="button-group">
                             <button class="btn btn-approve" onclick="approveUser(<?php echo $user['id']; ?>)"><i class="fas fa-check"></i> Approve</button>
                             <button class="btn btn-unapprove" onclick="unapproveUser(<?php echo $user['id']; ?>)"><i class="fas fa-trash"></i> Unapprove</button>

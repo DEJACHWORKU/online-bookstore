@@ -11,7 +11,8 @@ if ($conn->connect_error) {
 }
 
 $role = $fullname = $id_field = $form_username = $remember_me = "";
-$role_err = $fullname_err = $id_field_err = $username_err = $remember_me_err = $password_err = $confirm_password_err = "";
+$role_err = $fullname_err = $id_field_err = $username_err = $remember_me_err = "";
+$password_err = $confirm_password_err = $new_remember_me_err = "";
 $show_password_fields = false;
 $success_message = "";
 
@@ -59,25 +60,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt_fullname = $conn->prepare("SELECT full_name FROM $table WHERE full_name = ?");
                 $stmt_fullname->bind_param("s", $normalized_fullname);
                 $stmt_fullname->execute();
-                if ($stmt_fullname->get_result()->num_rows === 0) $fullname_err = "Full name does not match";
+                if ($stmt_fullname->get_result()->num_rows === 0) $fullname_err = "Full name is incorrect";
                 $stmt_fullname->close();
 
                 $stmt_id = $conn->prepare("SELECT $id_column FROM $table WHERE $id_column = ?");
                 $stmt_id->bind_param("s", $id_field);
                 $stmt_id->execute();
-                if ($stmt_id->get_result()->num_rows === 0) $id_field_err = $role === 'Admin' ? "Admin ID does not match" : "Personal ID does not match";
+                if ($stmt_id->get_result()->num_rows === 0) $id_field_err = $role === 'Admin' ? "Admin ID is incorrect" : "Personal ID is incorrect";
                 $stmt_id->close();
 
                 $stmt_username = $conn->prepare("SELECT username FROM $table WHERE username = ?");
                 $stmt_username->bind_param("s", $form_username);
                 $stmt_username->execute();
-                if ($stmt_username->get_result()->num_rows === 0) $username_err = "Username does not match";
+                if ($stmt_username->get_result()->num_rows === 0) $username_err = "Username is incorrect";
                 $stmt_username->close();
 
                 $stmt_remember_me = $conn->prepare("SELECT remember_me FROM $table WHERE remember_me = ?");
                 $stmt_remember_me->bind_param("s", $remember_me);
                 $stmt_remember_me->execute();
-                if ($stmt_remember_me->get_result()->num_rows === 0) $remember_me_err = "Security answer does not match";
+                if ($stmt_remember_me->get_result()->num_rows === 0) $remember_me_err = "Security answer is incorrect";
                 $stmt_remember_me->close();
             }
             $stmt->close();
@@ -87,6 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $form_username = trim($_POST['username'] ?? '');
         $new_password = trim($_POST['new_password'] ?? '');
         $confirm_password = trim($_POST['confirm_password'] ?? '');
+        $new_remember_me = trim($_POST['new_remember_me'] ?? '');
         
         if (empty($new_password)) $password_err = "New password is required";
         elseif (strlen($new_password) < 6) $password_err = "Password must be at least 6 characters";
@@ -94,14 +96,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (empty($confirm_password)) $confirm_password_err = "Confirm password is required";
         elseif ($new_password !== $confirm_password) $confirm_password_err = "Passwords do not match";
 
-        if (empty($password_err) && empty($confirm_password_err)) {
+        if (!empty($new_remember_me) && strlen($new_remember_me) < 3) {
+            $new_remember_me_err = "Security answer must be at least 3 characters";
+        }
+
+        if (empty($password_err) && empty($confirm_password_err) && empty($new_remember_me_err)) {
             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
             $table = $role === 'Admin' ? 'Admin' : 'Librarian';
-            $stmt = $conn->prepare("UPDATE $table SET password = ? WHERE username = ?");
-            $stmt->bind_param("ss", $hashed_password, $form_username);
+            if (!empty($new_remember_me)) {
+                $stmt = $conn->prepare("UPDATE $table SET password = ?, remember_me = ? WHERE username = ?");
+                $stmt->bind_param("sss", $hashed_password, $new_remember_me, $form_username);
+            } else {
+                $stmt = $conn->prepare("UPDATE $table SET password = ? WHERE username = ?");
+                $stmt->bind_param("ss", $hashed_password, $form_username);
+            }
             
             if ($stmt->execute() && $stmt->affected_rows === 1) {
-                $success_message = "Password reset successfully!";
+                $success_message = "Password reset successfully!" . (!empty($new_remember_me) ? " Security question updated." : "");
                 session_unset();
                 session_destroy();
                 $show_password_fields = false;
@@ -124,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   <link rel="stylesheet" href="css/forgot_AL.css">
+    <link rel="stylesheet" href="css/forgot_AL.css">
 </head>
 <body>
     <div class="container">
@@ -167,7 +178,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 
                 <div class="form-group">
-                    <label for="remember_me">Security Answer</label>
+                    <label for="remember_me">Remeber Me</label>
                     <input type="text" name="rememberMe" id="remember_me" value="<?php echo htmlspecialchars($remember_me); ?>" required placeholder="Enter security answer">
                     <i class="fas fa-check-circle input-icon"></i>
                     <span class="error"><?php echo $remember_me_err; ?></span>
@@ -191,6 +202,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="password" name="confirm_password" id="confirm_password" required placeholder="Confirm new password">
                     <span class="toggle-password" onclick="togglePassword('confirm_password')"><i class="fas fa-eye"></i></span>
                     <span class="error"><?php echo $confirm_password_err; ?></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new_remember_me">New Security Question Answer (Optional)</label>
+                    <input type="text" name="new_remember_me" id="new_remember_me" placeholder="Enter new security answer">
+                    <i class="fas fa-check-circle input-icon"></i>
+                    <span class="error"><?php echo $new_remember_me_err; ?></span>
                 </div>
                 
                 <button type="submit" class="btn">Reset Password</button>
@@ -234,8 +252,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         function validatePasswordForm() {
             let newPass = document.getElementById('new_password').value;
             let confirmPass = document.getElementById('confirm_password').value;
+            let newRememberMe = document.getElementById('new_remember_me').value;
             let errorSpanNew = document.getElementById('new_password').nextElementSibling.nextElementSibling;
             let errorSpanConfirm = document.getElementById('confirm_password').nextElementSibling.nextElementSibling;
+            let errorSpanRememberMe = document.getElementById('new_remember_me').nextElementSibling.nextElementSibling;
             let valid = true;
             
             if (!newPass.trim()) {
@@ -262,6 +282,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 errorSpanConfirm.textContent = "";
             }
             
+            if (newRememberMe.trim() && newRememberMe.length < 3) {
+                errorSpanRememberMe.textContent = "Security answer must be at least 3 characters";
+                fadeOutError(errorSpanRememberMe);
+                valid = false;
+            } else {
+                errorSpanRememberMe.textContent = "";
+            }
+            
             return valid;
         }
 
@@ -283,8 +311,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 setTimeout(() => {
                     element.textContent = "";
                     element.classList.remove('fade-out');
-                }, 500); // Match transition duration
-            }, 5000); // Display for 5 seconds
+                }, 500);
+            }, 5000);
         }
 
         function toggleIdField() {
@@ -304,7 +332,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            toggleIdField(); // Set initial label and placeholder
+            toggleIdField();
             document.querySelectorAll('.error').forEach(error => {
                 if (error.textContent) {
                     fadeOutError(error);
