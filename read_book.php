@@ -90,7 +90,7 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
             let isTimerRunning = false;
             const bookKey = '<?php echo htmlspecialchars($file); ?>';
             const storageKey = `alarmTime_${bookKey}`;
-            const eyeCareStorageKey = `eyeCareSettings_${bookKey}`;
+            const eyeCareStorageKey = `eyecareSettings_${bookKey}`;
             let isEyeCareActive = false;
             let eyeCareIntensity = 50;
             pdfContainer.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -149,8 +149,6 @@ if (!file_exists($file_path) || strtolower(pathinfo($file_path, PATHINFO_EXTENSI
                             clearInterval(timerInterval);
                             isTimerRunning = false;
                             alarmPopup.classList.add('show');
-                            const audio = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
-                            audio.play();
                             timerControl.innerHTML = '<i class="fas fa-play"></i>';
                             timerControl.title = 'Start Timer';
                             localStorage.removeItem(storageKey);
