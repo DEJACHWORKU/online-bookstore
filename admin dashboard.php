@@ -117,8 +117,8 @@ $conn->close();
                 <a href="user/manage librarian.php" class="menu-item">Manage Librarian</a>
                 <a href="user/manage user.php" class="menu-item">Manage User</a>
                 <a href="manage book.php" class="menu-item">Manage Book</a>
-                <a href="view-comment.php" class="menu-item">
-                    View Comment
+                <a href="notify-user.php" class="menu-item">notify users</a>
+                <a href="view-comment.php" class="menu-item">View Comment
                     <span class="comment-count" data-count="<?php echo $comment_count; ?>" style="position: relative; display: inline-block; margin-left: 5px;">
                         <i class="fas fa-bell notification-icon"></i>
                         <?php if ($comment_count > 0): ?>
