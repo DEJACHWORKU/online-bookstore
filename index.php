@@ -97,8 +97,8 @@
 
     <header class="header" id="header">
         <a href="" class="logo">
-            <i class='bx bxs-book' style="color: #61e5ff;"></i>
-            ONLINE BOOKSTORE
+            <img src="image/logo.jpeg" alt="Online Bookstore Logo" class="logo-img">
+            ARU ONLINE BOOKSTORE
         </a>
         <i class='bx bx-menu' id="menu-icon"></i>
         <nav class="navbar">
@@ -149,7 +149,7 @@
             <div class="stats-box">
                 <i class='bx bx-user'></i>
                 <h3>Total Users</h3>
-                <p class="counter" data-target="<?php echo $totalUsers; ?>">0</p> <!-- Display fetched user count -->
+                <p class="counter" data-target="<?php echo $totalUsers; ?>">0</p>
             </div>
             <div class="stats-box">
                 <i class='bx bx-book'></i>
