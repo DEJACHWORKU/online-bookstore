@@ -54,7 +54,9 @@ if ($user_stmt) {
     $user_stmt->close();
 }
 
-$search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
+$title_query = isset($_GET['title']) ? trim($_GET['title']) : '';
+$author_query = isset($_GET['author']) ? trim($_GET['author']) : '';
+$department_query = isset($_GET['department']) ? trim($_GET['department']) : '';
 $books = [];
 
 $query = "SELECT b.*, 
@@ -65,28 +67,25 @@ $query = "SELECT b.*,
 $params = [$user_id];
 $types = "i";
 
-if ($search_query) {
-    $search_terms = array_filter(array_map('trim', explode(',', $search_query)));
-    if (!empty($search_terms)) {
-        $query .= " AND (";
-        $first = true;
-        foreach ($search_terms as $index => $term) {
-            if (!$first) $query .= " OR ";
-            $query .= "(title LIKE ? OR author LIKE ? OR department LIKE ? 
-                      OR SOUNDEX(title) = SOUNDEX(?) 
-                      OR SOUNDEX(author) = SOUNDEX(?) 
-                      OR SOUNDEX(department) = SOUNDEX(?))";
-            $params[] = "%$term%";
-            $params[] = "%$term%";
-            $params[] = "%$term%";
-            $params[] = $term;
-            $params[] = $term;
-            $params[] = $term;
-            $types .= "ssssss";
-            $first = false;
-        }
-        $query .= ")";
-    }
+if ($title_query) {
+    $query .= " AND (title LIKE ? OR SOUNDEX(title) = SOUNDEX(?))";
+    $params[] = "%$title_query%";
+    $params[] = $title_query;
+    $types .= "ss";
+}
+
+if ($author_query) {
+    $query .= " AND (author LIKE ? OR SOUNDEX(author) = SOUNDEX(?))";
+    $params[] = "%$author_query%";
+    $params[] = $author_query;
+    $types .= "ss";
+}
+
+if ($department_query) {
+    $query .= " AND (department LIKE ? OR SOUNDEX(department) = SOUNDEX(?))";
+    $params[] = "%$department_query%";
+    $params[] = $department_query;
+    $types .= "ss";
 }
 
 $query .= " ORDER BY avg_rating DESC, rating_count DESC, date DESC";
@@ -142,23 +141,25 @@ $conn->close();
     <div class="search-section">
         <div class="search-container">
             <div class="search-input-container">
-                <label for="search-input" class="search-label">Search by:</label>
-                <input type="text" name="search" id="search-input" class="search-input" placeholder="Search by title, author, or department" value="<?php echo htmlspecialchars($search_query); ?>">
-                <button type="button" class="clear-search" title="Clear Search"><i class="fas fa-sync-alt"></i></button>
+                <label for="title-input" class="search-label">Search by:</label>
+                <input type="text" name="title" id="title-input" class="search-input" placeholder="Search by title" value="<?php echo htmlspecialchars($title_query); ?>">
+                <input type="text" name="author" id="author-input" class="search-input" placeholder="Search by author" value="<?php echo htmlspecialchars($author_query); ?>">
+                <input type="text" name="department" id="department-input" class="search-input" placeholder="Search by department" value="<?php echo htmlspecialchars($department_query); ?>">
                 <button type="submit" class="search-icon"><i class="fas fa-search"></i></button>
+                <button type="button" class="clear-search" title="Clear Search"><i class="fas fa-sync-alt"></i></button>
             </div>
         </div>
     </div>
 
     <main id="book-list">
         <div class="book-grid">
-            <?php if (empty($books) && $search_query): ?>
+            <?php if (empty($books) && ($title_query || $author_query || $department_query)): ?>
                 <div class="no-books">
                     <i class="fas fa-book-open fa-3x"></i>
                     <h3>No Book Found</h3>
                     <p>No book matches your search criteria.</p>
                 </div>
-            <?php elseif (empty($books) && !$search_query): ?>
+            <?php elseif (empty($books) && !($title_query || $author_query || $department_query)): ?>
                 <div class="no-books">
                     <i class="fas fa-book-open fa-3x"></i>
                     <h3>No Books Available</h3>
@@ -173,7 +174,7 @@ $conn->close();
                             <p class="book-meta"><span class="label">Author:</span> <?php echo htmlspecialchars($book['author']); ?></p>
                             <p class="book-meta"><span class="label">Department:</span> <?php echo htmlspecialchars($book['department']); ?></p>
                             <p class="book-meta"><span class="label">Published:</span> <?php echo date('M d, Y', strtotime($book['date'])); ?></p>
-                            <p class="book-description"><span class="label">Description:</span> <?php echo htmlspecialchars(substr($book['description'], 0, 100) . (strlen($book['description']) > 100 ? '...' : '')); ?></p>
+                            <p class="book-meta"><span class="label">Description:</span> <?php echo htmlspecialchars(substr($book['description'], 0, 100) . (strlen($book['description']) > 100 ? '...' : '')); ?></p>
                             <div class="book-rating">
                                 <span class="label">Rating:</span>
                                 <span class="average-rating"><?php echo ($book['avg_rating'] > 0) ? round($book['avg_rating'], 1) : '0.0'; ?></span>
@@ -233,7 +234,9 @@ $conn->close();
             const overlay = document.querySelector('.overlay');
             const scrollTopBtn = document.getElementById('scroll-top');
             const logoutBtn = document.querySelector('.logout');
-            const searchInput = document.querySelector('.search-input');
+            const titleInput = document.querySelector('#title-input');
+            const authorInput = document.querySelector('#author-input');
+            const departmentInput = document.querySelector('#department-input');
             const searchIcon = document.querySelector('.search-icon');
             const clearSearchBtn = document.querySelector('.clear-search');
 
@@ -276,17 +279,32 @@ $conn->close();
             });
 
             function submitSearch() {
-                const searchValue = searchInput.value.trim();
-                window.location.href = window.location.pathname + (searchValue ? '?search=' + encodeURIComponent(searchValue) : '');
+                const titleValue = titleInput.value.trim();
+                const authorValue = authorInput.value.trim();
+                const departmentValue = departmentInput.value.trim();
+                let queryParams = [];
+                if (titleValue) queryParams.push('title=' + encodeURIComponent(titleValue));
+                if (authorValue) queryParams.push('author=' + encodeURIComponent(authorValue));
+                if (departmentValue) queryParams.push('department=' + encodeURIComponent(departmentValue));
+                const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
+                window.location.href = window.location.pathname + queryString;
             }
 
             function clearSearch() {
-                searchInput.value = '';
+                titleInput.value = '';
+                authorInput.value = '';
+                departmentInput.value = '';
                 window.location.href = window.location.pathname;
             }
 
             searchIcon.addEventListener('click', submitSearch);
-            searchInput.addEventListener('keypress', function(e) {
+            titleInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') submitSearch();
+            });
+            authorInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') submitSearch();
+            });
+            departmentInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') submitSearch();
             });
 

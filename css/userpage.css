@@ -203,52 +203,45 @@ body.menu-open {
 }
 
 .search-input-container {
-  position: relative;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.input-wrapper {
   display: flex;
   align-items: center;
-  border: 3px solid var(--accent-color);
-  border-radius: 50px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #e6f0fa, #ffffff);
-  transition: var(--transition);
-}
-
-.input-wrapper:focus-within {
-  border-color: var(--warning-color);
-  box-shadow: 0 0 12px rgba(255, 193, 7, 0.5);
+  max-width: 1000px;
+  margin: 0;
+  gap: 0.5rem;
 }
 
 .search-label {
-  padding: 0 1rem;
+  padding: 0 0.5rem;
   font-weight: 500;
   color: var(--secondary-color);
   white-space: nowrap;
 }
 
 .search-input {
-  width: 40%;
-  flex: 1;
-  padding: 0.4rem 1rem;
-  border: none;
+  width: 200px;
+  padding: 0.4rem 0.8rem;
+  border: 2px solid var(--accent-color);
+  border-radius: 25px;
   outline: none;
-  font-size: 0.95rem;
-  height: 32px;
+  font-size: 0.9rem;
+  height: 30px;
   background: transparent;
   color: var(--secondary-color);
+  transition: var(--transition);
+}
+
+.search-input:focus {
+  border-color: var(--warning-color);
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.3);
 }
 
 .search-icon {
   background: linear-gradient(45deg, var(--warning-color), var(--accent-color));
   color: white;
   border: none;
-  padding: 0.4rem 1.5rem;
+  padding: 0.4rem 1rem;
   cursor: pointer;
-  border-radius: 0 50px 50px 0;
+  border-radius: 25px;
   transition: var(--transition);
 }
 
@@ -262,11 +255,8 @@ body.menu-open {
   cursor: pointer;
   padding: 0 10px;
   color: #666;
-  font-size: 1.2em;
-  position: absolute;
-  right: 40px;
-  top: 50%;
-  transform: translateY(-50%);
+  font-size: 1.1rem;
+  transition: var(--transition);
 }
 
 .clear-search:hover {
@@ -274,22 +264,32 @@ body.menu-open {
 }
 
 @media (max-width: 768px) {
-  .search-label {
-    display: none;
-  }
-  .search-section {
-    padding: 0.8rem;
-    margin: 0.5rem;
-  }
   .search-input-container {
-    max-width: 95%;
+    flex-direction: column;
+    align-items: flex-start;
   }
+  
   .search-input {
-    height: 28px;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .search-label {
+    padding: 0 0.3rem;
     font-size: 0.9rem;
   }
-  .search-icon {
-    padding: 0.4rem 1.2rem;
+  
+  .search-icon, .clear-search {
+    padding: 0.3rem 0.8rem;
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-input {
+    width: 100%;
+    max-width: 250px;
   }
 }
 
@@ -566,11 +566,6 @@ footer {
     height: 40px;
     bottom: 1rem;
     right: 1rem;
-  }
-  
-  footer {
-    padding: 0.3rem;
-    height: 1.8rem;
   }
   
   .footer-text marquee {
