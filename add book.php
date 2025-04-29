@@ -141,6 +141,7 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Book</title>
     <link rel="stylesheet" href="css/add book.css">
+    
 </head>
 <body>
     <h1>Add New Book</h1>
@@ -178,8 +179,8 @@ $conn->close();
             <input type="file" id="book_file" name="book_file" accept=".pdf" required data-max-size="20971520">
 
             <div class="checkbox-group">
-                <label><input type="checkbox" name="readCheckbox" value="1"> Read</label>
-                <label><input type="checkbox" name="downloadCheckbox" value="1"> Download</label>
+                <label><input type="checkbox" name="readCheckbox" value="1">Avaliable For Read</label>
+                <label><input type="checkbox" name="downloadCheckbox" value="1"> Avaliable For Download</label>
             </div>
 
             <button type="submit">Add Book</button>

@@ -9,7 +9,7 @@ if (!isset($_SESSION['logged_in']) || !isset($_SESSION['user_id'])) {
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "online_book_Db"; // Updated to match view-comment.php
+$dbname = "online_book_Db";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -80,8 +80,9 @@ $conn->close();
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/admin dashboard.css">
+    <link rel="stylesheet" href="css/themes.css">
 </head>
-<body>
+<body class="theme-switcher">
     <div class="header">
         <div class="profile-container">
             <?php if ($profile_image && file_exists($_SERVER['DOCUMENT_ROOT'] . "/bookstore/book/Admin/" . $profile_image)): ?>
@@ -112,6 +113,7 @@ $conn->close();
                 <a href="user/admin register form.php" class="menu-item">Add Admin</a>
                 <a href="user/librarian register form.php" class="menu-item">Add Librarian</a>
                 <a href="user/user register form.php" class="menu-item">Add User</a>
+                <a href="dep't.php" class="menu-item">Add Department</a>
                 <a href="add book.php" class="menu-item">Add Book</a>
                 <a href="user/manage admin.php" class="menu-item">Manage Admin</a>
                 <a href="user/manage librarian.php" class="menu-item">Manage Librarian</a>
@@ -146,7 +148,6 @@ $conn->close();
             <iframe id="contentFrame" class="content-frame active" src="user/admin register form.php"></iframe>
         </div>
     </div>
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const menuItems = document.querySelectorAll('.menu-item:not(.logout)');
@@ -155,19 +156,19 @@ $conn->close();
             const hamburger = document.querySelector('.hamburger');
             const contentFrame = document.getElementById('contentFrame');
             const contentArea = document.querySelector('.content-area');
-
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = 'theme-switcher ' + savedTheme;
+            }
             sidebar.classList.add('active');
             hamburger.style.display = 'none';
-
             const firstMenuItem = menuItems[0];
             firstMenuItem.classList.add('active');
-
             hamburger.addEventListener('click', function(e) {
                 e.stopPropagation();
                 sidebar.classList.toggle('active');
                 hamburger.style.display = sidebar.classList.contains('active') ? 'none' : 'block';
             });
-
             menuItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -184,12 +185,10 @@ $conn->close();
                     hamburger.style.display = 'block';
                 });
             });
-
             logoutBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = this.getAttribute('href');
             });
-
             document.addEventListener('click', function(e) {
                 if (sidebar.classList.contains('active') && 
                     !sidebar.contains(e.target) && 
@@ -198,7 +197,6 @@ $conn->close();
                     hamburger.style.display = 'block';
                 }
             });
-
             function updateCommentCount() {
                 fetch('get_comment_count.php')
                     .then(response => response.json())
@@ -232,7 +230,6 @@ $conn->close();
                     })
                     .catch(error => console.error('Error fetching comment count:', error));
             }
-
             function updateApprovalCount() {
                 fetch('get_approval_count.php')
                     .then(response => response.json())
@@ -266,14 +263,11 @@ $conn->close();
                     })
                     .catch(error => console.error('Error fetching approval count:', error));
             }
-
-            // Listen for messages from iframe (e.g., view-comment.php)
             window.addEventListener('message', (event) => {
                 if (event.data === 'updateCommentCount') {
                     updateCommentCount();
                 }
             });
-
             updateCommentCount();
             updateApprovalCount();
             setInterval(() => {

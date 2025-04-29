@@ -1,0 +1,131 @@
+:root {
+    --bg-color: #1f242d;
+    --second-bg-color: #323946;
+    --text-color: #fff;
+    --main-color: #0ef;
+}
+
+body.default {
+    --bg-color: #1f242d;
+    --second-bg-color: #323946;
+    --text-color: #fff;
+    --main-color: #0ef;
+}
+
+body.pink {
+    --bg-color: #2a1a2a;
+    --second-bg-color: #4a2a4a;
+    --text-color: #fff;
+    --main-color: #ff6b9d;
+}
+
+body.red {
+    --bg-color: #2a1a1a;
+    --second-bg-color: #4a2a2a;
+    --text-color: #fff;
+    --main-color: #ff4d4d;
+}
+
+body.dark {
+    --bg-color: #121212;
+    --second-bg-color: #1e1e1e;
+    --text-color: #fff;
+    --main-color: #bb86fc;
+}
+
+body.light {
+    --bg-color: #f5f5f5;
+    --second-bg-color: #e0e0e0;
+    --text-color: #333;
+    --main-color: #6200ee;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.header {
+    background: var(--bg-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.stats,
+.services,
+.portfolio {
+    background: var(--second-bg-color);
+}
+
+.footer {
+    background: var(--second-bg-color);
+}
+
+.search-section,
+.book-card,
+.no-books {
+    background: var(--second-bg-color);
+    color: var(--text-color);
+}
+
+.book-meta .label,
+.book-description .label,
+.search-label {
+    color: var(--main-color);
+}
+
+.nav-menu,
+.nav-menu.active {
+    background: var(--bg-color);
+}
+
+.theme-switcher {
+    position: relative;
+}
+
+.theme-switcher a {
+    cursor: pointer;
+}
+
+.theme-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--second-bg-color);
+    width: 20rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    padding: 0;
+}
+
+.theme-option {
+    font-size: 1.6rem;
+    color: var(--text-color);
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.theme-option:hover {
+    background: var(--main-color);
+    color: #000;
+}
+
+@media (max-width: 992px) {
+    .theme-options {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        background: var(--bg-color);
+        padding: 0 0 0 2rem;
+    }
+
+    .theme-option {
+        width: 100%;
+        padding: 0.8rem 1rem;
+    }
+}

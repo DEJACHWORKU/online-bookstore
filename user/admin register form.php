@@ -2,6 +2,7 @@
 ini_set('upload_max_filesize', '5M');
 ini_set('post_max_size', '21M');
 ini_set('max_execution_time', '300');
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -56,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (!in_array($image_ext, ['png', 'jpg', 'jpeg'])) {
             $errors['profileImage'] = "Profile image must be PNG, JPG, or JPEG.";
         }
-        if ($profileImage['size'] > 20971520) {
+        if ($profileImage['size'] > 5242880) { // 5MB
             $errors['profileImage'] = "Profile image must be less than 5MB.";
         }
     }
@@ -112,8 +113,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $profileImagePath = "";
         if ($profileImage && $profileImage['error'] === UPLOAD_ERR_OK) {
             $base_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/Admin/';
-            $image_dir = $base_dir . 'uploads/profile_images/';
-            $image_web_path = 'uploads/profile_images/';
+            $image_dir = $base_dir . 'Uploads/profile_images/';
+            $image_web_path = 'Uploads/profile_images/';
             
             if (!is_dir($image_dir)) {
                 mkdir($image_dir, 0777, true);
@@ -161,15 +162,17 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Registration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="../css/admin register.css">
+    <link rel="stylesheet" href="../css/themes.css">
+    <link rel="stylesheet" href="../css/admin register.css">
+    <script src="../js/theme_switcher.js"></script>
 </head>
-<body>
+<body class="theme-switcher">
     <div class="container">
         <h1 class="title">Admin Registration Form</h1>
         
         <form id="registrationForm" method="POST" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="profileImage">Profile Image (PNG/JPG, max 5MB):</label>
+                <label for="profileImage">Profile Image (PNG/JPG, max 5MB, Optional):</label>
                 <input type="file" id="profileImage" name="profileImage" accept="image/png, image/jpeg, image/jpg">
                 <div class="error-message" id="profileImage-error"></div>
             </div>
@@ -304,6 +307,10 @@ $conn->close();
                         const errorElement = document.getElementById(`${field}-error`);
                         if (errorElement) {
                             errorElement.textContent = error;
+                            const inputField = document.getElementById(field);
+                            if (inputField) {
+                                inputField.classList.add('error');
+                            }
                         } else {
                             document.getElementById('message-container').innerHTML += 
                                 `<p class="error">${error}</p>`;

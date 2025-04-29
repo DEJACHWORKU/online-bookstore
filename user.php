@@ -112,6 +112,7 @@ $conn->close();
     <title>User Page</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/userpage.css">
+    <link rel="stylesheet" href="css/themes.css">
 </head>
 <body>
     <header id="header">
@@ -221,7 +222,7 @@ $conn->close();
 
     <footer>
         <div class="footer-text">
-            <marquee behavior="" direction="left">WELCOME TO ARSI UNIVERSITY WEB-BASED ONLINE BOOKSTORE SYSTEM</marquee>    
+            <marquee behavior="" direction="left">WELCOME TO ARSI UNIVERSITY WEB-BASED ONLINE BOOKSTORE SYSTEM DEAR USERS IF YOU NOT FIND YOUR WANT BOOKS LEAVE US COMMENT ON THE COMMENT MENU IF WE THINK VERY NECCESSARY WE WILL UPLOAD YOUR REQUEST BOOK AND IF YOU GET ANY PROBLEM ON THE SYATEM LEAVE US COMMENT WE WILL UPGRADE OUR SYSTEM!</marquee>    
         </div>
     </footer>
     <div class="scroll-top" id="scroll-top">
@@ -239,6 +240,35 @@ $conn->close();
             const departmentInput = document.querySelector('#department-input');
             const searchIcon = document.querySelector('.search-icon');
             const clearSearchBtn = document.querySelector('.clear-search');
+            const settingsToggle = document.getElementById('settings-toggle');
+            const themeOptions = document.getElementById('theme-options');
+
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
+
+            if (settingsToggle && themeOptions) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+                });
+
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const theme = this.getAttribute('data-theme');
+                        document.body.className = theme;
+                        localStorage.setItem('bookstoreTheme', theme);
+                        themeOptions.style.display = 'none';
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                        themeOptions.style.display = 'none';
+                    }
+                });
+            }
 
             function toggleMenu() {
                 navMenu.classList.toggle('active');

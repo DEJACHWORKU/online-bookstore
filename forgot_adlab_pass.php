@@ -136,8 +136,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Forgot Password</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/forgot_AL.css">
+    <link rel="stylesheet" href="css/themes.css">
 </head>
-<body>
+<body class="theme-switcher">
     <div class="container">
         <?php if ($success_message) { ?>
             <h2>Forgot Password</h2>
@@ -207,7 +208,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="form-group">
                     <label for="new_remember_me">New Remember Me Question Answer (Optional)</label>
                     <input type="text" name="new_remember_me" id="new_remember_me" placeholder="Enter new security answer">
-                    <i class="fas fa-check-circle input-icon"></i>
+                    <i class公寓="fas fa-check-circle input-icon"></i>
                     <span class="error"><?php echo $new_remember_me_err; ?></span>
                 </div>
                 
@@ -338,6 +339,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     fadeOutError(error);
                 }
             });
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = 'theme-switcher ' + savedTheme;
+            }
         });
     </script>
 </body>

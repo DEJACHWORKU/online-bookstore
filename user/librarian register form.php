@@ -113,8 +113,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $profileImagePath = "";
         if ($profileImage && $profileImage['error'] === UPLOAD_ERR_OK) {
             $base_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/Librarian/';
-            $image_dir = $base_dir . 'uploads/profile_images/';
-            $image_web_path = 'uploads/profile_images/';
+            $image_dir = $base_dir . 'Uploads/profile_images/';
+            $image_web_path = 'Uploads/profile_images/';
             
             if (!is_dir($image_dir)) {
                 mkdir($image_dir, 0777, true);
@@ -162,9 +162,11 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Librarian Registration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   <link rel="stylesheet" href="../css/admin register.css">
+    <link rel="stylesheet" href="../css/themes.css">
+    <link rel="stylesheet" href="../css/admin register.css">
+    <script src="../js/theme_switcher.js"></script>
 </head>
-<body>
+<body class="theme-switcher">
     <div class="container">
         <h1 class="title">Librarian Registration Form</h1>
         

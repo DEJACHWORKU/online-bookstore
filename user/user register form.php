@@ -228,6 +228,9 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration Form</title>
     <link rel="stylesheet" href="../css/user register.css">
+    <link rel="stylesheet" href="../css/themes.css">
+
+    <script src="../js/theme_switcher.js"></script>
 </head>
 <body>
     <div class="form-container">

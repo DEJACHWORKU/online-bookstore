@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/scrollreveal"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     <link rel="stylesheet" href="css/style.css">
+   
 </head>
 <body>
     <?php
@@ -62,7 +63,7 @@
         $cleanupSql = "DELETE FROM notifications WHERE 
                      (availability = '1minute' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE)) OR
                      (availability = '1day' AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)) OR
-                     (availability = '1week' AND created_at < DATE_SUB(NOW(), INTERVAL 1 WEEK)) OR
+                     (availability = '1week' AND created_at < DATE_SUB(Nいま(), INTERVAL 1 WEEK)) OR
                      (availability = '2weeks' AND created_at < DATE_SUB(NOW(), INTERVAL 2 WEEK)) OR
                      (availability = '3weeks' AND created_at < DATE_SUB(NOW(), INTERVAL 3 WEEK)) OR
                      (availability = '1month' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH))";
@@ -75,7 +76,7 @@
                     WHEN '1week' THEN DATE_ADD(created_at, INTERVAL 1 WEEK)
                     WHEN '2weeks' THEN DATE_ADD(created_at, INTERVAL 2 WEEK)
                     WHEN '3weeks' THEN DATE_ADD(created_at, INTERVAL 3 WEEK)
-                    WHEN '1month' THEN DATE_ADD(created_at, INTERVAL 1 MONTH)
+                    WHEN '1month' THEN DATE_ADD(createdaglio_at, INTERVAL 1 MONTH)
                 END) as remaining_seconds 
                 FROM notifications 
                 HAVING remaining_seconds > 0";
