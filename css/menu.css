@@ -33,6 +33,7 @@ body.menu-open {
     white-space: nowrap;
     flex-shrink: 1;
     min-width: 0;
+    margin-left: clamp(0.5rem, 1vw, 1rem);
 }
 
 .hamburger {
@@ -42,7 +43,7 @@ body.menu-open {
     padding: clamp(0.4rem, 1vw, 0.5rem);
     color: white;
     flex-shrink: 0;
-    margin-left: clamp(0.5rem, 1.5vw, 1rem);
+    margin-right: clamp(0.5rem, 1.5vw, 1rem);
 }
 
 .nav-menu {
@@ -51,7 +52,7 @@ body.menu-open {
     align-items: center;
     flex-wrap: nowrap;
     flex-shrink: 0;
-    margin-right: 3rem;
+    margin-right: clamp(0.5rem, 1vw, 1rem);
     margin-left: clamp(1rem, 2vw, 1.5rem);
 }
 
@@ -64,6 +65,8 @@ body.menu-open {
     white-space: nowrap;
     flex-shrink: 0;
     transition: all 0.3s ease;
+    display: inline-block;
+    width: auto;
 }
 
 .nav-menu a:hover, .nav-menu a.active {
@@ -81,6 +84,8 @@ body.menu-open {
     font-size: clamp(0.8rem, 2vw, 1rem);
     flex-shrink: 0;
     transition: all 0.3s ease;
+    display: inline-block;
+    width: auto;
 }
 
 .nav-menu .logout:hover, .nav-menu .logout.active {
@@ -133,6 +138,7 @@ body.menu-open {
     }
     #header h1 {
         font-size: clamp(0.9rem, 2vw, 1.1rem);
+        margin-left: clamp(0.6rem, 1.2vw, 1rem);
     }
     .nav-menu {
         margin-right: clamp(0.6rem, 1.2vw, 1rem);
@@ -141,7 +147,7 @@ body.menu-open {
     }
     .hamburger {
         font-size: clamp(1.5rem, 3.2vw, 1.9rem);
-        margin-left: clamp(0.6rem, 1.2vw, 1.2rem);
+        margin-right: clamp(0.6rem, 1.2vw, 1.2rem);
     }
 }
 
@@ -166,6 +172,7 @@ body.menu-open {
     }
     #header h1 {
         font-size: clamp(0.85rem, 2.1vw, 1.05rem);
+        margin-left: clamp(0.5rem, 1.1vw, 0.9rem);
     }
     .nav-menu {
         margin-right: clamp(0.5rem, 1.1vw, 0.9rem);
@@ -174,7 +181,7 @@ body.menu-open {
     }
     .hamburger {
         font-size: clamp(1.4rem, 3vw, 1.7rem);
-        margin-left: clamp(0.5rem, 1.5vw, 1rem);
+        margin-right: clamp(0.5rem, 1.5vw, 1rem);
     }
 }
 
@@ -199,6 +206,7 @@ body.menu-open {
     }
     #header h1 {
         font-size: clamp(0.8rem, 2.2vw, 1rem);
+        margin-left: clamp(0.4rem, 1vw, 0.8rem);
     }
     .nav-menu {
         margin-right: clamp(0.4rem, 1vw, 0.8rem);
@@ -206,7 +214,7 @@ body.menu-open {
     }
     .hamburger {
         font-size: clamp(1.3rem, 2.8vw, 1.6rem);
-        margin-left: clamp(0.5rem, 1.5vw, 1rem);
+        margin-right: clamp(0.5rem, 1.5vw, 1rem);
     }
 }
 
@@ -231,6 +239,7 @@ body.menu-open {
     }
     #header h1 {
         font-size: clamp(0.75rem, 2vw, 0.95rem);
+        margin-left: clamp(0.5rem, 1.2vw, 0.9rem);
     }
     .nav-menu {
         margin-right: clamp(0.5rem, 1.2vw, 0.9rem);
@@ -239,7 +248,7 @@ body.menu-open {
     }
     .hamburger {
         font-size: clamp(1.3rem, 2.8vw, 1.6rem);
-        margin-left: clamp(0.5rem, 1.5vw, 1rem);
+        margin-right: clamp(0.5rem, 1.5vw, 1rem);
     }
 }
 
@@ -269,7 +278,7 @@ body.menu-open {
     }
     .hamburger {
         font-size: clamp(1.2rem, 2.6vw, 1.5rem);
-        margin-left: clamp(0.5rem, 1.5vw, 1rem);
+        margin-right: clamp(0.5rem, 1.5vw, 1rem);
     }
 }
 
@@ -294,6 +303,7 @@ body.menu-open {
     }
     #header h1 {
         font-size: clamp(0.65rem, 1.8vw, 0.85rem);
+        margin-left: clamp(0.7rem, 1.8vw, 1.1rem);
     }
     .nav-menu {
         margin-right: clamp(0.7rem, 1.8vw, 1.1rem);
@@ -302,7 +312,7 @@ body.menu-open {
     }
     .hamburger {
         font-size: clamp(1.2rem, 2.6vw, 1.5rem);
-        margin-left: clamp(0.5rem, 1.5vw, 1rem);
+        margin-right: clamp(0.5rem, 1.5vw, 1rem);
     }
 }
 
@@ -314,23 +324,24 @@ body.menu-open {
     .nav-menu {
         position: fixed;
         top: 50px;
-        left: -100%;
+        left: 0;
         width: clamp(200px, 60vw, 260px);
-        height: 100vh;
+        height: calc(100vh - 50px);
         background-color: #2c3e50;
         flex-direction: column;
         align-items: stretch;
         padding: clamp(0.4rem, 1vw, 0.5rem) 0;
-        transition: left 0.3s ease;
+        transition: transform 0.3s ease;
+        transform: translateX(-100%);
         overflow-y: auto;
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);
         z-index: 999;
-        margin-right: 0;
         margin-left: 0;
+        margin-right: 0;
     }
     
     .nav-menu.active {
-        left: 0;
+        transform: translateX(0);
     }
     
     .nav-menu a, .nav-menu .logout {
@@ -341,7 +352,8 @@ body.menu-open {
         border-bottom: 1px solid #34495e;
         border-radius: 0;
         box-sizing: border-box;
-        white-space: nowrap;
+        white-space: normal;
+        display: block;
     }
     
     .nav-menu a:hover, .nav-menu a.active {
@@ -353,6 +365,7 @@ body.menu-open {
     .nav-menu .logout {
         background: linear-gradient(45deg, #e74c3c, #c0392b);
         border-bottom: none;
+        display: block;
     }
     
     .nav-menu .logout:hover, .nav-menu .logout.active {
@@ -384,19 +397,20 @@ body.menu-open {
     
     #header h1 {
         font-size: clamp(0.75rem, 2.2vw, 0.9rem);
+        margin-left: clamp(0.5rem, 1.5vw, 1rem);
     }
     
     .hamburger {
         font-size: clamp(1.5rem, 4vw, 2rem);
-        margin-left: clamp(0.6rem, 2vw, 1.2rem);
+        margin-right: clamp(0.6rem, 2vw, 1.2rem);
     }
 }
 
 @media (max-width: 320px) {
     .nav-menu {
         width: 180px;
-        margin-right: 0;
         margin-left: 0;
+        margin-right: 0;
     }
     
     .nav-menu a, .nav-menu .logout {
@@ -416,10 +430,11 @@ body.menu-open {
     }
     #header h1 {
         font-size: clamp(0.7rem, 2vw, 0.85rem);
+        margin-left: clamp(0.5rem, 1.5vw, 1rem);
     }
     .hamburger {
         font-size: clamp(1.4rem, 3.8vw, 1.8rem);
-        margin-left: clamp(0.5rem, 1.8vw, 1rem);
+        margin-right: clamp(0.5rem, 1.8vw, 1rem);
     }
 }
 

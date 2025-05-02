@@ -65,7 +65,7 @@
                         <div class="comment-details">
                             <p><strong>Username:</strong> <?php echo htmlspecialchars($comment['username']); ?></p>
                             <p><strong>Department:</strong> <?php echo htmlspecialchars($comment['department']); ?></p>
-                            <p><strong>Subject:</strong> <?php echo htmlspecialchars($comment['subject']); ?></p>
+                            <p><strong>Message Subject:</strong> <?php echo htmlspecialchars($comment['subject']); ?></p>
                             <p class="message"><strong>Message:</strong> <?php echo nl2br(htmlspecialchars($comment['message'])); ?></p>
                             <button class="delete-btn" onclick="approveDelete(<?php echo $comment['id']; ?>)">Approve</button>
                         </div>
