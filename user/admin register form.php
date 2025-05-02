@@ -164,7 +164,6 @@ $conn->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/themes.css">
     <link rel="stylesheet" href="../css/admin register.css">
-    <script src="../js/theme_switcher.js"></script>
 </head>
 <body class="theme-switcher">
     <div class="container">

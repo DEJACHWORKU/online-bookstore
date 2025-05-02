@@ -81,6 +81,7 @@ $conn->close();
     <title>Manage Admins</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/manage admin.css">
+    <link rel="stylesheet" href="../css/themes.css">
 </head>
 <body>
     <div class="container">

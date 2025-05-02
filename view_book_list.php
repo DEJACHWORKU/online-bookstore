@@ -59,6 +59,7 @@ $conn->close();
     <title>View Book List</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="css/view book list.css">
+  <link rel="stylesheet" href="css/themes.css">
 </head>
 <body>
     <div class="menu-bar">

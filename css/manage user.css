@@ -48,11 +48,12 @@ h1 {
     position: relative;
     min-width: 250px; /* Minimum width for each group */
     max-width: 350px; /* Maximum width for larger screens */
+    color: #4fc3f7;
 }
 
 .search-container label {
     font-weight: bold;
-    color: #2c3e50;
+    color:#4fc3f7;
     font-size: 16px;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
     margin-right: 10px; /* Space between label and input */
@@ -240,7 +241,7 @@ h1 {
 .form-group label {
     display: block;
     margin-bottom: 6px;
-    color: #2c3e50;
+    color: #4fc3f7;
     font-weight: bold;
 }
 

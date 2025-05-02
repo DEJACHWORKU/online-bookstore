@@ -30,7 +30,7 @@ section {
 }
 
 .heading span {
-    color: #1e293b;
+    color: white;
 }
 
 .book-container {
@@ -116,7 +116,7 @@ section {
 
 .book-title-header {
     font-size: 1.6rem;
-    color: #1a2535;
+    color: white;
     margin-bottom: 15px;
     font-weight: 700;
     padding-bottom: 10px;
@@ -133,7 +133,7 @@ section {
 
 .detail-label {
     font-weight: 600;
-    color: #4a5a73;
+    color: #4fc3f7;
     font-size: 0.95rem;
     text-transform: capitalize;
     min-width: 110px;
@@ -141,7 +141,7 @@ section {
 }
 
 .detail-value {
-    color: #2d3748;
+    color: white;
     font-size: 0.95rem;
     line-height: 1.6;
     flex: 1;

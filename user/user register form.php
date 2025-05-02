@@ -230,7 +230,6 @@ $conn->close();
     <link rel="stylesheet" href="../css/user register.css">
     <link rel="stylesheet" href="../css/themes.css">
 
-    <script src="../js/theme_switcher.js"></script>
 </head>
 <body>
     <div class="form-container">
