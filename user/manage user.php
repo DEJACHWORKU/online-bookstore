@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($_POST['action'] === 'delete' && isset($_POST['id'])) {
             $id = $_POST['id'];
             
-            // First, get the profile image path to delete the file
+            // Fetch the profile image path before deletion
             $stmt = $conn->prepare("SELECT profile_image FROM users WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
@@ -25,18 +25,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $user = $result->fetch_assoc();
             $stmt->close();
             
-            // Delete the profile image file if it exists
-            if (!empty($user['profile_image'])) {
-                $imagePath = __DIR__ . "/bookstore/book/" . $user['profile_image'];
-                if (file_exists($imagePath)) {
-                    unlink($imagePath);
-                }
-            }
-            
             // Delete the user record from the database
             $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
             $stmt->bind_param("i", $id);
             $success = $stmt->execute();
+            
+            // If database deletion is successful, delete the profile image file
+            if ($success && !empty($user['profile_image'])) {
+                $imagePath = $_SERVER['DOCUMENT_ROOT'] . "/bookstore/book/" . $user['profile_image'];
+                if (file_exists($imagePath)) {
+                    unlink($imagePath); // Delete the file
+                }
+            }
+            
             echo json_encode(['success' => $success, 'error' => $success ? '' : $stmt->error]);
             $stmt->close();
         } elseif ($_POST['action'] === 'update' && isset($_POST['id'])) {
@@ -94,7 +95,7 @@ $conn->close();
         </div>
         <div class="search-container">
             <div class="search-group">
-                <label for="searchDepartment">Department:</label>
+                <label for="searchDepartment">Department yapılacak
                 <input type="text" id="searchDepartment" placeholder="Enter department" oninput="filterUsers()">
             </div>
             <div class="search-group">

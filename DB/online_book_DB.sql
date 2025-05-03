@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 02, 2025 at 08:20 PM
+-- Generation Time: Apr 14, 2025 at 02:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -132,6 +132,10 @@ CREATE TABLE `book_ratings` (
 --
 
 INSERT INTO `book_ratings` (`id`, `book_id`, `user_id`, `rating`, `created_at`) VALUES
+(1, 69, 4, 1, '2025-04-12 17:04:09'),
+(2, 65, 4, 5, '2025-04-12 17:04:34'),
+(3, 71, 4, 5, '2025-04-12 17:18:43'),
+(4, 70, 4, 4, '2025-04-12 17:19:12'),
 (5, 69, 5, 4, '2025-04-12 17:19:57'),
 (6, 70, 5, 5, '2025-04-12 17:26:03'),
 (7, 68, 5, 5, '2025-04-12 17:30:34'),
@@ -141,10 +145,10 @@ INSERT INTO `book_ratings` (`id`, `book_id`, `user_id`, `rating`, `created_at`) 
 (11, 66, 5, 5, '2025-04-12 17:43:33'),
 (13, 63, 5, 5, '2025-04-12 17:46:30'),
 (14, 62, 5, 5, '2025-04-12 17:48:21'),
-(19, 71, 8, 5, '2025-04-16 12:55:23'),
-(20, 65, 8, 3, '2025-04-16 13:11:40'),
-(21, 62, 8, 3, '2025-04-16 13:20:14'),
-(23, 70, 8, 5, '2025-05-02 14:56:44');
+(15, 68, 4, 4, '2025-04-12 17:51:25'),
+(16, 67, 4, 3, '2025-04-12 17:51:53'),
+(17, 66, 4, 3, '2025-04-12 18:02:11'),
+(18, 63, 4, 1, '2025-04-14 09:23:59');
 
 -- --------------------------------------------------------
 
@@ -190,13 +194,6 @@ CREATE TABLE `comment` (
   `date` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `comment`
---
-
-INSERT INTO `comment` (`id`, `full_name`, `username`, `department`, `subject`, `message`, `date`) VALUES
-(0, 'bjxdkcjakjcbaklcjbla', 'hzjxasdbklsdulb;', 'Economics', 'SHljbkJBSU', 'AHIKDJJOADLIDHPADIPA;DIHA;N', '2025-05-02 19:08:13');
-
 -- --------------------------------------------------------
 
 --
@@ -221,7 +218,7 @@ CREATE TABLE `librarian` (
 --
 
 INSERT INTO `librarian` (`id`, `full_name`, `personal_id`, `email`, `phone`, `username`, `password`, `remember_me`, `profile_image`, `created_at`) VALUES
-(3, 'Dejach Worku Tassew', 'DAGI1234', 'dagiman2116@gmail.com', '0921345676', 'DAGI1234', '$2y$10$jEWauV84.lRreLRR8ZSypeFing/TsnFb5189PJA82agp2Y9urSrMS', 'MOM', 'uploads/profile_images/67fbdc01534ce.jpg', '2025-04-16 13:49:01');
+(3, 'Dejach Worku Tassew', 'DAGI1234', 'dagiman2116@gmail.com', '0921345676', 'DAGI1234', '$2y$10$M6VDPQrlBR3r.AT0HcRpq.Q2HnxMF9slpWGNL.zFip0bXIQ6pAT16', 'GOOD DAY', 'uploads/profile_images/67fbdc01534ce.jpg', '2025-04-13 15:45:05');
 
 -- --------------------------------------------------------
 
@@ -242,9 +239,8 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `book_id`, `availability`, `created_at`, `expiry_date`) VALUES
-(0, 69, '1day', '2025-05-01 23:30:36', '2025-05-01 20:30:36'),
-(0, 62, '1week', '2025-05-01 23:52:38', '2025-05-01 20:52:38'),
-(0, 71, '2weeks', '2025-05-02 17:35:24', '2025-05-02 14:35:24');
+(0, 69, '1day', '2025-04-14 12:00:18', '2025-04-14 09:00:18'),
+(0, 70, '1day', '2025-04-14 12:00:25', '2025-04-14 09:00:25');
 
 -- --------------------------------------------------------
 
@@ -275,9 +271,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `date`, `academic_year`, `full_name`, `id_number`, `department`, `year`, `semester`, `phone`, `username`, `password`, `profile_image`, `remember_me`, `access_permission`, `created_at`) VALUES
-(5, '2025-04-12', '2025', 'Adey Worku Tasew', 'UGR/10043/13', 'CS', '4th', '2nd', '0996785658', 'UGR/10043/13', '$2y$10$5oFyZ5ufEkf2iJ2mF.MGreJGPod/7uHNcI2MYzYUsApK4Wfcpjafe', 'users/user_67fa4018eb578.jpg', 'MOM', '1 Month', '2025-04-16 13:35:46'),
-(6, '2025-04-12', '2025', 'Banch Worku Tasew', 'UGR/10143/13', 'CS', '4th', '1st', '0997785658', 'UGR/10143/13', '$2y$10$S6q.Xi0Zc3CqSrWODFtfTeBFudfiE/jwbl9zwBp5kzZ3b/M8JV5Vm', 'users/user_67fa40509c4ec.jpg', 'GOOD DAY', '2 Months', '2025-04-12 10:28:32'),
-(8, '2025-04-14', '2024', 'Banch Kassaw Tig', 'FA3452', 'cs', '6th', '1st', '0998786755', 'FA3465', '$2y$10$LD/07R3WnveHclAv3oQIsuKcH3sSPRd01HFrTpv7TM601/rYxTvxO', 'users/user_67fd232d45d91.jpg', 'kidbabe', '1 Month', '2025-04-14 15:02:17');
+(4, '2025-04-14', '2025', 'Dejach Worku Tasew', 'UGR/10343/13', 'CS', '4th', '2nd', '0995785658', 'UGR/10343/13', '$2y$10$6uaT0jCXiLz8yIktlEcst.6kT2rCaXYE3MnNl.r7rWgTf230TzEqC', 'users/user_67fa3fe7a5ab7.jpg', 'GOOD DAY', '3 Months', '2025-04-14 09:54:18'),
+(5, '2025-04-12', '2025', 'Adey Worku Tasew', 'UGR/10043/13', 'CS', '4th', '2nd', '0996785658', 'UGR/10043/13', '$2y$10$e9GHaE1W9wV3Wxsiwfx3uOg227eWOAp0eMttpfURyCFnqzMeQg4ZG', 'users/user_67fa4018eb578.jpg', 'GOOD DAY', '1 Month', '2025-04-12 10:27:37'),
+(6, '2025-04-12', '2025', 'Banch Worku Tasew', 'UGR/10143/13', 'CS', '4th', '1st', '0997785658', 'UGR/10143/13', '$2y$10$S6q.Xi0Zc3CqSrWODFtfTeBFudfiE/jwbl9zwBp5kzZ3b/M8JV5Vm', 'users/user_67fa40509c4ec.jpg', 'GOOD DAY', '2 Months', '2025-04-12 10:28:32');
 
 --
 -- Indexes for dumped tables
@@ -342,7 +338,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `librarian`
@@ -354,7 +350,7 @@ ALTER TABLE `librarian`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables

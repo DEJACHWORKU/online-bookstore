@@ -48,20 +48,24 @@ if ($result && $result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $accessPermission = $row['access_permission'];
         $startDate = $row['date'];
-        
+
         if ($accessPermission === 'Approved') {
             $expirationDate = date('Y-m-d', strtotime("+30 days", strtotime($startDate)));
         } else {
             $parts = explode(' ', $accessPermission);
-            $duration = (int)$parts[0];
-            $unit = $parts[1];
-            $interval = ($unit === 'Week') ? "weeks" : "months";
-            $expirationDate = date('Y-m-d', strtotime("+$duration $interval", strtotime($startDate)));
+            if (count($parts) === 2 && is_numeric($parts[0])) {
+                $duration = (int)$parts[0];
+                $unit = $parts[1];
+                $interval = ($unit === 'Week') ? "weeks" : "months";
+                $expirationDate = date('Y-m-d', strtotime("+$duration $interval", strtotime($startDate)));
+            } else {
+                continue;
+            }
         }
-        
+
         $remainingSeconds = strtotime($expirationDate) - strtotime($currentDate);
         $remainingDays = floor($remainingSeconds / (24 * 60 * 60));
-        
+
         if ($remainingDays <= 30) {
             $approval_count++;
         }
