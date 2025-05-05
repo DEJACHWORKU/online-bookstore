@@ -10,7 +10,6 @@
 </head>
 <body>
     <?php
-    // Database connection
     $servername = "localhost";
     $username = "root";
     $password = "";
@@ -22,18 +21,16 @@
         die("Connection failed: " . $conn->connect_error);
     }
 
-    // Handle delete request
     if (isset($_GET['delete_id'])) {
         $delete_id = $_GET['delete_id'];
         $stmt = $conn->prepare("DELETE FROM comment WHERE id = ?");
         $stmt->bind_param("i", $delete_id);
         $stmt->execute();
         $stmt->close();
-        header("Location: view-comment.php"); // Refresh page after delete
+        header("Location: view-comment.php");
         exit();
     }
 
-    // Fetch comments
     $sql = "SELECT * FROM comment ORDER BY date DESC";
     $result = $conn->query($sql);
 
@@ -48,7 +45,10 @@
     ?>
 
     <section>
-        <h2 class="heading">View All<span> Comments</span></h2>
+        <div class="header-container">
+            <h2 class="heading">View All<span> Comments</span></h2>
+           
+        </div>
         <div class="comment-container">
             <?php if (empty($comments)): ?>
                 <div class="no-comments">
@@ -79,31 +79,64 @@
     </section>
 
     <script>
-        function approveDelete(commentId) {
-            if (confirm('Are you sure you want to approve and delete this comment? It will be removed in 5 seconds.')) {
-                const card = document.querySelector(`.comment-card[data-id="${commentId}"]`);
-                const countdownElement = document.getElementById(`countdown-${commentId}`).querySelector('.countdown-timer');
-                card.classList.add('approved');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme initialization
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
 
-                let seconds = 5;
-                countdownElement.textContent = seconds;
+            // Theme switcher toggle
+            const settingsToggle = document.getElementById('settings-toggle');
+            const themeOptions = document.getElementById('theme-options');
+            settingsToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+            });
 
-                const countdown = setInterval(() => {
-                    seconds--;
+            // Theme selection
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    document.body.className = theme;
+                    localStorage.setItem('bookstoreTheme', theme);
+                    themeOptions.style.display = 'none';
+                });
+            });
+
+            // Close theme options when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                    themeOptions.style.display = 'none';
+                }
+            });
+
+            // Comment deletion functionality
+            function approveDelete(commentId) {
+                if (confirm('Are you sure you want to approve and delete this comment? It will be removed in 5 seconds.')) {
+                    const card = document.querySelector(`.comment-card[data-id="${commentId}"]`);
+                    const countdownElement = document.getElementById(`countdown-${commentId}`).querySelector('.countdown-timer');
+                    card.classList.add('approved');
+
+                    let seconds = 5;
                     countdownElement.textContent = seconds;
-                    if (seconds <= 0) {
-                        clearInterval(countdown);
-                        window.location.href = `view-comment.php?delete_id=${commentId}`;
-                    }
-                }, 1000);
-            }
-        }
 
-    
-        window.addEventListener('load', () => {
-            if (window.parent) {
-                window.parent.postMessage('updateCommentCount', '*');
+                    const countdown = setInterval(() => {
+                        seconds--;
+                        countdownElement.textContent = seconds;
+                        if (seconds <= 0) {
+                            clearInterval(countdown);
+                            window.location.href = `view-comment.php?delete_id=${commentId}`;
+                        }
+                    }, 1000);
+                }
             }
+
+            window.addEventListener('load', () => {
+                if (window.parent) {
+                    window.parent.postMessage('updateCommentCount', '*');
+                }
+            });
         });
     </script>
 </body>

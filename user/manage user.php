@@ -17,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($_POST['action'] === 'delete' && isset($_POST['id'])) {
             $id = $_POST['id'];
             
-            // Fetch the profile image path before deletion
             $stmt = $conn->prepare("SELECT profile_image FROM users WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
@@ -25,16 +24,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $user = $result->fetch_assoc();
             $stmt->close();
             
-            // Delete the user record from the database
             $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
             $stmt->bind_param("i", $id);
             $success = $stmt->execute();
             
-            // If database deletion is successful, delete the profile image file
             if ($success && !empty($user['profile_image'])) {
                 $imagePath = $_SERVER['DOCUMENT_ROOT'] . "/bookstore/book/" . $user['profile_image'];
                 if (file_exists($imagePath)) {
-                    unlink($imagePath); // Delete the file
+                    unlink($imagePath);
                 }
             }
             
@@ -89,17 +86,20 @@ $conn->close();
     <link rel="stylesheet" href="../css/themes.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <header id="header">
+        <div class="header-content">
             <h1>Manage Users</h1>
         </div>
+        
+    </header>
+    <div class="container">
         <div class="search-container">
             <div class="search-group">
-                <label for="searchDepartment">Department yapılacak
+                <label for="searchDepartment">Department</label>
                 <input type="text" id="searchDepartment" placeholder="Enter department" oninput="filterUsers()">
             </div>
             <div class="search-group">
-                <label for="searchAcademicYear">Academic Year:</label>
+                <label for="searchAcademicYear">Academic Year</label>
                 <input type="text" id="searchAcademicYear" placeholder="Enter academic year" oninput="filterUsers()">
             </div>
         </div>
@@ -235,6 +235,36 @@ $conn->close();
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsToggle = document.getElementById('settings-toggle');
+            const themeOptions = document.getElementById('theme-options');
+
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
+
+            settingsToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+            });
+
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    document.body.className = theme;
+                    localStorage.setItem('bookstoreTheme', theme);
+                    themeOptions.style.display = 'none';
+                });
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                    themeOptions.style.display = 'none';
+                }
+            });
+        });
+
         function filterUsers() {
             const searchDepartment = document.getElementById('searchDepartment').value.toLowerCase();
             const searchAcademicYear = document.getElementById('searchAcademicYear').value.toLowerCase();
@@ -349,8 +379,14 @@ $conn->close();
                     <head>
                         <title>User Details</title>
                         <link rel="stylesheet" href="../css/manage user.css">
+                        <link rel="stylesheet" href="../css/themes.css">
+                        <style>
+                            body { background: ${document.body.className ? getComputedStyle(document.body).backgroundColor : 'var(--bg-color)'}; }
+                            .user-card { background: var(--second-bg-color); color: var(--text-color); }
+                            .user-info span { color: var(--main-color); }
+                        </style>
                     </head>
-                    <body>
+                    <body class="${document.body.className}">
                         ${card.outerHTML}
                     </body>
                 </html>

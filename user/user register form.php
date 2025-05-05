@@ -227,143 +227,170 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/user register.css">
     <link rel="stylesheet" href="../css/themes.css">
-
 </head>
 <body>
-    <div class="form-container">
-        <h2>User Registration Form</h2>
-        <form id="registrationForm" class="form-grid" method="post" enctype="multipart/form-data">
-            <div style="grid-column: span 2;">
-                <div class="image-upload-circle" onclick="document.getElementById('profileImage').click()">
-                    <span id="uploadText">Click to upload photo</span>
-                    <img id="imagePreview" src="#" alt="Preview" style="display:none; width:100%; height:100%; object-fit:cover;">
-                    <input type="file" id="profileImage" name="profileImage" accept="image/*" style="display:none;" onchange="previewImage(event)">
+ 
+    <div class="container">
+        <h1 class="title">User Registration Form</h1>
+        <form id="registrationForm" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="profileImage">Profile Image (PNG/JPG/GIF, max 5MB, Optional):</label>
+                <input type="file" id="profileImage" name="profileImage" accept="image/png, image/jpeg, image/jpg, image/gif">
+                <div class="error-message" id="profileImage-error"></div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" required>
+                    <i class="fas fa-calendar-alt input-icon"></i>
+                    <div class="error-message" id="date-error"></div>
                 </div>
-                <div id="profileImage-error" class="error-message"></div>
+                
+                <div class="form-group">
+                    <label for="academicYear">Academic Year</label>
+                    <input type="text" id="academicYear" name="academicYear" placeholder="e.g. 2023" required maxlength="4" pattern="\d{4}" title="Enter 4 digit year">
+                    <i class="fas fa-graduation-cap input-icon"></i>
+                    <div class="error-message" id="academicYear-error"></div>
+                </div>
             </div>
             
-            <div>
-                <label for="date">Date</label>
-                <input type="date" id="date" name="date" required placeholder="Select date">
-                <div id="date-error" class="error-message"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="e.g. John Doe" required pattern="[a-zA-Z\s]+" title="Letters only">
+                    <i class="fas fa-user input-icon"></i>
+                    <div class="error-message" id="fullName-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="idNumber">ID Number</label>
+                    <input type="text" id="idNumber" name="idNumber" placeholder="Enter your ID number" required>
+                    <i class="fas fa-id-card input-icon"></i>
+                    <div class="error-message" id="idNumber-error"></div>
+                </div>
             </div>
             
-            <div>
-                <label for="academicYear">Academic Year</label>
-                <input type="text" id="academicYear" name="academicYear" placeholder="e.g. 2023" required maxlength="4" pattern="\d{4}" title="Enter 4 digit year">
-                <div id="academicYear-error" class="error-message"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <input type="text" id="department" name="department" placeholder="e.g. Computer Science" required pattern="[a-zA-Z\s]+" title="Letters only">
+                    <i class="fas fa-building input-icon"></i>
+                    <div class="error-message" id="department-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="year">Year</label>
+                    <select id="year" name="year" required>
+                        <option value="">Select Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                        <option value="5">5th Year</option>
+                        <option value="6">6th Year</option>
+                        <option value="7">7th Year</option>
+                    </select>
+                    <i class="fas fa-chevron-down input-icon"></i>
+                    <div class="error-message" id="year-error"></div>
+                </div>
             </div>
             
-            <div>
-                <label for="fullName">Full Name</label>
-                <input type="text" id="fullName" name="fullName" placeholder="e.g. John Doe" required pattern="[a-zA-Z\s]+" title="Letters only">
-                <div id="fullName-error" class="error-message"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="semester">Semester</label>
+                    <select id="semester" name="semester" required>
+                        <option value="">Select Semester</option>
+                        <option value="1">1st Semester</option>
+                        <option value="2">2nd Semester</option>
+                    </select>
+                    <i class="fas fa-chevron-down input-icon"></i>
+                    <div class="error-message" id="semester-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="e.g. 0912345678" required pattern="\d{10}" title="10 digits only" maxlength="10">
+                    <i class="fas fa-phone input-icon"></i>
+                    <div class="error-message" id="phone-error"></div>
+                </div>
             </div>
             
-            <div>
-                <label for="idNumber">ID Number</label>
-                <input type="text" id="idNumber" name="idNumber" placeholder="Enter your ID number" required>
-                <div id="idNumber-error" class="error-message"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    <i class="fas fa-user-tag input-icon"></i>
+                    <div class="error-message" id="username-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password (min 6 chars)</label>
+                    <input type="password" id="password" name="password" placeholder="Enter at least 6 characters" required minlength="6">
+                    <span class="password-toggle" onclick="togglePassword('password')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <div class="error-message" id="password-error"></div>
+                </div>
             </div>
             
-            <div>
-                <label for="department">Department</label>
-                <input type="text" id="department" name="department" placeholder="e.g. Computer Science" required pattern="[a-zA-Z\s]+" title="Letters only">
-                <div id="department-error" class="error-message"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="rememberMe">Remember Me</label>
+                    <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter preference Security question" required>
+                    <i class="fas fa-check-circle input-icon"></i>
+                    <div class="error-message" id="rememberMe-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accessPermission">Access Permission</label>
+                    <select id="accessPermission" name="accessPermission" required>
+                        <option value="">Select Duration</option>
+                        <option value="1 Week">1 Week</option>
+                        <option value="1 Month">1 Month</option>
+                        <option value="2 Months">2 Months</option>
+                        <option value="3 Months">3 Months</option>
+                        <option value="4 Months">4 Months</option>
+                        <option value="5 Months">5 Months</option>
+                        <option value="6 Months">6 Months</option>
+                        <option value="7 Months">7 Months</option>
+                        <option value="8 Months">8 Months</option>
+                        <option value="9 Months">9 Months</option>
+                        <option value="10 Months">10 Months</option>
+                        <option value="11 Months">11 Months</option>
+                        <option value="12 Months">12 Months</option>
+                    </select>
+                    <i class="fas fa-chevron-down input-icon"></i>
+                    <div class="error-message" id="accessPermission-error"></div>
+                </div>
             </div>
             
-            <div>
-                <label for="year">Year</label>
-                <select id="year" name="year" required>
-                    <option value="">Select Year</option>
-                    <option value="1">1st Year</option>
-                    <option value="2">2nd Year</option>
-                    <option value="3">3rd Year</option>
-                    <option value="4">4th Year</option>
-                    <option value="5">5th Year</option>
-                    <option value="6">6th Year</option>
-                    <option value="7">7th Year</option>
-                </select>
-                <div id="year-error" class="error-message"></div>
+            <div class="btn-container">
+                <button type="submit" class="btn">Register</button>
             </div>
-            
-            <div>
-                <label for="semester">Semester</label>
-                <select id="semester" name="semester" required>
-                    <option value="">Select Semester</option>
-                    <option value="1">1st Semester</option>
-                    <option value="2">2nd Semester</option>
-                </select>
-                <div id="semester-error" class="error-message"></div>
-            </div>
-            
-            <div>
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" placeholder="e.g. 0912345678" required pattern="\d{10}" title="10 digits only" maxlength="10">
-                <div id="phone-error" class="error-message"></div>
-            </div>
-            
-            <div>
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
-                <div id="username-error" class="error-message"></div>
-            </div>
-            
-            <div>
-                <label for="password">Password (min 6 chars)</label>
-                <input type="password" id="password" name="password" placeholder="Enter at least 6 characters" required minlength="6">
-                <div id="password-error" class="error-message"></div>
-            </div>
-            
-            <div>
-                <label for="rememberMe">Remember Me</label>
-                <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter remember me value" required>
-                <div id="rememberMe-error" class="error-message"></div>
-            </div>
-            
-            <div>
-                <label for="accessPermission">Access Permission</label>
-                <select id="accessPermission" name="accessPermission" required>
-                    <option value="">Select Duration</option>
-                    <option value="1 Week">1 Week</option>
-                    <option value="1 Month">1 Month</option>
-                    <option value="2 Months">2 Months</option>
-                    <option value="3 Months">3 Months</option>
-                    <option value="4 Months">4 Months</option>
-                    <option value="5 Months">5 Months</option>
-                    <option value="6 Months">6 Months</option>
-                    <option value="7 Months">7 Months</option>
-                    <option value="8 Months">8 Months</option>
-                    <option value="9 Months">9 Months</option>
-                    <option value="10 Months">10 Months</option>
-                    <option value="11 Months">11 Months</option>
-                    <option value="12 Months">12 Months</option>
-                </select>
-                <div id="accessPermission-error" class="error-message"></div>
-            </div>
-            
-            <button type="submit" id="submitBtn" style="grid-column: span 2;">Register</button>
-            <div id="form-message" style="grid-column: span 2;"></div>
+            <div class="message-container" id="message-container"></div>
         </form>
     </div>
 
     <script>
+        function togglePassword(id) {
+            const input = document.getElementById(id);
+            const icon = document.querySelector(`#${id} + .password-toggle i`);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
-            const reader = new FileReader();
-            const imagePreview = document.getElementById('imagePreview');
-            const uploadText = document.getElementById('uploadText');
-            
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-                uploadText.style.display = 'none';
-            }
-            reader.readAsDataURL(file);
             
             const errorElement = document.getElementById('profileImage-error');
             if (file.size > 5 * 1024 * 1024) {
@@ -382,81 +409,106 @@ $conn->close();
             errorElement.textContent = '';
         }
 
-        function hideSuccessMessage() {
-            setTimeout(() => {
-                document.getElementById('form-message').textContent = '';
-            }, 3000);
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsToggle = document.getElementById('settings-toggle');
+            const themeOptions = document.getElementById('theme-options');
 
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const form = e.target;
-            const formData = new FormData(form);
-            const submitBtn = document.getElementById('submitBtn');
-            
-            // Clear previous errors
-            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-            document.querySelectorAll('input, select').forEach(el => el.classList.remove('is-invalid'));
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Processing...";
-            
-            fetch('', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(err => {
-                        throw err;
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
+
+            if (settingsToggle && themeOptions) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+                });
+
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const theme = this.getAttribute('data-theme');
+                        document.body.className = theme;
+                        localStorage.setItem('bookstoreTheme', theme);
+                        themeOptions.style.display = 'none';
                     });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('form-message').style.color = 'green';
-                    document.getElementById('form-message').textContent = data.message;
-                    form.reset();
-                    document.getElementById('imagePreview').style.display = 'none';
-                    document.getElementById('uploadText').style.display = 'block';
-                    hideSuccessMessage();
-                } else {
-                    // Display errors for each field
-                    if (data.errors) {
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                        themeOptions.style.display = 'none';
+                    }
+                });
+            }
+
+            document.getElementById('registrationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const form = e.target;
+                const formData = new FormData(form);
+                const submitBtn = form.querySelector('.btn');
+                
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+                document.querySelectorAll('input, select').forEach(el => el.classList.remove('error'));
+                document.getElementById('message-container').textContent = '';
+                
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Processing...";
+                
+                fetch('', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw err;
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('message-container').innerHTML = 
+                            `<p class="success">${data.message}</p>`;
+                        form.reset();
+                    } else if (data.errors) {
                         for (const [field, error] of Object.entries(data.errors)) {
                             const errorElement = document.getElementById(`${field}-error`);
-                            const inputElement = document.getElementById(field);
-                            if (errorElement && inputElement) {
+                            if (errorElement) {
                                 errorElement.textContent = error;
-                                inputElement.classList.add('is-invalid');
+                                const inputElement = document.getElementById(field);
+                                if (inputElement) {
+                                    inputElement.classList.add('error');
+                                }
                             } else if (field === 'database') {
-                                // Show database errors in the form message area
-                                document.getElementById('form-message').style.color = 'red';
-                                document.getElementById('form-message').textContent = error;
+                                document.getElementById('message-container').innerHTML = 
+                                    `<p class="error">${error}</p>`;
                             }
                         }
                     }
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById('form-message').style.color = 'red';
-                document.getElementById('form-message').textContent = "An error occurred. Please try again.";
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Register";
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById('message-container').innerHTML = 
+                        `<p class="error">An error occurred. Please try again.</p>`;
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Register";
+                    document.getElementById('message-container').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest', 
+                        inline: 'nearest' 
+                    });
+                });
             });
-        });
 
-        // Input validation clearing as user types
-        document.querySelectorAll('input, select').forEach(element => {
-            element.addEventListener('input', function() {
-                this.classList.remove('is-invalid');
-                const errorElement = document.getElementById(`${this.id}-error`);
-                if (errorElement) errorElement.textContent = '';
+            document.querySelectorAll('input, select').forEach(element => {
+                element.addEventListener('input', function() {
+                    this.classList.remove('error');
+                    const errorElement = document.getElementById(`${this.id}-error`);
+                    if (errorElement) errorElement.textContent = '';
+                });
             });
         });
     </script>

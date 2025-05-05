@@ -17,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($_POST['action'] === 'delete' && isset($_POST['id'])) {
             $id = $_POST['id'];
             
-            // Fetch the profile image path before deletion
             $stmt = $conn->prepare("SELECT profile_image FROM Librarian WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
@@ -25,16 +24,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $librarian = $result->fetch_assoc();
             $stmt->close();
             
-            // Delete the librarian record from the database
             $stmt = $conn->prepare("DELETE FROM Librarian WHERE id = ?");
             $stmt->bind_param("i", $id);
             $success = $stmt->execute();
             
-            // If database deletion is successful, delete the profile image file
             if ($success && !empty($librarian['profile_image'])) {
                 $imagePath = $_SERVER['DOCUMENT_ROOT'] . "/bookstore/book/Librarian/" . $librarian['profile_image'];
                 if (file_exists($imagePath)) {
-                    unlink($imagePath); // Delete the file
+                    unlink($imagePath);
                 }
             }
             
@@ -84,6 +81,7 @@ $conn->close();
     <link rel="stylesheet" href="../css/themes.css">
 </head>
 <body>
+  
     <div class="container">
         <div class="header">
             <h1>Manage Librarians full information</h1>
@@ -153,7 +151,7 @@ $conn->close();
                 </div>
                 <div class="form-group">
                     <label for="editRememberMe">Remember Me</label>
-                    <input type="text" id помещения="rememberMe">
+                    <input type="text" id="editRememberMe" name="rememberMe">
                 </div>
                 <button type="submit" class="btn btn-save">Save Changes</button>
             </form>
@@ -161,6 +159,39 @@ $conn->close();
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme initialization
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
+
+            // Theme switcher toggle
+            const settingsToggle = document.querySelector('.settings-btn');
+            const themeOptions = document.querySelector('.theme-options');
+            if (settingsToggle && themeOptions) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+                });
+
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const theme = this.getAttribute('data-theme');
+                        document.body.className = theme;
+                        localStorage.setItem('bookstoreTheme', theme);
+                        themeOptions.style.display = 'none';
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                        themeOptions.style.display = 'none';
+                    }
+                });
+            }
+        });
+
         function editLibrarian(id) {
             const card = document.querySelector(`.librarian-card[data-id="${id}"]`);
             const modal = document.getElementById('editModal');

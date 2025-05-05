@@ -68,8 +68,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (empty($errors)) {
             $cover_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/uploads/covers/';
             $file_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/uploads/files/';
-            $cover_web_path = 'uploads/covers/';
-            $file_web_path = 'uploads/files/';
+            $cover_web_path = 'Uploads/covers/';
+            $file_web_path = 'Uploads/files/';
 
             if (!is_dir($cover_dir)) mkdir($cover_dir, 0777, true);
             if (!is_dir($file_dir)) mkdir($file_dir, 0777, true);
@@ -130,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             if (empty($errors)) {
                 $cover_filename = uniqid() . '.' . $cover_ext;
-                $cover_path = 'uploads/covers/' . $cover_filename;
+                $cover_path = 'Uploads/covers/' . $cover_filename;
                 
                 if (move_uploaded_file($_FILES['book_cover']['tmp_name'], $cover_dir . $cover_filename)) {
                     if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $existing_cover)) {
@@ -152,7 +152,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             if (empty($errors)) {
                 $file_filename = uniqid() . '.pdf';
-                $file_path = 'uploads/files/' . $file_filename;
+                $file_path = 'Uploads/files/' . $file_filename;
                 
                 if (move_uploaded_file($_FILES['book_file']['tmp_name'], $file_dir . $file_filename)) {
                     if (file_exists($_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/' . $existing_file)) {
@@ -303,9 +303,10 @@ $conn->close();
                     </form>
                 </div>
                 <div class="col-md-4 text-md-end">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">
+                    <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addBookModal">
                         <i class="fas fa-plus me-2"></i> Add Book
                     </button>
+                   
                 </div>
             </div>
         </div>
@@ -342,10 +343,10 @@ $conn->close();
                                 </p>
                                 <div>
                                     <?php if ($book['is_read']): ?>
-                                        <span>Readable</span>
+                                        <span class="status-badge readable">Readable</span>
                                     <?php endif; ?>
                                     <?php if ($book['is_download']): ?>
-                                        <span>Downloadable</span>
+                                        <span class="status-badge downloadable">Downloadable</span>
                                     <?php endif; ?>
                                 </div>
                                 <div>
@@ -397,9 +398,9 @@ $conn->close();
     <div class="modal fade" id="addBookModal" tabindex="-1" aria-labelledby="addBookModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header">
                     <h5 class="modal-title" id="addBookModalLabel">Add New Book</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="addBookForm" method="post" enctype="multipart/form-data">
                     <div class="modal-body">
@@ -480,9 +481,9 @@ $conn->close();
     <div class="modal fade" id="editBookModal" tabindex="-1" aria-labelledby="editBookModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <div class="modal-header bg-warning text-white">
+                <div class="modal-header">
                     <h5 class="modal-title" id="editBookModalLabel">Edit Book</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editBookForm" method="post" enctype="multipart/form-data">
                     <input type="hidden" name="edit_id" id="edit_id">
@@ -553,6 +554,38 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Theme initialization
+        const savedTheme = localStorage.getItem('bookstoreTheme');
+        if (savedTheme) {
+            document.body.className = savedTheme;
+        }
+
+        // Theme switcher toggle
+        const settingsToggle = document.getElementById('settings-toggle');
+        const themeOptions = document.getElementById('theme-options');
+        settingsToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Theme selection
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const theme = this.getAttribute('data-theme');
+                document.body.className = theme;
+                localStorage.setItem('bookstoreTheme', theme);
+                themeOptions.style.display = 'none';
+            });
+        });
+
+        // Close theme options when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                themeOptions.style.display = 'none';
+            }
+        });
+
+        // Existing functionality
         const messageContainer = document.getElementById('messageContainer');
         const searchInput = document.getElementById('searchInput');
         const bookCards = document.querySelectorAll('.book-card');
@@ -759,7 +792,7 @@ $conn->close();
             const fileInput = document.getElementById('edit_book_file');
             
             if (coverInput.files.length > 0 && !validateFileSize(coverInput)) return;
-            if (fileInput.files.length > 0 && !validateFileSize(fileInput)) return;
+            if (conflicts.length > 0 && !validateFileSize(fileInput)) return;
             
             const formData = new FormData(this);
             formData.append('edit_book', '1');

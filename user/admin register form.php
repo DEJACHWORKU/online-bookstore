@@ -154,7 +154,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -165,8 +164,8 @@ $conn->close();
     <link rel="stylesheet" href="../css/themes.css">
     <link rel="stylesheet" href="../css/admin register.css">
 </head>
-<body class="theme-switcher">
-    <div class="container">
+<body>
+        <div class="container">
         <h1 class="title">Admin Registration Form</h1>
         
         <form id="registrationForm" method="POST" enctype="multipart/form-data">
@@ -179,14 +178,14 @@ $conn->close();
             <div class="form-row">
                 <div class="form-group">
                     <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="fullName" required>
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
                     <i class="fas fa-user input-icon"></i>
                     <div class="error-message" id="fullName-error"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="adminID">Admin ID</label>
-                    <input type="text" id="adminID" name="adminID" required>
+                    <input type="text" id="adminID" name="adminID" placeholder="Enter your admin ID" required>
                     <i class="fas fa-id-card input-icon"></i>
                     <div class="error-message" id="adminID-error"></div>
                 </div>
@@ -195,14 +194,14 @@ $conn->close();
             <div class="form-row">
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
                     <i class="fas fa-envelope input-icon"></i>
                     <div class="error-message" id="email-error"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" required>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
                     <i class="fas fa-phone input-icon"></i>
                     <div class="error-message" id="phone-error"></div>
                 </div>
@@ -211,14 +210,14 @@ $conn->close();
             <div class="form-row">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
                     <i class="fas fa-user-tag input-icon"></i>
                     <div class="error-message" id="username-error"></div>
                 </div>
                 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" name="password" placeholder="Enter at least 6 characters" required>
                     <span class="password-toggle" onclick="togglePassword()">
                         <i class="fas fa-eye"></i>
                     </span>
@@ -229,7 +228,7 @@ $conn->close();
             <div class="form-row">
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
                     <span class="password-toggle" onclick="toggleConfirmPassword()">
                         <i class="fas fa-eye"></i>
                     </span>
@@ -238,7 +237,7 @@ $conn->close();
                 
                 <div class="form-group">
                     <label for="rememberMe">Remember Me</label>
-                    <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter preference">
+                    <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter security question">
                     <i class="fas fa-check-circle input-icon"></i>
                     <div class="error-message"></div>
                 </div>
@@ -277,58 +276,90 @@ $conn->close();
             }
         }
 
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsToggle = document.getElementById('settings-toggle');
+            const themeOptions = document.getElementById('theme-options');
 
-            const formData = new FormData(this);
-            const button = this.querySelector('button[type="submit"]');
-            button.disabled = true;
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
 
-            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-            document.getElementById('message-container').textContent = '';
+            if (settingsToggle && themeOptions) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+                });
 
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message) {
-                    document.getElementById('message-container').innerHTML = 
-                        `<p class="success">${data.message}</p>`;
-                    if (data.message.includes('success')) {
-                        this.reset();
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const theme = this.getAttribute('data-theme');
+                        document.body.className = theme;
+                        localStorage.setItem('bookstoreTheme', theme);
+                        themeOptions.style.display = 'none';
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                        themeOptions.style.display = 'none';
                     }
-                }
+                });
+            }
 
-                if (data.errors) {
-                    for (const [field, error] of Object.entries(data.errors)) {
-                        const errorElement = document.getElementById(`${field}-error`);
-                        if (errorElement) {
-                            errorElement.textContent = error;
-                            const inputField = document.getElementById(field);
-                            if (inputField) {
-                                inputField.classList.add('error');
-                            }
-                        } else {
-                            document.getElementById('message-container').innerHTML += 
-                                `<p class="error">${error}</p>`;
+            document.getElementById('registrationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const formData = new FormData(this);
+                const button = this.querySelector('button[type="submit"]');
+                button.disabled = true;
+
+                document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+                document.getElementById('message-container').textContent = '';
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        document.getElementById('message-container').innerHTML = 
+                            `<p class="success">${data.message}</p>`;
+                        if (data.message.includes('success')) {
+                            this.reset();
                         }
                     }
-                }
 
-                button.disabled = false;
-                document.getElementById('message-container').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'nearest', 
-                    inline: 'nearest' 
+                    if (data.errors) {
+                        for (const [field, error] of Object.entries(data.errors)) {
+                            const errorElement = document.getElementById(`${field}-error`);
+                            if (errorElement) {
+                                errorElement.textContent = error;
+                                const inputField = document.getElementById(field);
+                                if (inputField) {
+                                    inputField.classList.add('error');
+                                }
+                            } else {
+                                document.getElementById('message-container').innerHTML += 
+                                    `<p class="error">${error}</p>`;
+                            }
+                        }
+                    }
+
+                    button.disabled = false;
+                    document.getElementById('message-container').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest', 
+                        inline: 'nearest' 
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message-container').innerHTML = 
+                        "<p class='error'>An error occurred. Please try again.</p>";
+                    button.disabled = false;
                 });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('message-container').innerHTML = 
-                    "<p class='error'>An error occurred. Please try again.</p>";
-                button.disabled = false;
             });
         });
     </script>

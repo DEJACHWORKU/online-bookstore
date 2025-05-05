@@ -74,10 +74,11 @@ $conn->close();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/manage dep't.css">
-    
+    <link rel="stylesheet" href="css/themes.css">
 </head>
 <body>
-    <div class="container">
+   
+        
         <?php if (!empty($message)): ?>
             <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'error'; ?>">
                 <i class="fas <?php echo $message_type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?>"></i>
@@ -141,28 +142,62 @@ $conn->close();
     </div>
     
     <script>
-        function openEditModal(id, name) {
-            document.getElementById('edit_id').value = id;
-            document.getElementById('edit_name').value = name;
-            document.getElementById('editModal').style.display = 'flex';
-        }
-        
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-        
-        window.onclick = function(event) {
-            if (event.target.className === 'modal') {
-                closeEditModal();
+        // Theme initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
             }
-        }
-        
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.display = 'none';
+
+            // Theme switcher toggle
+            const settingsToggle = document.getElementById('settings-toggle');
+            const themeOptions = document.getElementById('theme-options');
+            settingsToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
             });
-        }, 5000);
+
+            // Theme selection
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    document.body.className = theme;
+                    localStorage.setItem('bookstoreTheme', theme);
+                    themeOptions.style.display = 'none';
+                });
+            });
+
+            // Close theme options when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                    themeOptions.style.display = 'none';
+                }
+            });
+
+            // Existing functionality
+            function openEditModal(id, name) {
+                document.getElementById('edit_id').value = id;
+                document.getElementById('edit_name').value = name;
+                document.getElementById('editModal').style.display = 'flex';
+            }
+            
+            function closeEditModal() {
+                document.getElementById('editModal').style.display = 'none';
+            }
+            
+            window.onclick = function(event) {
+                if (event.target.className === 'modal') {
+                    closeEditModal();
+                }
+            }
+            
+            setTimeout(() => {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    alert.style.display = 'none';
+                });
+            }, 5000);
+        });
     </script>
 </body>
 </html>

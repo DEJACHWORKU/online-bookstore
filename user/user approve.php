@@ -165,9 +165,10 @@ $conn->close();
     <title>User Approval</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/user approve.css">
-      <link rel="stylesheet" href="../css/themes.css">
+    <link rel="stylesheet" href="../css/themes.css">
 </head>
 <body>
+  
     <div class="container">
         <div class="header">
             WELCOME TO USER APPROVAL SYSTEM - THIS PAGE SHOWS USERS WITH 30 DAYS OR LESS REMAINING ACCESS
@@ -298,6 +299,39 @@ $conn->close();
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme initialization
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
+            }
+
+            // Theme switcher toggle
+            const settingsToggle = document.querySelector('.settings-btn');
+            const themeOptions = document.querySelector('.theme-options');
+            if (settingsToggle && themeOptions) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+                });
+
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const theme = this.getAttribute('data-theme');
+                        document.body.className = theme;
+                        localStorage.setItem('bookstoreTheme', theme);
+                        themeOptions.style.display = 'none';
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                        themeOptions.style.display = 'none';
+                    }
+                });
+            }
+        });
+
         let isAllSelected = false;
 
         function toggleSelectAll() {

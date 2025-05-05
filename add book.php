@@ -95,10 +95,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         $base_dir = $_SERVER['DOCUMENT_ROOT'] . '/bookstore/book/';
-        $cover_dir = $base_dir . 'uploads/covers/';
-        $file_dir = $base_dir . 'uploads/files/';
-        $cover_web_path = 'uploads/covers/';
-        $file_web_path = 'uploads/files/';
+        $cover_dir = $base_dir . 'Uploads/covers/';
+        $file_dir = $base_dir . 'Uploads/files/';
+        $cover_web_path = 'Uploads/covers/';
+        $file_web_path = 'Uploads/files/';
         
         if (!is_dir($cover_dir)) mkdir($cover_dir, 0777, true);
         if (!is_dir($file_dir)) mkdir($file_dir, 0777, true);
@@ -133,17 +133,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Book</title>
-    <link rel="stylesheet" href="css/add book.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/add book.css">
 </head>
 <body>
+
     <h1>Add New Book</h1>
     <div class="container">
         <form id="book-form" method="post" enctype="multipart/form-data">
@@ -179,8 +180,8 @@ $conn->close();
             <input type="file" id="book_file" name="book_file" accept=".pdf" required data-max-size="20971520">
 
             <div class="checkbox-group">
-                <label><input type="checkbox" name="readCheckbox" value="1">Avaliable For Read</label>
-                <label><input type="checkbox" name="downloadCheckbox" value="1"> Avaliable For Download</label>
+                <label><input type="checkbox" name="readCheckbox" value="1"> Available For Read</label>
+                <label><input type="checkbox" name="downloadCheckbox" value="1"> Available For Download</label>
             </div>
 
             <button type="submit">Add Book</button>
@@ -190,47 +191,79 @@ $conn->close();
     </div>
 
     <script>
-        document.getElementById('book-form').addEventListener('submit', function(e) {
-            e.preventDefault();
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsToggle = document.getElementById('settings-toggle');
+            const themeOptions = document.getElementById('theme-options');
 
-            const coverInput = document.getElementById('book_cover');
-            const fileInput = document.getElementById('book_file');
-            const maxSize = 20971520;
-
-            if (coverInput.files[0] && coverInput.files[0].size > maxSize) {
-                document.getElementById('message-container').innerHTML = "<p class='error'>Book cover must be less than 20MB</p>";
-                return;
-            }
-            if (fileInput.files[0] && fileInput.files[0].size > maxSize) {
-                document.getElementById('message-container').innerHTML = "<p class='error'>Book file must be less than 20MB</p>";
-                return;
+            const savedTheme = localStorage.getItem('bookstoreTheme');
+            if (savedTheme) {
+                document.body.className = savedTheme;
             }
 
-            const formData = new FormData(this);
-            const button = this.querySelector('button[type="submit"]');
-            button.disabled = true;
+            if (settingsToggle && themeOptions) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+                });
 
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                const messageContainer = document.getElementById('message-container');
-                messageContainer.innerHTML = data.message;
-                button.disabled = false;
-                messageContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-                if (data.message.includes('success')) {
-                    this.reset();
-                    setTimeout(() => {
-                        messageContainer.innerHTML = '';
-                    }, 3000);
+                document.querySelectorAll('.theme-option').forEach(option => {
+                    option.addEventListener('click', function() {
+                        const theme = this.getAttribute('data-theme');
+                        document.body.className = theme;
+                        localStorage.setItem('bookstoreTheme', theme);
+                        themeOptions.style.display = 'none';
+                    });
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                        themeOptions.style.display = 'none';
+                    }
+                });
+            }
+
+            document.getElementById('book-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const coverInput = document.getElementById('book_cover');
+                const fileInput = document.getElementById('book_file');
+                const maxSize = 20971520;
+
+                if (coverInput.files[0] && coverInput.files[0].size > maxSize) {
+                    document.getElementById('message-container').innerHTML = "<p class='error'>Book cover must be less than 20MB</p>";
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('message-container').innerHTML = "<p class='error'>An error occurred. Please try again.</p>";
-                button.disabled = false;
+                if (fileInput.files[0] && fileInput.files[0].size > maxSize) {
+                    document.getElementById('message-container').innerHTML = "<p class='error'>Book file must be less than 20MB</p>";
+                    return;
+                }
+
+                const formData = new FormData(this);
+                const button = this.querySelector('button[type="submit"]');
+                button.disabled = true;
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const messageContainer = document.getElementById('message-container');
+                    messageContainer.innerHTML = data.message;
+                    button.disabled = false;
+                    messageContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                    if (data.message.includes('success')) {
+                        this.reset();
+                        setTimeout(() => {
+                            messageContainer.innerHTML = '';
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message-container').innerHTML = "<p class='error'>An error occurred. Please try again.</p>";
+                    button.disabled = false;
+                });
             });
         });
     </script>
