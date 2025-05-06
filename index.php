@@ -90,13 +90,13 @@
     }
 
     $totalBooks = countBooks();
-    $totalUsers = countUsers(); // Fetch the total number of users
+    $totalUsers = countUsers();
     $activeNotifications = getActiveNotifications();
     $notificationCount = count($activeNotifications);
     ?>
 
     <header class="header" id="header">
-    <a href="" class="logo">
+        <a href="" class="logo">
             <img src="image/logo.jpeg" alt="Online Bookstore Logo" class="logo-img">
             ARU ONLINE BOOKSTORE
         </a>
@@ -149,7 +149,7 @@
             <div class="stats-box">
                 <i class='bx bx-user'></i>
                 <h3>Total Users</h3>
-                <p class="counter" data-target="<?php echo $totalUsers; ?>">0</p> <!-- Display fetched user count -->
+                <p class="counter" data-target="<?php echo $totalUsers; ?>">0</p>
             </div>
             <div class="stats-box">
                 <i class='bx bx-book'></i>
@@ -197,7 +197,7 @@
                              (availability = '1month' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH))";
                 $conn->query($cleanupSql);
 
-                $sql = "SELECT cover FROM books ORDER BY id DESC LIMIT 6";
+                $sql = "SELECT cover FROM books ORDER BY date DESC LIMIT 6";
                 $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {

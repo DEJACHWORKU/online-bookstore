@@ -80,7 +80,7 @@ body {
 }
 
 .header {
-    color: white;
+    color: var(--text-color);
     text-align: center;
     width: 100%;
     text-transform: uppercase;

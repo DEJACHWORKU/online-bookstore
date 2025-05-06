@@ -122,6 +122,7 @@ $conn->close();
                 <a href="user/manage admin.php" class="menu-item">Manage Admin</a>
                 <a href="user/manage librarian.php" class="menu-item">Manage Librarian</a>
                 <a href="user/manage user.php" class="menu-item">Manage User</a>
+                <a href="manage dep't.php" class="menu-item">Manage Department</a>
                 <a href="manage book.php" class="menu-item">Manage Book</a>
                 <a href="notify-user.php" class="menu-item">notify users</a>
                 <a href="view-comment.php" class="menu-item">View Comment

@@ -96,10 +96,11 @@ body.menu-open {
   display: flex;
   gap: 1rem;
   align-items: center;
+  color: var(--text-color);
 }
 
 .nav-menu a, .logout {
-  color: white;
+  color: var(--text-color);
   text-decoration: none;
   font-weight: 500;
   display: flex;
@@ -381,8 +382,11 @@ body.menu-open {
 .book-cover {
   width: 100%;
   height: 250px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  background-color: #f8f9fa;
   border-bottom: 1px solid #eee;
+  display: block;
 }
 
 .book-details {

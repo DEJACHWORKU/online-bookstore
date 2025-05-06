@@ -114,6 +114,98 @@ $conn->close();
     </section>
 
     <script>
+    function sendNotification(event, bookId) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const bookCard = document.getElementById('book-' + bookId);
+        const notifyBtn = form.querySelector('.notify-btn');
+        const bookTitle = form.querySelector('input[name="book_title"]').value;
+        
+        notifyBtn.disabled = true;
+        notifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        
+        fetch('notification.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const messageDiv = document.getElementById('notification-message');
+            if (data.success) {
+                const availabilityText = {
+                    '1min': '1 Minute',
+                    '1day': '1 Day',
+                    '1week': '1 Week',
+                    '2weeks': '2 Weeks', 
+                    '3weeks': '3 Weeks',
+                    '1month': '1 Month'
+                }[data.availability] || data.availability;
+                
+                messageDiv.innerHTML = `
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Successfully notified users about <strong>"${bookTitle}"</strong>! Available for ${availabilityText}.</span>
+                    </div>
+                `;
+                
+                bookCard.style.transition = 'all 0.4s ease';
+                bookCard.style.opacity = '0';
+                bookCard.style.height = '0';
+                bookCard.style.margin = '0';
+                bookCard.style.padding = '0';
+                bookCard.style.overflow = 'hidden';
+                
+                setTimeout(() => {
+                    bookCard.remove();
+                    if (document.querySelectorAll('.book-card').length === 0) {
+                        document.querySelector('.book-container').innerHTML = `
+                            <div class="no-books">
+                                <h3>All Books Notified</h3>
+                                <p>No more books to notify users about.</p>
+                            </div>
+                        `;
+                    }
+                }, 400);
+                
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 6000);
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Failed to notify about <strong>"${bookTitle}"</strong>: ${data.message || 'Please try again later.'}</span>
+                    </div>
+                `;
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 6000);
+            }
+        })
+        .catch(error => {
+            const messageDiv = document.getElementById('notification-message');
+            messageDiv.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Error notifying about <strong>"${bookTitle}"</strong>: ${error.message || 'Network error occurred'}</span>
+                </div>
+            `;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 6000);
+        })
+        .finally(() => {
+            notifyBtn.disabled = false;
+            notifyBtn.innerHTML = '<i class="fas fa-bell"></i> Notify Users';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Theme initialization
         const savedTheme = localStorage.getItem('bookstoreTheme');
@@ -124,118 +216,27 @@ $conn->close();
         // Theme switcher toggle
         const settingsToggle = document.getElementById('settings-toggle');
         const themeOptions = document.getElementById('theme-options');
-        settingsToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Theme selection
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const theme = this.getAttribute('data-theme');
-                document.body.className = theme;
-                localStorage.setItem('bookstoreTheme', theme);
-                themeOptions.style.display = 'none';
+        if (settingsToggle && themeOptions) {
+            settingsToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
             });
-        });
 
-        // Close theme options when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
-                themeOptions.style.display = 'none';
-            }
-        });
+            // Theme selection
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    document.body.className = theme;
+                    localStorage.setItem('bookstoreTheme', theme);
+                    themeOptions.style.display = 'none';
+                });
+            });
 
-        // Notification functionality
-        function sendNotification(event, bookId) {
-            event.preventDefault();
-            const form = event.target;
-            const formData = new FormData(form);
-            const bookCard = document.getElementById('book-' + bookId);
-            const notifyBtn = form.querySelector('.notify-btn');
-            const bookTitle = form.querySelector('input[name="book_title"]').value;
-            
-            notifyBtn.disabled = true;
-            notifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-            
-            fetch('notification.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            // Close theme options when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                    themeOptions.style.display = 'none';
                 }
-                return response.json();
-            })
-            .then(data => {
-                const messageDiv = document.getElementById('notification-message');
-                if (data.success) {
-                    const availabilityText = {
-                        '1min': '1 Minute',
-                        '1day': '1 Day',
-                        '1week': '1 Week',
-                        '2weeks': '2 Weeks', 
-                        '3weeks': '3 Weeks',
-                        '1month': '1 Month'
-                    }[data.availability] || data.availability;
-                    
-                    messageDiv.innerHTML = `
-                        <div class="success-message">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Successfully notified users about <strong>"${bookTitle}"</strong>! Available for ${availabilityText}.</span>
-                        </div>
-                    `;
-                    
-                    bookCard.style.transition = 'all 0.4s ease';
-                    bookCard.style.opacity = '0';
-                    bookCard.style.height = '0';
-                    bookCard.style.margin = '0';
-                    bookCard.style.padding = '0';
-                    bookCard.style.overflow = 'hidden';
-                    
-                    setTimeout(() => {
-                        bookCard.remove();
-                        if (document.querySelectorAll('.book-card').length === 0) {
-                            document.querySelector('.book-container').innerHTML = `
-                                <div class="no-books">
-                                    <h3>All Books Notified</h3>
-                                    <p>No more books to notify users about.</p>
-                                </div>
-                            `;
-                        }
-                    }, 400);
-                    
-                    setTimeout(() => {
-                        messageDiv.innerHTML = '';
-                    }, 6000);
-                } else {
-                    messageDiv.innerHTML = `
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <span>Failed to notify about <strong>"${bookTitle}"</strong>: ${data.message || 'Please try again later.'}</span>
-                        </div>
-                    `;
-                    setTimeout(() => {
-                        messageDiv.innerHTML = '';
-                    }, 6000);
-                }
-            })
-            .catch(error => {
-                const messageDiv = document.getElementById('notification-message');
-                messageDiv.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>Error notifying about <strong>"${bookTitle}"</strong>: ${error.message || 'Network error occurred'}</span>
-                    </div>
-                `;
-                setTimeout(() => {
-                    messageDiv.innerHTML = '';
-                }, 6000);
-            })
-            .finally(() => {
-                notifyBtn.disabled = false;
-                notifyBtn.innerHTML = '<i class="fas fa-bell"></i> Notify Users';
             });
         }
     });

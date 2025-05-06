@@ -5,13 +5,56 @@
     font-family: 'Poppins', sans-serif;
 }
 
+:root {
+    --bg-color: #1f242d;
+    --second-bg-color: #323946;
+    --text-color: #fff;
+    --main-color: #0ef;
+}
+
+body.default {
+    --bg-color: #1f242d;
+    --second-bg-color: #323946;
+    --text-color: #fff;
+    --main-color: #0ef;
+}
+
+body.pink {
+    --bg-color: #2a1a2a;
+    --second-bg-color: #4a2a4a;
+    --text-color: #fff;
+    --main-color: #ff6b9d;
+}
+
+body.red {
+    --bg-color: #2a1a1a;
+    --second-bg-color: #4a2a2a;
+    --text-color: #fff;
+    --main-color: #ff4d4d;
+}
+
+body.dark {
+    --bg-color: #121212;
+    --second-bg-color: #1e1e1e;
+    --text-color: #fff;
+    --main-color: #bb86fc;
+}
+
+body.light {
+    --bg-color: #f5f5f5;
+    --second-bg-color: #e0e0e0;
+    --text-color: #333;
+    --main-color: #6200ee;
+}
+
 body {
-    background: linear-gradient(135deg, #f0f4f8, #e0e7ef);
+    background: var(--bg-color);
     min-height: 100vh;
     padding: 20px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    color: var(--text-color);
 }
 
 section {
@@ -20,17 +63,63 @@ section {
     margin: 0 auto;
 }
 
+.header-container {
+    position: relative;
+}
+
 .heading {
     text-align: center;
     font-size: 2.5rem;
-    color: #0277bd;
+    color: var(--main-color);
     margin-bottom: 40px;
     font-weight: 800;
     text-shadow: 0 3px 6px rgba(0,0,0,0.1);
 }
 
 .heading span {
-    color: white;
+    color: var(--text-color);
+}
+
+.theme-switcher {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#settings-toggle {
+    cursor: pointer;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    padding: 5px;
+}
+
+.theme-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--second-bg-color);
+    width: 20rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 0;
+}
+
+.theme-option {
+    font-size: 1.6rem;
+    color: var(--text-color);
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.theme-option:hover {
+    background: var(--main-color);
+    color: #000;
 }
 
 .book-container {
@@ -42,7 +131,7 @@ section {
 }
 
 .book-card {
-    background: white;
+    background: var(--second-bg-color);
     border-radius: 15px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     width: 360px;
@@ -61,7 +150,7 @@ section {
     height: 260px;
     overflow: hidden;
     flex-shrink: 0;
-    background: #f5f8fa;
+    background: var(--bg-color);
 }
 
 .book-cover {
@@ -78,11 +167,11 @@ section {
 .default-cover {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #e6eef4, #d5dee7);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #8a9cb2;
+    color: var(--text-color);
     font-size: 4rem;
 }
 
@@ -93,7 +182,8 @@ section {
     padding: 20px;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: #b0bfd6 #f5f8fa;
+    scrollbar-color: var(--main-color) var(--second-bg-color);
+    background: var(--second-bg-color);
 }
 
 .book-details::-webkit-scrollbar {
@@ -101,26 +191,27 @@ section {
 }
 
 .book-details::-webkit-scrollbar-track {
-    background: #f5f8fa;
+    background: var(--second-bg-color);
     border-radius: 3px;
 }
 
 .book-details::-webkit-scrollbar-thumb {
-    background: #b0bfd6;
+    background: var(--main-color);
     border-radius: 3px;
 }
 
 .book-details::-webkit-scrollbar-thumb:hover {
-    background: #8a9cb2;
+    background: var(--text-color);
 }
 
 .book-title-header {
     font-size: 1.6rem;
-    color: white;
+    color: var(--text-color);
     margin-bottom: 15px;
     font-weight: 700;
     padding-bottom: 10px;
-    border-bottom: 2px solid #e8eef3;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    background: var(--second-bg-color);
 }
 
 .detail-row {
@@ -129,39 +220,46 @@ section {
     gap: 10px;
     margin-bottom: 14px;
     align-items: flex-start;
+    background: var(--second-bg-color);
 }
 
 .detail-label {
     font-weight: 600;
-    color: #4fc3f7;
+    color: var(--main-color);
     font-size: 0.95rem;
     text-transform: capitalize;
     min-width: 110px;
     flex-shrink: 0;
+    background: var(--second-bg-color);
 }
 
 .detail-value {
-    color: white;
+    color: var(--text-color);
     font-size: 0.95rem;
     line-height: 1.6;
     flex: 1;
     word-break: break-word;
+    background: var(--second-bg-color);
+}
+
+.description-row {
+    background: var(--second-bg-color);
 }
 
 .description-row .detail-value {
     white-space: pre-wrap;
     padding: 10px;
-    border: 1px solid #e8eef3;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 6px;
-    background: #0a0b0b;
+    background: var(--second-bg-color);
     font-size: 0.9rem;
     width: 100%;
 }
 
 .notification-card {
     padding: 20px;
-    background: white;
-    border-top: 1px solid #eef2f7;
+    background: var(--second-bg-color);
+    border-top: 1px solid rgba(255,255,255,0.1);
     flex-shrink: 0;
 }
 
@@ -179,7 +277,7 @@ section {
 
 .availability-label {
     font-weight: 700;
-    color: #2d3748;
+    color: var(--main-color);
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -188,13 +286,13 @@ section {
 .availability-select {
     width: 100%;
     padding: 12px 15px;
-    border: 2px solid #e8eef3;
+    border: 2px solid rgba(255,255,255,0.1);
     border-radius: 8px;
-    background-color: white;
+    background-color: var(--bg-color);
     font-size: 0.95rem;
-    color: #2d3748;
+    color: var(--text-color);
     transition: all 0.3s ease;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23339af0'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 16px;
@@ -203,15 +301,15 @@ section {
 
 .availability-select:focus {
     outline: none;
-    border-color: #339af0;
-    box-shadow: 0 0 0 3px rgba(51, 154, 240, 0.2);
+    border-color: var(--main-color);
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
 }
 
 .notify-btn {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, #339af0 0%, #228be6 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--main-color) 0%, var(--text-color) 100%);
+    color: var(--bg-color);
     border: none;
     border-radius: 8px;
     cursor: pointer;
@@ -227,7 +325,7 @@ section {
 }
 
 .notify-btn:hover {
-    background: linear-gradient(135deg, #228be6 0%, #1c7ed6 100%);
+    background: linear-gradient(135deg, var(--text-color) 0%, var(--main-color) 100%);
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
@@ -277,7 +375,7 @@ section {
 .no-books {
     width: 360px;
     min-height: 600px;
-    background: white;
+    background: var(--second-bg-color);
     border-radius: 15px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -289,14 +387,14 @@ section {
 }
 
 .no-books h3 {
-    color: #2d3748;
+    color: var(--text-color);
     margin-bottom: 20px;
     font-size: 1.6rem;
     font-weight: 700;
 }
 
 .no-books p {
-    color: #64748b;
+    color: var(--text-color);
     font-size: 1rem;
     line-height: 1.5;
 }
@@ -304,6 +402,20 @@ section {
 @media (max-width: 1200px) {
     .book-container {
         justify-content: center;
+    }
+}
+
+@media (max-width: 992px) {
+    .theme-options {
+        position: static;
+        width: 100%;
+        box-shadow: none;
+        background: var(--bg-color);
+        padding: 0 0 0 2rem;
+    }
+    .theme-option {
+        width: 100%;
+        padding: 0.8rem 1rem;
     }
 }
 
@@ -350,4 +462,4 @@ section {
     .notify-btn {
         padding: 12px;
     }
-}
+} 

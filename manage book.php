@@ -330,7 +330,9 @@ $conn->close();
                 <?php foreach ($books as $book): ?>
                     <div class="col-lg-4 col-md-6 mb-4 book-card">
                         <div class="card h-100">
-                            <img src="/bookstore/book/<?php echo htmlspecialchars($book['cover']); ?>" class="card-img-top" alt="Book Cover" style="height: 200px; object-fit: cover;">
+                            <div class="card-img-wrapper">
+                                <img src="/bookstore/book/<?php echo htmlspecialchars($book['cover']); ?>" class="card-img-top" alt="Book Cover">
+                            </div>
                             <div class="card-body">
                                 <h5 class="card-title">
                                     <span>Title:</span>
@@ -445,12 +447,12 @@ $conn->close();
                                 </datalist>
                             </div>
                             <div class="col-md-6">
-                                <label for="add_book_cover" class="form-label">Book Cover (PNG/JPG, max 20MB)</label>
+                                <label for="add_book_cover" class="form-label">Choose Photo (PNG/JPG, max 20MB)</label>
                                 <input class="form-control" type="file" id="add_book_cover" name="book_cover" accept="image/png, image/jpeg" required data-max-size="20971520">
                                 <small class="text-muted">Maximum file size: 20MB</small>
                             </div>
                             <div class="col-md-6">
-                                <label for="add_book_file" class="form-label">Upload File (PDF, max 20MB)</label>
+                                <label for="add_book_file" class="form-label">Choose File (PDF, max 20MB)</label>
                                 <input class="form-control" type="file" id="add_book_file" name="book_file" accept=".pdf" required data-max-size="20971520">
                                 <small class="text-muted">Maximum file size: 20MB</small>
                             </div>
@@ -511,15 +513,15 @@ $conn->close();
                                 <input type="text" class="form-control" id="edit_author" name="author" list="author_list" placeholder="Type or select author" required>
                             </div>
                             <div class="col-md-6">
-                                <label for="edit_book_cover" class="form-label">Book Cover (PNG/JPG, max 20MB)</label>
+                                <label for="edit_book_cover" class="form-label">Choose Photo (PNG/JPG, max 20MB)</label>
                                 <input class="form-control" type="file" id="edit_book_cover" name="book_cover" accept="image/png, image/jpeg" data-max-size="20971520">
                                 <small class="text-muted">Maximum file size: 20MB</small>
                                 <div class="mt-2">
-                                    <img id="current_cover" src="" alt="Current Cover" style="max-height: 100px; display: none;">
+                                    <img id="current_cover" src="" alt="Current Cover" style="max-width: 100%; max-height: 150px; object-fit: contain;">
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label for="edit_book_file" class="form-label">Upload File (PDF, max 20MB)</label>
+                                <label for="edit_book_file" class="form-label">Choose File (PDF, max 20MB)</label>
                                 <input class="form-control" type="file" id="edit_book_file" name="book_file" accept=".pdf" data-max-size="20971520">
                                 <small class="text-muted">Maximum file size: 20MB</small>
                             </div>

@@ -77,52 +77,49 @@ $conn->close();
     <link rel="stylesheet" href="css/themes.css">
 </head>
 <body>
-   
-        
-        <?php if (!empty($message)): ?>
-            <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'error'; ?>">
-                <i class="fas <?php echo $message_type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?>"></i>
-                <?php echo $message; ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if (!empty($departments)): ?>
-            <table class="departments-table">
-                <thead>
+    <?php if (!empty($message)): ?>
+        <div class="alert alert-<?php echo $message_type === 'success' ? 'success' : 'error'; ?>">
+            <i class="fas <?php echo $message_type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'; ?>"></i>
+            <?php echo $message; ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (!empty($departments)): ?>
+        <table class="departments-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Department Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($departments as $dept): ?>
                     <tr>
-                        <th>ID</th>
-                        <th>Department Name</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($departments as $dept): ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($dept['id']); ?></td>
-                            <td><?php echo htmlspecialchars($dept['name']); ?></td>
-                            <td class="action-cell">
-                                <button class="btn btn-primary" onclick="openEditModal(<?php echo $dept['id']; ?>, '<?php echo htmlspecialchars($dept['name']); ?>')">
-                                    <i class="fas fa-edit"></i> Edit
+                        <td><?php echo htmlspecialchars($dept['id']); ?></td>
+                        <td><?php echo htmlspecialchars($dept['name']); ?></td>
+                        <td class="action-cell">
+                            <button class="btn btn-primary" onclick="openEditModal(<?php echo $dept['id']; ?>, '<?php echo htmlspecialchars($dept['name'], ENT_QUOTES); ?>')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <form method="post" style="display:inline;">
+                                <input type="hidden" name="delete_id" value="<?php echo $dept['id']; ?>">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this department?')">
+                                    <i class="fas fa-trash"></i> Delete
                                 </button>
-                                <form method="post" style="display:inline;">
-                                    <input type="hidden" name="delete_id" value="<?php echo $dept['id']; ?>">
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this department?')">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <div class="no-departments">
-                <i class="fas fa-building"></i>
-                <h2>No Departments Found</h2>
-                <p>There are currently no departments in the system.</p>
-            </div>
-        <?php endif; ?>
-    </div>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <div class="no-departments">
+            <i class="fas fa-building"></i>
+            <h2>No Departments Found</h2>
+            <p>There are currently no departments in the system.</p>
+        </div>
+    <?php endif; ?>
     
     <div id="editModal" class="modal">
         <div class="modal-content">
@@ -142,8 +139,28 @@ $conn->close();
     </div>
     
     <script>
-        // Theme initialization
+        // Modal functions
+        function openEditModal(id, name) {
+            try {
+                document.getElementById('edit_id').value = id;
+                document.getElementById('edit_name').value = name;
+                document.getElementById('editModal').style.display = 'flex';
+            } catch (error) {
+                console.error('Error opening edit modal:', error);
+            }
+        }
+        
+        function closeEditModal() {
+            try {
+                document.getElementById('editModal').style.display = 'none';
+            } catch (error) {
+                console.error('Error closing edit modal:', error);
+            }
+        }
+
+        // Theme initialization and other event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            // Theme initialization
             const savedTheme = localStorage.getItem('bookstoreTheme');
             if (savedTheme) {
                 document.body.className = savedTheme;
@@ -152,10 +169,12 @@ $conn->close();
             // Theme switcher toggle
             const settingsToggle = document.getElementById('settings-toggle');
             const themeOptions = document.getElementById('theme-options');
-            settingsToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
-            });
+            if (settingsToggle && themeOptions) {
+                settingsToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
+                });
+            }
 
             // Theme selection
             document.querySelectorAll('.theme-option').forEach(option => {
@@ -169,28 +188,19 @@ $conn->close();
 
             // Close theme options when clicking outside
             document.addEventListener('click', function(e) {
-                if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
+                if (settingsToggle && themeOptions && !settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
                     themeOptions.style.display = 'none';
                 }
             });
 
-            // Existing functionality
-            function openEditModal(id, name) {
-                document.getElementById('edit_id').value = id;
-                document.getElementById('edit_name').value = name;
-                document.getElementById('editModal').style.display = 'flex';
-            }
-            
-            function closeEditModal() {
-                document.getElementById('editModal').style.display = 'none';
-            }
-            
+            // Modal close on click outside
             window.onclick = function(event) {
                 if (event.target.className === 'modal') {
                     closeEditModal();
                 }
-            }
-            
+            };
+
+            // Auto-hide alerts
             setTimeout(() => {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(alert => {
