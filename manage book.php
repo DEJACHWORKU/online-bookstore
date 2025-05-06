@@ -306,7 +306,6 @@ $conn->close();
                     <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addBookModal">
                         <i class="fas fa-plus me-2"></i> Add Book
                     </button>
-                   
                 </div>
             </div>
         </div>
@@ -554,38 +553,11 @@ $conn->close();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Theme initialization
         const savedTheme = localStorage.getItem('bookstoreTheme');
         if (savedTheme) {
             document.body.className = savedTheme;
         }
 
-        // Theme switcher toggle
-        const settingsToggle = document.getElementById('settings-toggle');
-        const themeOptions = document.getElementById('theme-options');
-        settingsToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Theme selection
-        document.querySelectorAll('.theme-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const theme = this.getAttribute('data-theme');
-                document.body.className = theme;
-                localStorage.setItem('bookstoreTheme', theme);
-                themeOptions.style.display = 'none';
-            });
-        });
-
-        // Close theme options when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
-                themeOptions.style.display = 'none';
-            }
-        });
-
-        // Existing functionality
         const messageContainer = document.getElementById('messageContainer');
         const searchInput = document.getElementById('searchInput');
         const bookCards = document.querySelectorAll('.book-card');
@@ -708,6 +680,9 @@ $conn->close();
             modal.querySelector('#existing_file').value = file;
             modal.querySelector('#current_cover').src = '/bookstore/book/' + cover;
             modal.querySelector('#current_cover').style.display = 'block';
+            
+            modal.querySelector('#edit_book_cover').value = '';
+            modal.querySelector('#edit_book_file').value = '';
         });
 
         document.querySelectorAll('.delete-book').forEach(button => {
@@ -792,7 +767,7 @@ $conn->close();
             const fileInput = document.getElementById('edit_book_file');
             
             if (coverInput.files.length > 0 && !validateFileSize(coverInput)) return;
-            if (conflicts.length > 0 && !validateFileSize(fileInput)) return;
+            if (fileInput.files.length > 0 && !validateFileSize(fileInput)) return;
             
             const formData = new FormData(this);
             formData.append('edit_book', '1');
