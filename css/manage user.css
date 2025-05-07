@@ -308,6 +308,13 @@ h1 {
     color: var(--text-color);
 }
 
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%) brightness(100%); /* Ensures the calendar icon is white */
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
+
 .form-group input:focus, .form-group select:focus {
     border-color: var(--main-color);
     box-shadow: 0 0 8px rgba(0, 238, 255, 0.3);

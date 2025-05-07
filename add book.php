@@ -173,7 +173,7 @@ $conn->close();
                 <?php endforeach; ?>
             </datalist>
 
-            <label for="book_cover">Book Cover (PNG/JPG, max 20MB):</label>
+            <label for="book_cover">Book Cover (PNG/JPG, max 5MB):</label>
             <input type="file" id="book_cover" name="book_cover" accept="image/png, image/jpeg" required data-max-size="20971520">
 
             <label for="book_file">Upload File (PDF, max 20MB):</label>

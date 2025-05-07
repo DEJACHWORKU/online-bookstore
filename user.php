@@ -96,6 +96,8 @@ if ($stmt) {
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
+        $row['is_read'] = 1;
+        $row['is_download'] = 1;
         $books[] = $row;
     }
     $stmt->close();
@@ -181,7 +183,7 @@ $conn->close();
                                 <span class="average-rating"><?php echo ($book['avg_rating'] > 0) ? round($book['avg_rating'], 1) : '0.0'; ?></span>
                                 <span class="rating-count">(<?php echo $book['rating_count']; ?> ratings)</span>
                                 <?php if (is_null($book['user_rating'])): ?>
-                                    <div class="star-rating" data-book-id="<?php echo $book['id']; ?>">
+                                    <div class="star-rating" data-book-id="<?php echo (int)$book['id']; ?>">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
                                             <i class="fas fa-star" data-value="<?php echo $i; ?>"></i>
                                         <?php endfor; ?>
@@ -198,7 +200,7 @@ $conn->close();
                                 $file_extension = !empty($book['file']) ? strtolower(pathinfo($book['file'], PATHINFO_EXTENSION)) : '';
                                 $is_pdf = $file_extension === 'pdf';
                                 ?>
-                                <?php if ($file_exists && isset($book['is_read']) && $book['is_read'] && $is_pdf): ?>
+                                <?php if ($file_exists && $is_pdf): ?>
                                     <a href="read_book.php?file=<?php echo rawurlencode($book['file']); ?>" 
                                        target="_blank" 
                                        class="read-btn" 
@@ -206,7 +208,7 @@ $conn->close();
                                         <i class="fas fa-book-open"></i> Read
                                     </a>
                                 <?php endif; ?>
-                                <?php if ($file_exists && isset($book['is_download']) && $book['is_download']): ?>
+                                <?php if ($file_exists): ?>
                                     <a href="download_book.php?file=<?php echo rawurlencode($book['file']); ?>&title=<?php echo rawurlencode($book['title']); ?>" 
                                        class="download-btn">
                                         <i class="fas fa-download"></i> Download
@@ -240,34 +242,10 @@ $conn->close();
             const departmentInput = document.querySelector('#department-input');
             const searchIcon = document.querySelector('.search-icon');
             const clearSearchBtn = document.querySelector('.clear-search');
-            const settingsToggle = document.getElementById('settings-toggle');
-            const themeOptions = document.getElementById('theme-options');
 
             const savedTheme = localStorage.getItem('bookstoreTheme');
             if (savedTheme) {
                 document.body.className = savedTheme;
-            }
-
-            if (settingsToggle && themeOptions) {
-                settingsToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    themeOptions.style.display = themeOptions.style.display === 'block' ? 'none' : 'block';
-                });
-
-                document.querySelectorAll('.theme-option').forEach(option => {
-                    option.addEventListener('click', function() {
-                        const theme = this.getAttribute('data-theme');
-                        document.body.className = theme;
-                        localStorage.setItem('bookstoreTheme', theme);
-                        themeOptions.style.display = 'none';
-                    });
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (!settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
-                        themeOptions.style.display = 'none';
-                    }
-                });
             }
 
             function toggleMenu() {
@@ -374,20 +352,15 @@ $conn->close();
                 });
 
                 submitBtn.addEventListener('click', () => {
-                    if (selectedRating > 0) {
+                    if (selectedRating > 0 && bookId) {
                         fetch('submit_rating.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: `book_id=${bookId}&rating=${selectedRating}`
+                            body: `book_id=${encodeURIComponent(bookId)}&rating=${encodeURIComponent(selectedRating)}`
                         })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Network response was not ok');
-                            }
-                            return response.json();
-                        })
+                        .then(response => response.json())
                         .then(data => {
                             if (data.success) {
                                 const ratingContainer = document.querySelector(`.star-rating[data-book-id="${bookId}"]`).parentElement;
@@ -406,13 +379,26 @@ $conn->close();
                                 document.body.appendChild(feedback);
                                 setTimeout(() => feedback.remove(), 3000);
                             } else {
-                                alert(data.message || 'Error submitting rating.');
+                                const feedback = document.createElement('div');
+                                feedback.className = 'feedback-message error';
+                                feedback.textContent = data.message || 'Error submitting rating';
+                                document.body.appendChild(feedback);
+                                setTimeout(() => feedback.remove(), 5000);
                             }
                         })
                         .catch(error => {
-                            console.error('Fetch error:', error);
-                            alert('An error occurred while submitting your rating.');
+                            const feedback = document.createElement('div');
+                            feedback.className = 'feedback-message error';
+                            feedback.textContent = 'An error occurred while submitting your rating';
+                            document.body.appendChild(feedback);
+                            setTimeout(() => feedback.remove(), 5000);
                         });
+                    } else {
+                        const feedback = document.createElement('div');
+                        feedback.className = 'feedback-message error';
+                        feedback.textContent = 'Please select a valid rating';
+                        document.body.appendChild(feedback);
+                        setTimeout(() => feedback.remove(), 5000);
                     }
                 });
             });

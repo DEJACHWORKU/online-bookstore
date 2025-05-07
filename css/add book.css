@@ -71,11 +71,9 @@ h1 {
     text-align: center;
     margin: 20px 0;
     font-size: 2.5em;
-   
     font-size: 24px;
     font-weight: 600;
     color: var(--text-color);
-  
 }
 
 .container {
@@ -116,6 +114,13 @@ input[type="date"]:focus {
     border-color: #ff3d3d;
     box-shadow: 0 0 5px rgba(255, 61, 61, 0.5);
     outline: none;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%) brightness(100%); /* Makes the calendar icon white */
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
 }
 
 input[type="file"] {

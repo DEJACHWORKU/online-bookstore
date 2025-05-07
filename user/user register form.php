@@ -246,7 +246,7 @@ $conn->close();
                 <div class="form-group">
                     <label for="date">Date</label>
                     <input type="date" id="date" name="date" required>
-                    <i class="fas fa-calendar-alt input-icon"></i>
+                   
                     <div class="error-message" id="date-error"></div>
                 </div>
                 

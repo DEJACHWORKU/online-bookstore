@@ -23,3 +23,4 @@ header('Content-Disposition: attachment; filename="' . $download_filename . '"')
 header('Content-Length: ' . filesize($file_path));
 readfile($file_path);
 exit;
+?>

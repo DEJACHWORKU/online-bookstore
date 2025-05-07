@@ -134,6 +134,14 @@ body {
     -moz-appearance: none;
 }
 
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%) brightness(100%); /* Makes the calendar icon white */
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
 .form-group select {
     padding: 10px 35px 10px 12px;
     background: var(--second-bg-color);

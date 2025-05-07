@@ -621,16 +621,36 @@ footer {
 }
 
 .star-rating .fa-star {
-  color: #ddd;
+  color: #999;
   cursor: pointer;
-  transition: color 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
   font-size: 1.2rem;
 }
 
 .star-rating .fa-star:hover,
-.star-rating .fa-star.hover,
+.star-rating .fa-star.hover {
+  color: #ffc107;
+  transform: scale(1.2);
+}
+
 .star-rating .fa-star.selected {
-  color: #ffca28;
+  color: #28a745;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .star-rating .fa-star {
+  color: #ccc;
+}
+
+body.dark-theme .star-rating .fa-star:hover,
+body.dark-theme .star-rating .fa-star.hover {
+  color: #e0a800;
+  transform: scale(1.2);
+}
+
+body.dark-theme .star-rating .fa-star.selected {
+  color: #218838;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .submit-rating {

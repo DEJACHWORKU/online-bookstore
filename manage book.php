@@ -447,7 +447,7 @@ $conn->close();
                                 </datalist>
                             </div>
                             <div class="col-md-6">
-                                <label for="add_book_cover" class="form-label">Choose Photo (PNG/JPG, max 20MB)</label>
+                                <label for="add_book_cover" class="form-label">Choose Photo (PNG/JPG, max 5MB)</label>
                                 <input class="form-control" type="file" id="add_book_cover" name="book_cover" accept="image/png, image/jpeg" required data-max-size="20971520">
                                 <small class="text-muted">Maximum file size: 20MB</small>
                             </div>
