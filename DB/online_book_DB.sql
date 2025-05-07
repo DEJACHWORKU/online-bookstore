@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2025 at 04:54 PM
+-- Generation Time: May 07, 2025 at 05:43 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -103,16 +103,12 @@ CREATE TABLE `books` (
 --
 
 INSERT INTO `books` (`id`, `date`, `title`, `description`, `department`, `author`, `cover`, `file`, `is_read`, `is_download`, `created_at`) VALUES
-(2, '2025-04-05', 'Eyewitness', 'Ethiopian wonder full historical book based on true story', 'Art', 'Mr. Abebe belay', 'uploads/covers/67f1c9c9c548e.jpg', 'uploads/files/67f1c9c9c5497.pdf', 1, 0, '2025-04-06 00:24:41'),
-(3, '2025-04-06', 'ፍቅር እስከ መቃብር', 'Ethiopian Greate love fiction', 'Jornalist', 'Adis Alemayew', 'uploads/covers/67f1ca4a5e891.jpg', 'uploads/files/67f1ca4a5e896.pdf', 1, 1, '2025-04-06 00:26:50'),
-(4, '2025-04-08', 'Civics and Ethical', 'Ethio ethical education book', 'Teaching', 'ETHIOPIAN EDUCATION ASSOCATION', 'uploads/covers/67f1cbcc7d8a8.jpg', 'uploads/files/67f1cbcc7d8ac.pdf', 1, 1, '2025-04-06 00:33:16'),
-(5, '2025-04-08', 'Get smart', 'To the advice to taker our life and success way of life', 'philosophy', 'Mark Anstine', 'uploads/covers/67f1ccc383cf5.jpg', 'uploads/files/67f1ccc383cfa.pdf', 1, 0, '2025-04-06 00:37:23'),
-(6, '2025-04-09', 'TIME TOP', 'How to use our time the best accountant book', 'IT', 'Mr. Maharish bela', 'uploads/covers/67f1cddcdf76b.jpg', 'uploads/files/67f1cddcdf76f.pdf', 1, 1, '2025-04-06 00:42:04'),
-(7, '2025-04-12', 'Buisness plan', 'How to use our time and how to work and invest our money', 'Political science', 'Mr. Michael Marko', 'uploads/covers/67f1ce5329559.jpg', 'uploads/files/67f1ce532955e.pdf', 0, 1, '2025-04-06 00:44:03'),
-(8, '2025-04-18', 'Electrical power', 'based on the international research to explain Detail about Electrical power', 'Electrical engineer', 'Anvertan Stayin', 'uploads/covers/67f1cf0065c5e.jpg', 'uploads/files/67f1cf0065c63.pdf', 1, 0, '2025-04-06 00:46:56'),
-(9, '2025-04-13', 'How-to-Talk-to-Anyone', 'How-to-Talk-to-Anyone psychological book', 'philosophy', 'Berlin Angelo', 'uploads/covers/67f1cf5ec0e5e.jpg', 'uploads/files/67f1cf5ec0e65.pdf', 0, 1, '2025-04-06 00:48:30'),
-(10, '2025-04-09', 'Dopamine', 'Health science book about health protection', 'Health', 'Dr.Andersen alene', 'uploads/covers/67f1cfd042dba.jpg', 'uploads/files/67f1cfd042dc1.pdf', 1, 1, '2025-04-06 00:50:24'),
-(13, '2025-05-07', 'BIOLOGY omm', 'fdh;flfhfbafifdbfu;isfkughw', 'Electrical', 'Biniam', 'Uploads/covers/681b7365bb817.jpg', 'Uploads/files/681b7365bb81e.pdf', 1, 0, '2025-05-07 14:51:34');
+(15, '2025-05-08', 'FIKR ESKE MEKABR', 'Love of fiction about Ethiopian Country the origin of Ethiopia Gojam Mankusa', 'Art', 'Adis Alemayew', 'Uploads/covers/681b7c3c41265.jpg', 'Uploads/files/681b7c3c41269.pdf', 1, 0, '2025-05-07 15:29:00'),
+(16, '2025-05-07', 'Eyewitness', 'Ethiopian population History Living and life process', 'Art', 'Mr alebachew shemse', 'Uploads/covers/681b7c9fa321a.jpg', 'Uploads/files/681b7c9fa3221.pdf', 1, 1, '2025-05-07 15:30:39'),
+(17, '2025-05-08', 'Gemena', 'Fiction book about life and social behavior and environmental factor', 'Art', 'Selomon shumye', 'Uploads/covers/681b7d275658a.jpg', 'Uploads/files/681b7d275658d.pdf', 0, 1, '2025-05-07 15:32:55'),
+(18, '2025-04-27', 'HOW-to -talk-without fear', 'Psychological book for reader', 'Health', 'Biniam', 'Uploads/covers/681b7dbd86889.jpg', 'Uploads/files/681b7dbd8688d.pdf', 1, 1, '2025-05-07 15:35:25'),
+(19, '2025-05-28', 'TOP-100-English question', 'Self-Training for English grammar book', 'English', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681b7ec8f031a.jpg', 'Uploads/files/681b7ec8f0320.pdf', 1, 0, '2025-05-07 15:39:52'),
+(20, '2025-04-27', 'Civics', 'Citizen and civilization for people learn about rule and law', 'Political', 'Dr.Andersen alene', 'Uploads/covers/681b7f51c4afa.jpg', 'Uploads/files/681b7f51c4b01.pdf', 0, 1, '2025-05-07 15:42:09');
 
 -- --------------------------------------------------------
 
@@ -306,7 +302,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `book_ratings`
