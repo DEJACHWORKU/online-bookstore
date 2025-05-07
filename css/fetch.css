@@ -97,7 +97,6 @@ html, body {
   border: none;
   padding: 8px 15px;
   border-radius: 4px;
-  display: flex;
   align-items: center;
   white-space: nowrap;
 }
@@ -155,31 +154,69 @@ html, body {
   font-size: 1.3rem;
 }
 
+.card-title span:first-child {
+  font-weight: 800;
+  color: #000;
+}
+
+.card-title span:nth-child(2) {
+  font-weight: normal;
+}
+
 .card-text {
-  color: black;
+  color: var(--text-color);
   margin-bottom: 18px;
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
-.card-info {
-  display: flex;
-  margin-bottom: 14px;
-  line-height: 1.5;
+.card-text span:first-child {
+  font-weight: 800;
+  color: #000;
 }
 
-.card-info-label {
-  font-weight: 600;
-  color: var(--main-color);
-  min-width: 80px;
-  margin-right: 8px;
-  flex-shrink: 0;
+.card-text span:nth-child(2) {
+  font-weight: normal;
+  color: #000;
 }
 
-.card-info-value {
-  color: var(--text-color);
-  font-weight: 500;
-  word-break: break-word;
+.card-body div:nth-child(4) span:first-child {
+  font-weight: 800;
+  color: #000;
+}
+
+.card-body div:nth-child(4) span:nth-child(2) {
+  font-weight: normal;
+  color: #000;
+}
+
+.card-body p.mb-0 span:first-child {
+  font-weight: 800;
+  color: #000;
+}
+
+.card-body p.mb-0 span:nth-child(2) {
+  font-weight: normal;
+  color: #000;
+}
+
+.card-body small span:first-child {
+  font-weight: 800;
+  color: #000;
+}
+
+.card-body small span:nth-child(2) {
+  font-weight: normal;
+}
+
+.status-badge.readable {
+  font-weight: 800;
+  color: #000;
+}
+
+.status-badge.downloadable {
+  font-weight: 800;
+  color: #000;
 }
 
 .status-badge {
@@ -469,4 +506,24 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--main-color);
   opacity: 0.9;
+}
+
+.card-info {
+  display: flex;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.card-info-label {
+  font-weight: 600;
+  color: var(--main-color);
+  min-width: 80px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.card-info-value {
+  color: var(--text-color);
+  font-weight: 500;
+  word-break: break-word;
 }
