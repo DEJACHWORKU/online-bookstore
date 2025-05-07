@@ -1,4 +1,5 @@
 <?php
+session_start();
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -13,30 +14,43 @@ if ($conn->connect_error) {
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $full_name = $_POST['full_name'];
-    $username = $_POST['username'];
-    $department = $_POST['department'];
-    $subject = $_POST['subject'];
-    $message_text = $_POST['message'];
+    $full_name = trim($_POST['full_name']);
+    $username = trim($_POST['username']);
+    $department = trim($_POST['department']);
+    $subject = trim($_POST['subject']);
+    $message_text = trim($_POST['message']);
     $date = date('Y-m-d H:i:s');
 
-    $stmt = $conn->prepare("INSERT INTO comment (full_name, username, department, subject, message, date) VALUES (?, ?, ?, ?, ?, ?)");
-    if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
-    }
-    
-    $stmt->bind_param("ssssss", $full_name, $username, $department, $subject, $message_text, $date);
-
-    if ($stmt->execute()) {
-        $message = "<p class='success-msg'>Comment submitted successfully!</p>";
+    if (empty($full_name) || empty($username) || empty($department) || empty($subject) || empty($message_text)) {
+        $message = "<p class='error-msg'>All fields must be filled!</p>";
     } else {
-        $message = "<p class='error-msg'>Error: " . $stmt->error . "</p>";
-    }
+        $stmt = $conn->prepare("INSERT INTO comment (full_name, username, department, subject, message, date) VALUES (?, ?, ?, ?, ?, ?)");
+        if ($stmt === false) {
+            die("Prepare failed: " . $conn->error);
+        }
+        
+        $stmt->bind_param("ssssss", $full_name, $username, $department, $subject, $message_text, $date);
 
-    $stmt->close();
+        if ($stmt->execute()) {
+            $_SESSION['message'] = "<p class='success-msg'>Comment submitted successfully!</p>";
+            $stmt->close();
+            $conn->close();
+            header("Location: " . $_SERVER["PHP_SELF"]);
+            exit();
+        } else {
+            $message = "<p class='error-msg'>Error: " . $stmt->error . "</p>";
+        }
+
+        $stmt->close();
+    }
 }
 
 $conn->close();
+
+if (isset($_SESSION['message'])) {
+    $message = $_SESSION['message'];
+    unset($_SESSION['message']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -52,7 +66,7 @@ $conn->close();
 <body class="theme-switcher">
     <section>
         <h2 class="heading">Send Your<span> comment!</span></h2>
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" id="commentForm">
             <div class="input-box">
                 <input type="text" name="full_name" placeholder="Full Name" required>
                 <input type="text" name="username" placeholder="Access Username" required>
@@ -83,6 +97,9 @@ $conn->close();
             const savedTheme = localStorage.getItem('bookstoreTheme');
             if (savedTheme) {
                 document.body.className = 'theme-switcher ' + savedTheme;
+            }
+            if (messageContainer.innerHTML.includes('success')) {
+                document.getElementById('commentForm').reset();
             }
         });
     </script>
