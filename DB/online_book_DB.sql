@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 06:31 PM
+-- Generation Time: May 08, 2025 at 07:18 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,7 +46,8 @@ CREATE TABLE `admin` (
 
 INSERT INTO `admin` (`id`, `full_name`, `admin_id`, `email`, `phone`, `username`, `password`, `remember_me`, `profile_image`, `created_at`) VALUES
 (1, 'Banch Kasaw Tgabu', '2323BA', 'banchkasaw@gmail.com', '0942326791', 'UGR/143/13', '$2y$10$EJ3xXHWM8TagSGgJ7cnP9OzDtZc4TUaZXRW7kVyJgDvrXujOlmoGi', 'MOM', 'uploads/profile_images/67fb32e49219a.jpg', '2025-04-13 03:58:12'),
-(2, 'Adey Kasaw Tgabu', '2303BA', 'adeykasaw@gmail.com', '0943326791', 'UGR/144/13', '$2y$10$sDFXW1V2AlcCpKEyjMn9FO7n2DRM1EC7biEfwZpuGOPMhfI0nnqBS', 'MOM', 'uploads/profile_images/67fb339ec2645.jpg', '2025-04-13 03:58:36');
+(2, 'Adey Kasaw Tgabu', '2303BA', 'adeykasaw@gmail.com', '0943326791', 'UGR/144/13', '$2y$10$sDFXW1V2AlcCpKEyjMn9FO7n2DRM1EC7biEfwZpuGOPMhfI0nnqBS', 'MOM', 'uploads/profile_images/67fb339ec2645.jpg', '2025-04-13 03:58:36'),
+(3, 'Iftu Berhanu', '11779', 'efi@gmail.com', '09042092658', 'iftu@', '$2y$10$rAb4nrST7xBjScAM22MjHe2C31YkgCLBaGt4YHidkxlv9/F1ahNYi', 'w', 'Uploads/profile_images/681cdec64b029.jpg', '2025-05-08 16:41:42');
 
 -- --------------------------------------------------------
 
@@ -64,6 +65,7 @@ CREATE TABLE `authors` (
 --
 
 INSERT INTO `authors` (`id`, `name`) VALUES
+(0, 'iftu'),
 (1, 'Mr alebachew shemse'),
 (2, 'kmbj'),
 (3, 'Biniam'),
@@ -108,7 +110,8 @@ INSERT INTO `books` (`id`, `date`, `title`, `description`, `department`, `author
 (17, '2025-05-08', 'Gemena', 'Fiction book about life and social behavior and environmental factor', 'Art', 'Selomon shumye', 'Uploads/covers/681b7d275658a.jpg', 'Uploads/files/681b7d275658d.pdf', 0, 1, '2025-05-07 15:32:55'),
 (18, '2025-04-27', 'HOW-to -talk-without fear', 'Psychological book for reader', 'Health', 'Biniam', 'Uploads/covers/681b7dbd86889.jpg', 'Uploads/files/681b7dbd8688d.pdf', 1, 1, '2025-05-07 15:35:25'),
 (19, '2025-05-28', 'TOP-100-English question', 'Self-Training for English grammar book', 'English', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681b7ec8f031a.jpg', 'Uploads/files/681b7ec8f0320.pdf', 1, 0, '2025-05-07 15:39:52'),
-(20, '2025-04-27', 'Civics', 'Citizen and civilization for people learn about rule and law', 'Political', 'Dr.Andersen alene', 'Uploads/covers/681b7f51c4afa.jpg', 'Uploads/files/681b7f51c4b01.pdf', 0, 1, '2025-05-07 15:42:09');
+(20, '2025-04-27', 'Civics', 'Citizen and civilization for people learn about rule and law', 'Political', 'Dr.Andersen alene', 'Uploads/covers/681b7f51c4afa.jpg', 'Uploads/files/681b7f51c4b01.pdf', 0, 1, '2025-05-07 15:42:09'),
+(21, '2025-05-08', 'programming', 'programming', 'Marketing', 'iftu', 'Uploads/covers/681ce2970b166.jpg', 'Uploads/files/681ce2970b16d.pdf', 1, 1, '2025-05-08 16:59:41');
 
 -- --------------------------------------------------------
 
@@ -123,6 +126,13 @@ CREATE TABLE `book_ratings` (
   `rating` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `book_ratings`
+--
+
+INSERT INTO `book_ratings` (`id`, `book_id`, `user_id`, `rating`, `created_at`) VALUES
+(22, 21, 8, 1, '2025-05-08 17:11:07');
 
 -- --------------------------------------------------------
 
@@ -148,9 +158,10 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 (6, 'Health'),
 (7, 'IT'),
 (8, 'Jornalist'),
-(9, 'philosophy'),
-(10, 'Political '),
-(11, 'Teaching');
+(9, 'Marketing'),
+(10, 'philosophy'),
+(11, 'Political '),
+(12, 'Teaching');
 
 -- --------------------------------------------------------
 
@@ -199,7 +210,8 @@ CREATE TABLE `librarian` (
 --
 
 INSERT INTO `librarian` (`id`, `full_name`, `personal_id`, `email`, `phone`, `username`, `password`, `remember_me`, `profile_image`, `created_at`) VALUES
-(4, 'DAGI MAN WOLF', 'UGR/101023/17', 'dagiman2116@gmaail.com', '0998564323', 'DAGI1234', '$2y$10$6.DiLw/m.03llbVvcSdIQeZ2LHyIxf/ZWzamYxAFcdQye/rOTD9Xi', 'MOM', 'Uploads/profile_images/681b73138d2fa.jpg', '2025-05-07 14:49:55');
+(4, 'DAGI MAN WOLF', 'UGR/101023/17', 'dagiman2116@gmaail.com', '0998564323', 'DAGI1234', '$2y$10$6.DiLw/m.03llbVvcSdIQeZ2LHyIxf/ZWzamYxAFcdQye/rOTD9Xi', 'MOM', 'Uploads/profile_images/681b73138d2fa.jpg', '2025-05-07 14:49:55'),
+(5, 'Iftu Berhanu', '11779', 'efi@gmail.com', '0904209265', 'iftu@', '$2y$10$21U0VH3wESCiyFxVZsBL2OmtxBz.m8KzrPglq0oo0D44wDitY/c/i', 'Y', 'Uploads/profile_images/681cdf736785f.jpg', '2025-05-08 16:44:35');
 
 -- --------------------------------------------------------
 
@@ -220,7 +232,8 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `book_id`, `availability`, `created_at`, `expiry_date`) VALUES
-(0, 19, '1week', '2025-05-07 20:43:14', '2025-05-07 17:43:14');
+(0, 19, '1week', '2025-05-07 20:43:14', '2025-05-07 17:43:14'),
+(0, 21, '1day', '2025-05-08 20:18:19', '2025-05-08 17:18:19');
 
 -- --------------------------------------------------------
 
@@ -251,7 +264,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `date`, `academic_year`, `full_name`, `id_number`, `department`, `year`, `semester`, `phone`, `username`, `password`, `profile_image`, `remember_me`, `access_permission`, `created_at`) VALUES
-(6, '2025-04-12', '2025', 'Banch Worku Tasew', 'UGR/10143/13', 'CS', '4th', '1st', '0997785658', 'UGR/10143/13', '$2y$10$S6q.Xi0Zc3CqSrWODFtfTeBFudfiE/jwbl9zwBp5kzZ3b/M8JV5Vm', 'users/user_67fa40509c4ec.jpg', 'GOOD DAY', '2 Months', '2025-04-12 10:28:32');
+(6, '2025-04-12', '2025', 'Banch Worku Tasew', 'UGR/10143/13', 'CS', '4th', '1st', '0997785658', 'UGR/10143/13', '$2y$10$S6q.Xi0Zc3CqSrWODFtfTeBFudfiE/jwbl9zwBp5kzZ3b/M8JV5Vm', 'users/user_67fa40509c4ec.jpg', 'GOOD DAY', '2 Months', '2025-04-12 10:28:32'),
+(8, '2025-05-08', '2025', 'Iftu Berhanu', '11779', 'Marketing', '2nd', '2nd', '0904209265', 'iftu@', '$2y$10$vg9SX4tIZkOkeK9nJwC0t.6a2oDZkDABrVIR0KBcJmuOlMZ5RQvWe', 'users/user_681ce099191f4.jpg', 'w', '7 Months', '2025-05-08 16:49:29');
 
 --
 -- Indexes for dumped tables
@@ -303,12 +317,6 @@ ALTER TABLE `librarian`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `notifications`
---
-ALTER TABLE `notifications`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -322,37 +330,43 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `comment`
 --
 ALTER TABLE `comment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `librarian`
 --
 ALTER TABLE `librarian`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables

@@ -37,8 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || empty($email)) {
         $errors['email'] = "Valid email is required.";
     }
-    if (!preg_match("/^[0-9]*$/", $phone) || empty($phone)) {
-        $errors['phone'] = "Phone number must contain only digits and cannot be empty.";
+    if (!preg_match("/^[0-9]{10}$/", $phone) || empty($phone)) {
+        $errors['phone'] = "Phone number must be exactly 10 digits.";
     }
     if (empty($username)) {
         $errors['username'] = "Username is required.";
@@ -57,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (!in_array($image_ext, ['png', 'jpg', 'jpeg'])) {
             $errors['profileImage'] = "Profile image must be PNG, JPG, or JPEG.";
         }
-        if ($profileImage['size'] > 5242880) { // 5MB
+        if ($profileImage['size'] > 5242880) {
             $errors['profileImage'] = "Profile image must be less than 5MB.";
         }
     }
@@ -237,7 +237,7 @@ $conn->close();
                 
                 <div class="form-group">
                     <label for="rememberMe">Remember Me</label>
-                    <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter security question">
+                    <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter Your security  Reference">
                     <i class="fas fa-check-circle input-icon"></i>
                     <div class="error-message"></div>
                 </div>

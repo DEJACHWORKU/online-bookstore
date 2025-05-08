@@ -78,7 +78,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($input['phone'])) {
         $errors['phone'] = "Phone number is required";
     } elseif (!preg_match('/^\d{10}$/', $input['phone'])) {
-        $errors['phone'] = "Phone must be 10 digits";
+        $errors['phone'] = "Phone number must be exactly 10 digits";
     }
 
     if (empty($input['username'])) {
@@ -340,7 +340,7 @@ $conn->close();
             <div class="form-row">
                 <div class="form-group">
                     <label for="rememberMe">Remember Me</label>
-                    <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter preference Security question" required>
+                    <input type="text" id="rememberMe" name="rememberMe" placeholder="Enter Your security  Reference" required>
                     <i class="fas fa-check-circle input-icon"></i>
                     <div class="error-message" id="rememberMe-error"></div>
                 </div>
