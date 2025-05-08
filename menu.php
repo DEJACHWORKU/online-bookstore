@@ -9,10 +9,9 @@
 </head>
 <body>
     <?php
-    // Database connection to get comment count
     $servername = "localhost";
-    $username = "root";
-    $password = "";
+    $username = "root"; // TODO: Replace with a secure user
+    $password = "";     // TODO: Replace with a secure password
     $dbname = "online_book_Db";
 
     $conn = new mysqli($servername, $username, $password, $dbname);
@@ -45,7 +44,7 @@
                 <span class="comment-count" data-count="<?php echo $comment_count; ?>" style="position: relative; display: inline-block;">
                     <i class="fas fa-bell notification-icon"></i>
                     <?php if ($comment_count > 0): ?>
-                        <span style="position: absolute; top: -8px; right: -8px; background-color: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; font-weight: bold;">
+                        <span class="count-badge" style="position: absolute; top: -8px; right: -8px; background-color: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; font-weight: bold; transition: transform 0.2s;">
                             <?php echo $comment_count; ?>
                         </span>
                     <?php endif; ?>
@@ -114,43 +113,81 @@
                     body.classList.remove('menu-open');
                 }
             });
-            
+
             // Function to update comment count
-            function updateCommentCount() {
-                fetch('get_comment_count.php')
-                    .then(response => response.json())
-                    .then(data => {
-                        const countElement = document.querySelector('.comment-count');
-                        if (countElement) {
-                            countElement.setAttribute('data-count', data.count);
-                            // Update the visible count
-                            const countBadge = countElement.querySelector('span');
-                            if (data.count > 0) {
-                                if (!countBadge) {
-                                    const newBadge = document.createElement('span');
-                                    newBadge.style.position = 'absolute';
-                                    newBadge.style.top = '-8px';
-                                    newBadge.style.right = '-8px';
-                                    newBadge.style.backgroundColor = 'red';
-                                    newBadge.style.color = 'white';
-                                    newBadge.style.borderRadius = '50%';
-                                    newBadge.style.padding = '2px 6px';
-                                    newBadge.style.fontSize = '12px';
-                                    newBadge.style.fontWeight = 'bold';
-                                    newBadge.textContent = data.count;
-                                    countElement.appendChild(newBadge);
-                                } else {
-                                    countBadge.textContent = data.count;
-                                }
-                            } else if (countBadge) {
-                                countBadge.remove();
-                            }
+            function updateCommentCount(count) {
+                const countElement = document.querySelector('.comment-count');
+                if (countElement) {
+                    const parsedCount = parseInt(count, 10);
+                    if (isNaN(parsedCount) || parsedCount < 0) {
+                        console.error('Invalid comment count:', count);
+                        return;
+                    }
+
+                    countElement.setAttribute('data-count', parsedCount);
+                    let countBadge = countElement.querySelector('.count-badge');
+
+                    if (parsedCount > 0) {
+                        if (!countBadge) {
+                            countBadge = document.createElement('span');
+                            countBadge.className = 'count-badge';
+                            countBadge.style.position = 'absolute';
+                            countBadge.style.top = '-8px';
+                            countBadge.style.right = '-8px';
+                            countBadge.style.backgroundColor = 'red';
+                            countBadge.style.color = 'white';
+                            countBadge.style.borderRadius = '50%';
+                            countBadge.style.padding = '2px 6px';
+                            countBadge.style.fontSize = '12px';
+                            countBadge.style.fontWeight = 'bold';
+                            countBadge.style.transition = 'transform 0.2s';
+                            countElement.appendChild(countBadge);
                         }
-                    });
+                        countBadge.textContent = parsedCount;
+                        // Add a slight scale animation for visual feedback
+                        countBadge.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            countBadge.style.transform = 'scale(1)';
+                        }, 200);
+                    } else if (countBadge) {
+                        countBadge.style.transform = 'scale(0)';
+                        setTimeout(() => {
+                            countBadge.remove();
+                        }, 200);
+                    }
+                }
             }
-            
-            // Update count every 30 seconds
-            setInterval(updateCommentCount, 30000);
+
+            // Listen for messages from the iframe
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'updateCommentCount') {
+                    updateCommentCount(event.data.count);
+                }
+            });
+
+            // Handle SSE for real-time comment count updates
+            const eventSource = new EventSource('comment_count_stream.php');
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    updateCommentCount(data.count);
+                } catch (error) {
+                    console.error('Error parsing SSE data:', error);
+                }
+            };
+            eventSource.onerror = function() {
+                console.warn('SSE connection error. Retrying...');
+                // Optionally, attempt to reconnect after a delay
+                setTimeout(() => {
+                    if (eventSource.readyState === EventSource.CLOSED) {
+                        console.log('Reconnecting SSE...');
+                        const newSource = new EventSource('comment_count_stream.php');
+                        newSource.onmessage = eventSource.onmessage;
+                        newSource.onerror = eventSource.onerror;
+                        eventSource = newSource;
+                    }
+                }, 5000);
+            };
         });
     </script>
 </body>

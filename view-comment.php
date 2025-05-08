@@ -21,7 +21,6 @@
         die("Connection failed: " . $conn->connect_error);
     }
 
-    // Handle deletion
     if (isset($_GET['delete_id'])) {
         $delete_id = $_GET['delete_id'];
         $stmt = $conn->prepare("DELETE FROM comment WHERE id = ?");
@@ -60,19 +59,15 @@
                 <?php foreach ($comments as $comment): ?>
                     <div class="comment-card" data-id="<?php echo $comment['id']; ?>">
                         <div class="comment-header">
-                            <h3><?php echo htmlspecialchars($comment['full_name']); ?></h3>
+                            <h3><strong>Full Name:</strong> <?php echo htmlspecialchars($comment['full_name']); ?></h3>
                             <span class="date"><?php echo date('M d, Y - H:i', strtotime($comment['date'])); ?></span>
                         </div>
                         <div class="comment-details">
-                            <p><strong>Username:</strong> <?php echo htmlspecialchars($comment['username']); ?></p>
+                            <p><strong>ID Nmber:</strong> <?php echo htmlspecialchars($comment['username']); ?></p>
                             <p><strong>Department:</strong> <?php echo htmlspecialchars($comment['department']); ?></p>
                             <p><strong>Message Subject:</strong> <?php echo htmlspecialchars($comment['subject']); ?></p>
                             <p class="message"><strong>Message:</strong> <?php echo nl2br(htmlspecialchars($comment['message'])); ?></p>
-                            <button class="delete-btn" onclick="approveDelete(<?php echo $comment['id']; ?>, this)">Approve</button>
-                            <button class="undo-btn" onclick="undoDelete(<?php echo $comment['id']; ?>, this)" style="display: none;">Undo</button>
-                        </div>
-                        <div class="countdown-notification" id="countdown-<?php echo $comment['id']; ?>" style="display: none;">
-                            Deleting in <span class="countdown-timer">5</span> seconds
+                            <button class="delete-btn" onclick="deleteComment(<?php echo $comment['id']; ?>, this)">Approve</button>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -82,15 +77,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const deletionTimers = new Map();
-
-            // Theme initialization
             const savedTheme = localStorage.getItem('bookstoreTheme');
             if (savedTheme) {
                 document.body.className = savedTheme;
             }
 
-            // Theme switcher toggle
             const settingsToggle = document.getElementById('settings-toggle');
             const themeOptions = document.getElementById('theme-options');
             if (settingsToggle && themeOptions) {
@@ -100,7 +91,6 @@
                 });
             }
 
-            // Theme selection
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.addEventListener('click', function() {
                     const theme = this.getAttribute('data-theme');
@@ -110,94 +100,60 @@
                 });
             });
 
-            // Close theme options when clicking outside
             document.addEventListener('click', function(e) {
                 if (settingsToggle && themeOptions && !settingsToggle.contains(e.target) && !themeOptions.contains(e.target)) {
                     themeOptions.style.display = 'none';
                 }
             });
 
-            // Approve deletion
-            window.approveDelete = function(commentId, button) {
-                const card = document.querySelector(`.comment-card[data-id="${commentId}"]`);
-                const countdownNotification = document.getElementById(`countdown-${commentId}`);
-                const countdownElement = countdownNotification.querySelector('.countdown-timer');
-                const undoButton = card.querySelector('.undo-btn');
-                const deleteButton = button;
+            window.deleteComment = function(commentId, button) {
+                const card = button.closest('.comment-card');
+                let countdown = 5;
 
-                // Disable approve button, show undo button and countdown
-                deleteButton.style.display = 'none';
-                undoButton.style.display = 'inline-block';
-                card.classList.add('approved');
-                countdownNotification.style.display = 'block';
+                button.disabled = true;
+                button.textContent = `Approving (${countdown}s)`;
 
-                let seconds = 5;
-                countdownElement.textContent = seconds;
-
-                const countdown = setInterval(() => {
-                    seconds--;
-                    countdownElement.textContent = seconds;
-                    if (seconds <= 0) {
-                        clearInterval(countdown);
-                        deletionTimers.delete(commentId);
-                        // Remove card from DOM
-                        card.style.opacity = '0';
-                        setTimeout(() => {
-                            card.remove();
-                            // Check if there are any comments left
-                            const remainingComments = document.querySelectorAll('.comment-card');
-                            if (remainingComments.length === 0) {
-                                const commentContainer = document.querySelector('.comment-container');
-                                commentContainer.innerHTML = `
-                                    <div class="no-comments">
-                                        <h3>No Comments Available</h3>
-                                        <p>No comments have been submitted yet.</p>
-                                    </div>
-                                `;
-                            }
-                            // Send updated comment count to parent
-                            if (window.parent) {
-                                window.parent.postMessage({
-                                    type: 'updateCommentCount',
-                                    count: remainingComments.length
-                                }, '*');
-                            }
-                        }, 300);
-
-                        // Delete from database
-                        fetch(`view-comment.php?delete_id=${commentId}`, {
-                            method: 'GET'
-                        }).then(response => response.json())
-                          .then(data => {
-                              if (!data.success) {
-                                  console.error('Deletion failed');
-                              }
-                          }).catch(error => {
-                              console.error('Deletion error:', error);
-                          });
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    button.textContent = `Approving (${countdown}s)`;
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
                     }
                 }, 1000);
 
-                deletionTimers.set(commentId, countdown);
-            };
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.remove();
+                        const remainingComments = document.querySelectorAll('.comment-card').length;
+                        if (remainingComments === 0) {
+                            const commentContainer = document.querySelector('.comment-container');
+                            commentContainer.innerHTML = `
+                                <div class="no-comments">
+                                    <h3>No Comments Available</h3>
+                                    <p>No comments have been submitted yet.</p>
+                                </div>
+                            `;
+                        }
+                        if (window.parent) {
+                            window.parent.postMessage({
+                                type: 'updateCommentCount',
+                                count: remainingComments
+                            }, '*');
+                        }
+                    }, 300);
 
-            // Undo deletion
-            window.undoDelete = function(commentId, button) {
-                const card = document.querySelector(`.comment-card[data-id="${commentId}"]`);
-                const countdownNotification = document.getElementById(`countdown-${commentId}`);
-                const deleteButton = card.querySelector('.delete-btn');
-
-                // Clear the countdown and reset UI
-                const countdown = deletionTimers.get(commentId);
-                if (countdown) {
-                    clearInterval(countdown);
-                    deletionTimers.delete(commentId);
-                }
-
-                card.classList.remove('approved');
-                countdownNotification.style.display = 'none';
-                button.style.display = 'none';
-                deleteButton.style.display = 'inline-block';
+                    fetch(`view-comment.php?delete_id=${commentId}`, {
+                        method: 'GET'
+                    }).then(response => response.json())
+                      .then(data => {
+                          if (!data.success) {
+                              console.error('Deletion failed');
+                          }
+                      }).catch(error => {
+                          console.error('Deletion error:', error);
+                      });
+                }, 5000);
             };
         });
     </script>

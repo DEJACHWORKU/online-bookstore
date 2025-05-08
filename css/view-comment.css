@@ -52,11 +52,6 @@ section {
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
-.comment-card.approved {
-    opacity: 0.7;
-    background: #e0f7fa;
-}
-
 .comment-header {
     display: flex;
     justify-content: space-between;
@@ -122,31 +117,6 @@ section {
     box-shadow: 0 2px 10px rgba(211, 47, 47, 0.3);
 }
 
-.undo-btn {
-    background: linear-gradient(45deg, #2196f3, #42a5f5);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-left: 10px;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
-}
-
-.undo-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.6);
-    background: linear-gradient(45deg, #42a5f5, #2196f3);
-}
-
-.undo-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
-}
-
 .no-comments {
     text-align: center;
     padding: 30px;
@@ -161,12 +131,6 @@ section {
 
 .no-comments p {
     font-size: 1.2em;
-}
-
-.countdown-notification {
-    color: black;
-    margin-top: 10px;
-    font-weight: 600;
 }
 
 @media (max-width: 768px) {
@@ -211,7 +175,7 @@ section {
         font-size: 0.9em;
     }
 
-    .delete-btn, .undo-btn {
+    .delete-btn {
         padding: 8px 15px;
         font-size: 0.9em;
     }

@@ -68,11 +68,11 @@ if (isset($_SESSION['message'])) {
         <h2 class="heading">Send Your<span> comment!</span></h2>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" id="commentForm">
             <div class="input-box">
-                <input type="text" name="full_name" placeholder="Full Name" required>
-                <input type="text" name="username" placeholder="Access Username" required>
+                <input type="text" name="full_name" placeholder="Enter Your Full Name" required>
+                <input type="text" name="username" placeholder="Enter Your ID number" required>
             </div>
             <div class="input-box">
-                <input type="text" name="department" placeholder="Department" required>
+                <input type="text" name="department" placeholder="Enter Your Department" required>
                 <input type="text" name="subject" placeholder="Message Subject" required>
             </div>
             <textarea name="message" placeholder="Your Message" required></textarea>
