@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 08:44 PM
+-- Generation Time: May 08, 2025 at 09:01 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -107,19 +107,19 @@ CREATE TABLE `books` (
 --
 
 INSERT INTO `books` (`id`, `date`, `title`, `description`, `department`, `author`, `cover`, `file`, `is_read`, `is_download`, `created_at`) VALUES
-(15, '2025-05-08', 'FIKR ESKE MEKABR', 'Love of fiction about Ethiopian Country the origin of Ethiopia Gojam Mankusa', 'Art', 'Adis Alemayew', 'Uploads/covers/681b7c3c41265.jpg', 'Uploads/files/681b7c3c41269.pdf', 1, 0, '2025-05-07 15:29:00'),
-(16, '2025-05-07', 'Eyewitness', 'Ethiopian population History Living and life process', 'Art', 'Mr alebachew shemse', 'Uploads/covers/681b7c9fa321a.jpg', 'Uploads/files/681b7c9fa3221.pdf', 1, 1, '2025-05-07 15:30:39'),
-(17, '2025-05-08', 'Gemena', 'Fiction book about life and social behavior and environmental factor', 'Art', 'Selomon shumye', 'Uploads/covers/681b7d275658a.jpg', 'Uploads/files/681b7d275658d.pdf', 0, 1, '2025-05-07 15:32:55'),
-(18, '2025-04-27', 'HOW-to -talk-without fear', 'Psychological book for reader', 'Health', 'Biniam', 'Uploads/covers/681b7dbd86889.jpg', 'Uploads/files/681b7dbd8688d.pdf', 1, 1, '2025-05-07 15:35:25'),
-(19, '2025-05-28', 'TOP-100-English question', 'Self-Training for English grammar book', 'English', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681b7ec8f031a.jpg', 'Uploads/files/681b7ec8f0320.pdf', 1, 0, '2025-05-07 15:39:52'),
-(20, '2025-04-27', 'Civics', 'Citizen and civilization for people learn about rule and law', 'Political', 'Dr.Andersen alene', 'Uploads/covers/681b7f51c4afa.jpg', 'Uploads/files/681b7f51c4b01.pdf', 0, 1, '2025-05-07 15:42:09'),
-(21, '2025-05-08', 'programming', 'programming', 'Marketing', 'iftu', 'Uploads/covers/681ce2970b166.jpg', 'Uploads/files/681ce2970b16d.pdf', 1, 1, '2025-05-08 16:59:41'),
-(22, '2025-05-21', 'java', 'programing', 'IT', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681ceb22691cb.jpg', 'Uploads/files/681ceb22691d7.pdf', 1, 1, '2025-05-08 17:34:26'),
-(23, '2025-05-12', 'Business plan', 'all neccessary book for starrt business', 'Economics', 'Mr. Abebe belay', 'Uploads/covers/681cf38e409b3.jpg', 'Uploads/files/681cf38e409be.pdf', 1, 0, '2025-05-08 18:10:22'),
-(24, '2025-05-16', 'get smart', 'all freak book all maind of access of history', 'Economics', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681cf3eded6c6.jpg', 'Uploads/files/681cf3eded6cd.pdf', 0, 1, '2025-05-08 18:11:57'),
-(26, '2025-05-08', 'MUlti media', 'all technology', 'English', 'Mr. Abebe belay', 'Uploads/covers/681cf7a42f591.jpg', 'Uploads/files/681cf7a42f59b.pdf', 1, 0, '2025-05-08 18:27:48'),
-(27, '2025-05-16', 'c++', 'all programing book for learn', 'CS', 'Anvertan Stayin', 'Uploads/covers/681cf7e246fa8.jpg', 'Uploads/files/681cf7e246fb0.pdf', 0, 1, '2025-05-08 18:28:50'),
-(28, '2025-05-16', 'Internet programing 2', 'all web based book accomplish', 'English', 'Berlin Angelo', 'Uploads/covers/681cf8d738c08.jpg', 'Uploads/files/681cf8d738c0f.pdf', 1, 0, '2025-05-08 18:32:55');
+(1, '2025-05-08', 'FIKR ESKE MEKABR', 'Love of fiction about Ethiopian Country the origin of Ethiopia Gojam Mankusa', 'Art', 'Adis Alemayew', 'Uploads/covers/681b7c3c41265.jpg', 'Uploads/files/681b7c3c41269.pdf', 1, 0, '2025-05-08 18:53:49'),
+(2, '2025-05-07', 'Eyewitness', 'Ethiopian population History Living and life process', 'Art', 'Mr alebachew shemse', 'Uploads/covers/681b7c9fa321a.jpg', 'Uploads/files/681b7c9fa3221.pdf', 1, 1, '2025-05-08 18:57:22'),
+(3, '2025-05-08', 'Gemena', 'Fiction book about life and social behavior and environmental factor', 'Art', 'Selomon shumye', 'Uploads/covers/681b7d275658a.jpg', 'Uploads/files/681b7d275658d.pdf', 0, 1, '2025-05-08 18:57:22'),
+(4, '2025-04-27', 'HOW-to -talk-without fear', 'Psychological book for reader', 'Health', 'Biniam', 'Uploads/covers/681b7dbd86889.jpg', 'Uploads/files/681b7dbd8688d.pdf', 1, 1, '2025-05-08 18:57:22'),
+(5, '2025-05-28', 'TOP-100-English question', 'Self-Training for English grammar book', 'English', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681b7ec8f031a.jpg', 'Uploads/files/681b7ec8f0320.pdf', 1, 0, '2025-05-08 18:59:08'),
+(6, '2025-04-27', 'Civics', 'Citizen and civilization for people learn about rule and law', 'Political', 'Dr.Andersen alene', 'Uploads/covers/681b7f51c4afa.jpg', 'Uploads/files/681b7f51c4b01.pdf', 0, 1, '2025-05-08 19:00:34'),
+(7, '2025-05-08', 'programming', 'programming', 'Marketing', 'iftu', 'Uploads/covers/681ce2970b166.jpg', 'Uploads/files/681ce2970b16d.pdf', 1, 1, '2025-05-08 19:00:34'),
+(8, '2025-05-21', 'java', 'programing', 'IT', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681ceb22691cb.jpg', 'Uploads/files/681ceb22691d7.pdf', 1, 1, '2025-05-08 19:00:34'),
+(9, '2025-05-12', 'Business plan', 'all neccessary book for starrt business', 'Economics', 'Mr. Abebe belay', 'Uploads/covers/681cf38e409b3.jpg', 'Uploads/files/681cf38e409be.pdf', 1, 0, '2025-05-08 19:00:34'),
+(10, '2025-05-16', 'get smart', 'all freak book all maind of access of history', 'Economics', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681cf3eded6c6.jpg', 'Uploads/files/681cf3eded6cd.pdf', 0, 1, '2025-05-08 19:00:34'),
+(11, '2025-05-08', 'MUlti media', 'all technology', 'English', 'Mr. Abebe belay', 'Uploads/covers/681cf7a42f591.jpg', 'Uploads/files/681cf7a42f59b.pdf', 1, 0, '2025-05-08 19:00:34'),
+(12, '2025-05-16', 'c++', 'all programing book for learn', 'CS', 'Anvertan Stayin', 'Uploads/covers/681cf7e246fa8.jpg', 'Uploads/files/681cf7e246fb0.pdf', 0, 1, '2025-05-08 19:00:34'),
+(13, '2025-05-16', 'Internet programing 2', 'all web based book accomplish', 'English', 'Berlin Angelo', 'Uploads/covers/681cf8d738c08.jpg', 'Uploads/files/681cf8d738c0f.pdf', 1, 0, '2025-05-08 19:00:34');
 
 -- --------------------------------------------------------
 
@@ -140,9 +140,8 @@ CREATE TABLE `book_ratings` (
 --
 
 INSERT INTO `book_ratings` (`id`, `book_id`, `user_id`, `rating`, `created_at`) VALUES
-(22, 21, 8, 1, '2025-05-08 17:11:07'),
-(23, 22, 9, 5, '2025-05-08 17:38:16'),
-(24, 19, 6, 5, '2025-05-08 18:44:32');
+(25, 5, 6, 5, '2025-05-08 19:01:27'),
+(26, 8, 6, 5, '2025-05-08 19:01:30');
 
 -- --------------------------------------------------------
 
@@ -309,7 +308,7 @@ ALTER TABLE `books`
 --
 ALTER TABLE `book_ratings`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `book_id` (`book_id`,`user_id`),
+  ADD UNIQUE KEY `book_id` (`book_id`,`user_id`) USING BTREE,
   ADD KEY `user_id_fk` (`user_id`);
 
 --
@@ -357,7 +356,7 @@ ALTER TABLE `books`
 -- AUTO_INCREMENT for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `categories`
