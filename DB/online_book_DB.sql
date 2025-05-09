@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 08, 2025 at 09:01 PM
+-- Generation Time: May 09, 2025 at 06:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -119,7 +119,8 @@ INSERT INTO `books` (`id`, `date`, `title`, `description`, `department`, `author
 (10, '2025-05-16', 'get smart', 'all freak book all maind of access of history', 'Economics', 'ETHIOPIAN EDUCATION ASSOCATION', 'Uploads/covers/681cf3eded6c6.jpg', 'Uploads/files/681cf3eded6cd.pdf', 0, 1, '2025-05-08 19:00:34'),
 (11, '2025-05-08', 'MUlti media', 'all technology', 'English', 'Mr. Abebe belay', 'Uploads/covers/681cf7a42f591.jpg', 'Uploads/files/681cf7a42f59b.pdf', 1, 0, '2025-05-08 19:00:34'),
 (12, '2025-05-16', 'c++', 'all programing book for learn', 'CS', 'Anvertan Stayin', 'Uploads/covers/681cf7e246fa8.jpg', 'Uploads/files/681cf7e246fb0.pdf', 0, 1, '2025-05-08 19:00:34'),
-(13, '2025-05-16', 'Internet programing 2', 'all web based book accomplish', 'English', 'Berlin Angelo', 'Uploads/covers/681cf8d738c08.jpg', 'Uploads/files/681cf8d738c0f.pdf', 1, 0, '2025-05-08 19:00:34');
+(13, '2025-05-16', 'Internet programing 2', 'all web based book accomplish', 'English', 'Berlin Angelo', 'Uploads/covers/681cf8d738c08.jpg', 'Uploads/files/681cf8d738c0f.pdf', 1, 0, '2025-05-08 19:00:34'),
+(29, '2025-05-08', 'CHAPTER 5', 'all web based book accomplish', 'Electrical', 'Biniam', 'Uploads/covers/681d011edfbb6.jpg', 'Uploads/files/681d011edfbce.pdf', 1, 0, '2025-05-08 19:08:14');
 
 -- --------------------------------------------------------
 
@@ -141,7 +142,13 @@ CREATE TABLE `book_ratings` (
 
 INSERT INTO `book_ratings` (`id`, `book_id`, `user_id`, `rating`, `created_at`) VALUES
 (25, 5, 6, 5, '2025-05-08 19:01:27'),
-(26, 8, 6, 5, '2025-05-08 19:01:30');
+(26, 8, 6, 5, '2025-05-08 19:01:30'),
+(27, 10, 6, 5, '2025-05-08 19:06:18'),
+(28, 12, 6, 3, '2025-05-08 19:06:26'),
+(29, 13, 6, 4, '2025-05-08 19:06:31'),
+(30, 9, 6, 4, '2025-05-08 19:12:59'),
+(31, 3, 6, 3, '2025-05-08 19:13:04'),
+(32, 29, 6, 4, '2025-05-09 03:45:22');
 
 -- --------------------------------------------------------
 
@@ -159,7 +166,7 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`) VALUES
-(1, 'Art'),
+(1, 'Art OF civ'),
 (2, 'CS'),
 (3, 'Economics'),
 (4, 'Electrical'),
@@ -187,13 +194,6 @@ CREATE TABLE `comment` (
   `message` text NOT NULL,
   `date` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `comment`
---
-
-INSERT INTO `comment` (`id`, `full_name`, `username`, `department`, `subject`, `message`, `date`) VALUES
-(4, 'hsh', 'HDSJDH', 'KJASJabk', 'nsxSDLK,', 'ASJkanbJDUkj', '2025-05-08 18:22:13');
 
 -- --------------------------------------------------------
 
@@ -234,7 +234,7 @@ CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
   `book_id` int(11) NOT NULL,
   `availability` varchar(10) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp(),
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `expiry_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -243,9 +243,9 @@ CREATE TABLE `notifications` (
 --
 
 INSERT INTO `notifications` (`id`, `book_id`, `availability`, `created_at`, `expiry_date`) VALUES
-(0, 19, '1week', '2025-05-07 20:43:14', '2025-05-07 17:43:14'),
-(0, 21, '1day', '2025-05-08 20:18:19', '2025-05-08 17:18:19'),
-(0, 22, '1day', '2025-05-08 20:35:03', '2025-05-08 17:35:03');
+(1, 6, '1day', '2025-05-09 07:00:26', '2025-05-09 04:00:26'),
+(2, 4, '1week', '2025-05-09 07:00:30', '2025-05-09 04:00:30'),
+(3, 2, '1day', '2025-05-09 07:00:35', '2025-05-09 04:00:35');
 
 -- --------------------------------------------------------
 
@@ -331,6 +331,12 @@ ALTER TABLE `librarian`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -350,13 +356,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `book_ratings`
 --
 ALTER TABLE `book_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -375,6 +381,12 @@ ALTER TABLE `comment`
 --
 ALTER TABLE `librarian`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `users`
