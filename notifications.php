@@ -10,7 +10,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle AJAX request for deleting expired notifications
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
     $data = json_decode(file_get_contents('php://input'), true);
     $ids = $data['ids'] ?? [];
@@ -34,7 +33,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SERVER['HTTP_X_REQUESTED_WI
     }
 }
 
-// Clean up expired notifications
 $cleanupSql = "DELETE FROM notifications WHERE 
                (availability = '1min' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MINUTE)) OR
                (availability = '1day' AND created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)) OR
@@ -44,10 +42,19 @@ $cleanupSql = "DELETE FROM notifications WHERE
                (availability = '1month' AND created_at < DATE_SUB(NOW(), INTERVAL 1 MONTH))";
 $conn->query($cleanupSql);
 
-// Get active notifications
-$sql = "SELECT b.*, n.availability, n.created_at as notification_date, n.id as notification_id
+$sql = "SELECT b.*, n.availability, n.created_at as notification_date, n.id as notification_id,
+        TIMESTAMPDIFF(SECOND, NOW(), 
+            CASE n.availability
+                WHEN '1min' THEN DATE_ADD(n.created_at, INTERVAL 1 MINUTE)
+                WHEN '1day' THEN DATE_ADD(n.created_at, INTERVAL 1 DAY)
+                WHEN '1week' THEN DATE_ADD(n.created_at, INTERVAL 1 WEEK)
+                WHEN '2weeks' THEN DATE_ADD(n.created_at, INTERVAL 2 WEEK)
+                WHEN '3weeks' THEN DATE_ADD(n.created_at, INTERVAL 3 WEEK)
+                WHEN '1month' THEN DATE_ADD(n.created_at, INTERVAL 1 MONTH)
+            END) as remaining_seconds
         FROM books b 
         JOIN notifications n ON b.id = n.book_id 
+        HAVING remaining_seconds > 0
         ORDER BY n.created_at DESC";
 $result = $conn->query($sql);
 $notifications = [];
@@ -70,7 +77,6 @@ $conn->close();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/notification.css">
     <link rel="stylesheet" href="css/themes.css">
-    
 </head>
 <body>
     <div class="container">
@@ -91,47 +97,23 @@ $conn->close();
                 </div>
             <?php else: ?>
                 <?php foreach ($notifications as $book): 
-                    try {
-                        $now = new DateTime();
-                        $createdAt = new DateTime($book['notification_date']);
-                        $expiryDate = clone $createdAt;
-                        
-                        switch ($book['availability']) {
-                            case '1min': $expiryDate->add(new DateInterval('PT1M')); break;
-                            case '1day': $expiryDate->add(new DateInterval('P1D')); break;
-                            case '1week': $expiryDate->add(new DateInterval('P7D')); break;
-                            case '2weeks': $expiryDate->add(new DateInterval('P14D')); break;
-                            case '3weeks': $expiryDate->add(new DateInterval('P21D')); break;
-                            case '1month': $expiryDate->add(new DateInterval('P1M')); break;
-                        }
-                        
-                        $remaining = $now->diff($expiryDate);
-                        $remainingDays = $remaining->days;
-                        $remainingHours = $remaining->h;
-                        $remainingMinutes = $remaining->i;
-                        
-                        $availabilityText = str_replace(
-                            ['min', 'day', 'week', 'month'], 
-                            ['Minute', 'Day', 'Week', 'Month'], 
-                            $book['availability']
-                        );
-                        
-                        $remainingText = '';
-                        if ($book['availability'] === '1min') {
-                            $remainingText = $remainingMinutes > 0 ? "$remainingMinutes minutes left" : "Expiring soon";
-                        } elseif ($book['availability'] === '1day') {
-                            $remainingText = $remainingHours > 0 ? "$remainingHours hours left" : "Expiring soon";
-                        } else {
-                            $remainingText = $remainingDays > 0 ? "$remainingDays days left" : "Expiring soon";
-                        }
-                    } catch (Exception $e) {
-                        $remainingDays = 0;
-                        $remainingText = "Expiring soon";
-                        $availabilityText = $book['availability'];
-                        $expiryDate = new DateTime();
+                    $availabilityText = str_replace(
+                        ['min', 'day', 'week', 'month'], 
+                        ['Minute', 'Day', 'Week', 'Month'], 
+                        $book['availability']
+                    );
+                    $remainingSeconds = $book['remaining_seconds'];
+                    if ($book['availability'] === '1min') {
+                        $remainingText = $remainingSeconds > 0 ? "$remainingSeconds seconds left" : "Expiring soon";
+                    } elseif ($book['availability'] === '1day') {
+                        $remainingHours = floor($remainingSeconds / 3600);
+                        $remainingText = $remainingHours > 0 ? "$remainingHours hours left" : "Expiring soon";
+                    } else {
+                        $remainingDays = floor($remainingSeconds / 86400);
+                        $remainingText = $remainingDays > 0 ? "$remainingDays days left" : "Expiring soon";
                     }
                 ?>
-                    <div class="notification-card" data-expiry="<?php echo $expiryDate->format('Y-m-d H:i:s'); ?>" data-notification-id="<?php echo $book['notification_id']; ?>">
+                    <div class="notification-card" data-expiry-seconds="<?php echo $remainingSeconds; ?>" data-notification-id="<?php echo $book['notification_id']; ?>">
                         <div class="book-cover-container">
                             <?php if (!empty($book['cover'])): ?>
                                 <img src="/bookstore/book/<?php echo htmlspecialchars($book['cover']); ?>" alt="Book Cover" class="book-cover">
@@ -166,7 +148,7 @@ $conn->close();
                                     Posted: <?php echo date('M d, Y H:i', strtotime($book['notification_date'])); ?>
                                 </div>
                                 <div class="availability-info">
-                                   Notification Available for <?php echo $availabilityText ?> (<?php echo $remainingText ?>)
+                                    Notification Available for <?php echo $availabilityText ?> (<span class="remaining-time"><?php echo $remainingText ?></span>)
                                 </div>
                             </div>
                         </div>
@@ -177,46 +159,53 @@ $conn->close();
     </div>
 
     <script>
-    function checkExpiredNotifications() {
-        const now = new Date();
+    function updateRemainingTime() {
         const notificationCards = document.querySelectorAll('.notification-card');
         let expiredIds = [];
         
         notificationCards.forEach(card => {
-            const expiryDateStr = card.getAttribute('data-expiry');
+            let remainingSeconds = parseInt(card.getAttribute('data-expiry-seconds'));
             const notificationId = card.getAttribute('data-notification-id');
+            const remainingTimeSpan = card.querySelector('.remaining-time');
             
-            try {
-                const expiryDate = new Date(expiryDateStr);
-                
-                if (now > expiryDate) {
-                    expiredIds.push(notificationId);
-                    
-                    card.style.transition = 'all 0.5s ease';
-                    card.style.opacity = '0';
-                    card.style.height = '0';
-                    card.style.margin = '0';
-                    card.style.padding = '0';
-                    card.style.overflow = 'hidden';
-                    
-                    setTimeout(() => {
-                        card.remove();
-                        
-                        if (document.querySelectorAll('.notification-card').length === 0) {
-                            const container = document.querySelector('.notification-container');
-                            container.innerHTML = `
-                                <div class="no-notifications">
-                                    <i class="fas fa-bell-slash"></i>
-                                    <h3>No Active Notifications</h3>
-                                    <p>Check back later for new book announcements</p>
-                                </div>
-                            `;
-                        }
-                    }, 500);
-                }
-            } catch (e) {
-                console.error('Error processing expiry date:', e);
+            if (remainingSeconds <= 0) {
+                expiredIds.push(notificationId);
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '0';
+                card.style.height = '0';
+                card.style.margin = '0';
+                card.style.padding = '0';
+                card.style.overflow = 'hidden';
+                setTimeout(() => {
+                    card.remove();
+                    if (document.querySelectorAll('.notification-card').length === 0) {
+                        document.querySelector('.notification-container').innerHTML = `
+                            <div class="no-notifications">
+                                <i class="fas fa-bell-slash"></i>
+                                <h3>No Active Notifications</h3>
+                                <p>Check back later for new book announcements</p>
+                            </div>
+                        `;
+                    }
+                }, 500);
+                return;
             }
+            
+            remainingSeconds--;
+            card.setAttribute('data-expiry-seconds', remainingSeconds);
+            
+            const availability = card.querySelector('.availability-info').textContent.includes('Minute') ? '1min' : 'other';
+            let remainingText = '';
+            
+            if (availability === '1min') {
+                remainingText = remainingSeconds > 0 ? `${remainingSeconds} seconds left` : 'Expiring soon';
+            } else {
+                const remainingDays = Math.floor(remainingSeconds / 86400);
+                const remainingHours = Math.floor(remainingSeconds / 3600);
+                remainingText = remainingDays > 0 ? `${remainingDays} days left` : remainingHours > 0 ? `${remainingHours} hours left` : 'Expiring soon';
+            }
+            
+            remainingTimeSpan.textContent = remainingText;
         });
         
         if (expiredIds.length > 0) {
@@ -240,8 +229,8 @@ $conn->close();
         }
     }
     
-    setInterval(checkExpiredNotifications, 60000);
-    document.addEventListener('DOMContentLoaded', checkExpiredNotifications);
+    setInterval(updateRemainingTime, 1000);
+    document.addEventListener('DOMContentLoaded', updateRemainingTime);
     </script>
 </body>
 </html>

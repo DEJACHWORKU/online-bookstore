@@ -62,7 +62,9 @@ $books = [];
 $query = "SELECT b.*, 
                  COALESCE((SELECT AVG(rating) FROM book_ratings WHERE book_id = b.id), 0) as avg_rating,
                  COALESCE((SELECT COUNT(rating) FROM book_ratings WHERE book_id = b.id), 0) as rating_count,
-                 (SELECT rating FROM book_ratings WHERE book_id = b.id AND user_id = ?) as user_rating
+                 (SELECT rating FROM book_ratings WHERE book_id = b.id AND user_id = ?) as user_rating,
+                 is_read,
+                 is_download
           FROM books b WHERE 1=1";
 $params = [$user_id];
 $types = "i";
@@ -96,8 +98,6 @@ if ($stmt) {
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
-        $row['is_read'] = 1;
-        $row['is_download'] = 1;
         $books[] = $row;
     }
     $stmt->close();
@@ -200,7 +200,7 @@ $conn->close();
                                 $file_extension = !empty($book['file']) ? strtolower(pathinfo($book['file'], PATHINFO_EXTENSION)) : '';
                                 $is_pdf = $file_extension === 'pdf';
                                 ?>
-                                <?php if ($file_exists && $is_pdf): ?>
+                                <?php if ($book['is_read'] && $file_exists && $is_pdf): ?>
                                     <a href="read_book.php?file=<?php echo rawurlencode($book['file']); ?>" 
                                        target="_blank" 
                                        class="read-btn" 
@@ -208,7 +208,7 @@ $conn->close();
                                         <i class="fas fa-book-open"></i> Read
                                     </a>
                                 <?php endif; ?>
-                                <?php if ($file_exists): ?>
+                                <?php if ($book['is_download'] && $file_exists): ?>
                                     <a href="download_book.php?file=<?php echo rawurlencode($book['file']); ?>&title=<?php echo rawurlencode($book['title']); ?>" 
                                        class="download-btn">
                                         <i class="fas fa-download"></i> Download

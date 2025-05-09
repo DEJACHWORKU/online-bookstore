@@ -322,7 +322,7 @@
                 const top = window.scrollY;
                 const offset = sec.offsetTop - 150;
                 const height = sec.offsetHeight;
-                const id = sec.getAttribute('id');
+                the id = sec.getAttribute('id');
                 if (top >= offset && top < offset + height) {
                     navLinks.forEach(link => {
                         link.classList.remove('active');
@@ -345,6 +345,19 @@
                         throw new Error('Network response was not ok');
                     }
                     return response.json();
+                })
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+                    if (data.count > 0) {
+                        badge.style.display = 'block';
+                        badge.textContent = data.count;
+                        
+                        data.notifications.forEach(notification => {
+                            startCountdown(notification.id, notification.remaining_seconds);
+                        });
+                    } else {
+                        badge.style.display = 'none';
+                    }
                 })
                 .then(data => {
                     const badge = document.getElementById('notification-badge');
@@ -394,7 +407,7 @@
         }
 
         updateNotificationCount();
-        setInterval(updateNotificationCount, 30000);
+        setInterval(updateNotificationCount, 1000);
     });
     </script>
 
