@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 09, 2025 at 06:30 AM
+-- Generation Time: May 09, 2025 at 08:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -245,7 +245,8 @@ CREATE TABLE `notifications` (
 INSERT INTO `notifications` (`id`, `book_id`, `availability`, `created_at`, `expiry_date`) VALUES
 (1, 6, '1day', '2025-05-09 07:00:26', '2025-05-09 04:00:26'),
 (2, 4, '1week', '2025-05-09 07:00:30', '2025-05-09 04:00:30'),
-(3, 2, '1day', '2025-05-09 07:00:35', '2025-05-09 04:00:35');
+(3, 2, '1day', '2025-05-09 07:00:35', '2025-05-09 04:00:35'),
+(7, 8, '2weeks', '2025-05-09 09:23:36', '2025-05-09 06:23:36');
 
 -- --------------------------------------------------------
 
@@ -386,7 +387,7 @@ ALTER TABLE `librarian`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
